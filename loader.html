@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>Room</title></head>
+<body style="margin:0;background:#11100e">
+<script>
+/* Loader: gets the latest panel from GitHub. Your address, token and light
+   choices stay saved on the tablet. If the internet is down, the last
+   working copy is used. */
+var SRC = 'https://raw.githubusercontent.com/amontgomery57/room-panel/main/panel.html';
+function show(code) { document.open(); document.write(code); document.close(); }
+function saved() { try { return localStorage.getItem('panel.code'); } catch (e) { return null; } }
+fetch(SRC + '?t=' + Date.now(), { cache: 'no-store' })
+  .then(function (r) { if (!r.ok) throw new Error(r.status); return r.text(); })
+  .then(function (code) { try { localStorage.setItem('panel.code', code); } catch (e) {} show(code); })
+  .catch(function () {
+    var code = saved();
+    if (code) return show(code);
+    document.body.innerHTML = '<p style="color:#9b958b;font:18px system-ui,sans-serif;padding:40px">Couldn\'t load the panel. Check the Wi-Fi. Trying again in 30 seconds…</p>';
+    setTimeout(function () { location.reload(); }, 30000);
+  });
+</script>
+</body></html>

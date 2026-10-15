@@ -1,0 +1,437 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<meta name="theme-color" content="#11100e">
+<title>Room</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+/* ---------- Look ---------- */
+:root{
+  --bg:#11100e; --tile:#1b1a17; --tile-on:#24211c; --line:#2b2924;
+  --text:#f3efe8; --muted:#9b958b; --dim:#5f5a52;
+  --warm:255,176,96; --accent:#f2a54a;
+  --radius:32px;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;height:100%;background:var(--bg);color:var(--text);
+  font-family:'Geist',system-ui,-apple-system,'Segoe UI',sans-serif;
+  -webkit-user-select:none;user-select:none;overflow:hidden;touch-action:manipulation}
+button{font:inherit;color:inherit;cursor:pointer}
+
+#app{height:100%;display:flex;flex-direction:column;gap:clamp(16px,3vh,28px);
+  padding:clamp(20px,4.5vh,44px) clamp(20px,3.5vw,48px)}
+
+/* header */
+header{display:flex;justify-content:space-between;align-items:flex-start}
+.clock{font-size:clamp(44px,8vh,72px);font-weight:300;letter-spacing:-.03em;line-height:1}
+.date{margin-top:8px;font-size:17px;color:var(--muted)}
+.conn{display:flex;align-items:center;gap:8px;font-size:14px;color:var(--muted);padding-top:10px}
+.conn i{width:8px;height:8px;border-radius:50%;background:var(--dim)}
+.conn.ok i{background:#6fbf73}.conn.ok span{display:none}
+.conn.bad i{background:#e0654b}
+
+/* zone tiles */
+.tiles{flex:1;min-height:0;display:grid;grid-template-columns:1.6fr 1fr;gap:clamp(14px,2vw,24px)}
+@media (orientation:portrait){.tiles{grid-template-columns:1fr;grid-template-rows:1.6fr 1fr}}
+.tile{position:relative;border-radius:var(--radius);background:var(--tile);border:1px solid var(--line);
+  overflow:hidden;display:flex;flex-direction:column;transition:background .4s}
+.tile.on{background:var(--tile-on)}
+.glow{position:absolute;inset:0;pointer-events:none;opacity:0;transition:opacity .5s;
+  background:radial-gradient(120% 90% at 30% 0%,rgba(var(--warm),.42),rgba(var(--warm),0) 60%)}
+.toggle{position:relative;flex:1;border:0;background:none;text-align:left;
+  padding:clamp(22px,3.5vh,34px) clamp(22px,2.4vw,34px);display:flex;flex-direction:column;justify-content:space-between}
+.tname{font-size:clamp(26px,4.2vh,36px);font-weight:400}
+.tstate{font-size:18px;color:var(--muted);margin-top:6px}
+.tile.on .tstate{color:#e9cfa6}
+.power{width:72px;height:72px;border-radius:50%;border:1px solid var(--line);display:grid;place-items:center;
+  background:rgba(255,255,255,.03);transition:background .3s,color .3s;color:var(--muted)}
+.tile.on .power{background:var(--accent);border-color:var(--accent);color:#1a1208}
+.power svg{width:30px;height:30px}
+
+/* brightness bar: whole bar is the touch target */
+.bar{position:relative;margin:0 clamp(16px,2vw,24px) clamp(16px,2vw,24px);height:72px;border-radius:22px;
+  background:rgba(255,255,255,.05);overflow:hidden;touch-action:none}
+.fill{position:absolute;inset:0 auto 0 0;width:0;background:rgba(var(--warm),.28);transition:width .25s}
+.bar.drag .fill{transition:none}
+.tile:not(.on) .fill{background:rgba(255,255,255,.06)}
+.bar label{position:absolute;inset:0;display:flex;align-items:center;justify-content:space-between;
+  padding:0 22px;font-size:15px;color:var(--muted);pointer-events:none}
+.bar b{font-weight:500;color:var(--text);font-variant-numeric:tabular-nums}
+
+/* scenes */
+.scenes{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:clamp(10px,1.4vw,16px)}
+.scene{height:clamp(64px,10vh,84px);border-radius:24px;border:1px solid var(--line);background:var(--tile);
+  font-size:18px;display:flex;align-items:center;justify-content:center;gap:12px;transition:background .2s,border-color .2s}
+.scene svg{width:22px;height:22px;color:var(--muted)}
+.scene:active,.scene.flash{background:#2a2620;border-color:var(--accent)}
+
+/* setup */
+#setup{position:fixed;inset:0;background:var(--bg);overflow:auto;padding:40px clamp(20px,6vw,80px);display:none;
+  -webkit-user-select:text;user-select:text}
+#setup.show{display:block}
+#setup h1{font-weight:400;font-size:32px;margin:0 0 6px}
+#setup p{color:var(--muted);margin:0 0 24px;line-height:1.5;max-width:640px}
+.field{display:flex;flex-direction:column;gap:8px;margin-bottom:18px;max-width:640px;font-size:15px;color:var(--muted)}
+.field input,.field textarea{font:inherit;font-size:16px;color:var(--text);background:var(--tile);border:1px solid var(--line);
+  border-radius:14px;padding:14px 16px}
+.field textarea{min-height:110px;resize:vertical}
+.btn{height:56px;padding:0 28px;border-radius:16px;border:0;background:var(--accent);color:#1a1208;font-size:17px;font-weight:500}
+.btn.ghost{background:var(--tile);color:var(--text);border:1px solid var(--line)}
+.row{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:14px 0;border-bottom:1px solid var(--line);max-width:860px}
+.row small{display:block;color:var(--muted);font-size:13px;margin-top:2px}
+.seg{display:flex;background:var(--tile);border:1px solid var(--line);border-radius:14px;padding:4px;flex-shrink:0}
+.seg button{border:0;background:none;height:44px;padding:0 18px;border-radius:10px;color:var(--muted);font-size:15px}
+.seg button.sel{background:var(--text);color:var(--bg)}
+.err{color:#ef8a73;min-height:22px;margin:8px 0}
+.actions{display:flex;gap:12px;margin-top:24px}
+.tag{font-size:12px;color:#e9cfa6;border:1px solid #5a4a33;border-radius:999px;padding:2px 8px;margin-left:8px}
+</style>
+</head>
+<body>
+
+<div id="app">
+  <header>
+    <div id="clockbox">
+      <div class="clock" id="clock">--:--</div>
+      <div class="date" id="date"></div>
+    </div>
+    <div class="conn" id="conn"><i></i><span>Connecting…</span></div>
+  </header>
+
+  <main class="tiles" id="tiles"></main>
+
+  <nav class="scenes" id="scenes"></nav>
+</div>
+
+<div id="setup">
+  <div id="step1">
+    <h1>Set up the panel</h1>
+    <p>Connect to Home Assistant. Make a long-lived access token in Home Assistant under your profile → Security → Long-lived access tokens, then paste it here. It's saved only on this tablet.</p>
+    <div class="field">Home Assistant address<input id="haUrl" placeholder="http://192.168.1.50:8123" autocomplete="off"></div>
+    <div class="field">Access token<textarea id="haToken" placeholder="eyJ0eXAiOiJKV1Qi…" autocomplete="off"></textarea></div>
+    <div class="err" id="err1"></div>
+    <div class="actions"><button class="btn" id="connectBtn">Connect</button></div>
+  </div>
+  <div id="step2" hidden>
+    <h1>Which lights go where?</h1>
+    <p>"Room" lights all turn on and off together. "Island" is controlled on its own. If you made Hue zones for these, pick the zone and leave the individual bulbs out — the lights then switch at exactly the same moment.</p>
+    <div id="lightList"></div>
+    <div class="err" id="err2"></div>
+    <div class="actions"><button class="btn" id="saveBtn">Save</button><button class="btn ghost" id="backBtn">Back</button></div>
+  </div>
+</div>
+
+<script>
+/* =========================================================
+   SETTINGS YOU MIGHT WANT TO CHANGE
+   ========================================================= */
+const ZONES = [
+  { id: 'room',   name: 'Room'   },
+  { id: 'island', name: 'Island' }
+];
+// Scenes only touch the Room lights — the island is left alone,
+// except "All off", which turns everything off.
+const SCENES = [
+  { name: 'Bright',  icon: 'sun',   room: { pct: 100, k: 4000 } },
+  { name: 'Evening', icon: 'lamp',  room: { pct: 45,  k: 2700 } },
+  { name: 'Night',   icon: 'moon',  room: { pct: 5,   k: 2200 } },
+  { name: 'All off', icon: 'power', room: 'off', island: 'off' }
+];
+const FADE_SECONDS = 0.6;   // how softly lights change
+/* ========================================================= */
+
+const $ = (s) => document.querySelector(s);
+const ICONS = {
+  power: '<path d="M12 3v8"/><path d="M6.3 7.2a8 8 0 1 0 11.4 0"/>',
+  sun:   '<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/>',
+  lamp:  '<path d="M8 3h8l3 8H5z"/><path d="M12 11v8"/><path d="M8 21h8"/>',
+  moon:  '<path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z"/>'
+};
+const svg = (n) => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">${ICONS[n]}</svg>`;
+
+const store = {
+  get(k, d) { try { const v = localStorage.getItem('panel.' + k); return v ? JSON.parse(v) : d; } catch (e) { return d; } },
+  set(k, v) { try { localStorage.setItem('panel.' + k, JSON.stringify(v)); } catch (e) {} }
+};
+
+const DEMO = new URLSearchParams(location.search).has('demo');
+let cfg = store.get('cfg', null);            // { url, token, zones: { room: [ids], island: [ids] } }
+let states = {};                              // entity_id -> state object
+let ws = null, msgId = 1, pending = {}, retry = 1000;
+
+/* ---------- clock ---------- */
+function tick() {
+  const d = new Date();
+  $('#clock').textContent = d.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' }).replace(/\s?[AP]M$/i, '');
+  $('#date').textContent = d.toLocaleDateString([], { weekday: 'long', month: 'long', day: 'numeric' });
+}
+tick(); setInterval(tick, 10000);
+
+/* ---------- build the screen ---------- */
+function buildUI() {
+  $('#tiles').innerHTML = ZONES.map((z) => `
+    <section class="tile" id="t-${z.id}">
+      <div class="glow"></div>
+      <button class="toggle" data-zone="${z.id}" aria-label="Turn ${z.name} on or off">
+        <div><div class="tname">${z.name}</div><div class="tstate">Off</div></div>
+        <div class="power">${svg('power')}</div>
+      </button>
+      <div class="bar" data-zone="${z.id}" role="slider" aria-label="${z.name} brightness" aria-valuemin="1" aria-valuemax="100">
+        <div class="fill"></div>
+        <label><span>Brightness</span><b>–</b></label>
+      </div>
+    </section>`).join('');
+  $('#scenes').innerHTML = SCENES.map((s, i) =>
+    `<button class="scene" data-scene="${i}">${svg(s.icon)}<span>${s.name}</span></button>`).join('');
+
+  document.querySelectorAll('.toggle').forEach((b) => b.addEventListener('click', () => toggleZone(b.dataset.zone)));
+  document.querySelectorAll('.bar').forEach(bindBar);
+  document.querySelectorAll('.scene').forEach((b) => b.addEventListener('click', () => {
+    b.classList.add('flash'); setTimeout(() => b.classList.remove('flash'), 350);
+    runScene(SCENES[+b.dataset.scene]);
+  }));
+
+  // Hold the clock for 2 seconds to open setup
+  let hold;
+  const cb = $('#clockbox');
+  cb.addEventListener('pointerdown', () => { hold = setTimeout(openSetup, 2000); });
+  ['pointerup', 'pointerleave', 'pointercancel'].forEach((e) => cb.addEventListener(e, () => clearTimeout(hold)));
+}
+
+/* ---------- zone state from entity states ---------- */
+function zoneInfo(zid) {
+  const ids = (cfg && cfg.zones[zid]) || [];
+  const on = ids.map((id) => states[id]).filter((s) => s && s.state === 'on');
+  const bri = on.length ? Math.round(on.reduce((n, s) => n + (s.attributes.brightness || 255), 0) / on.length / 2.55) : 0;
+  return { ids, on: on.length > 0, bri: Math.max(bri, on.length ? 1 : 0) };
+}
+
+const dragging = {};
+function render() {
+  ZONES.forEach((z) => {
+    const t = $('#t-' + z.id); if (!t) return;
+    const info = zoneInfo(z.id);
+    t.style.display = info.ids.length || DEMO ? '' : 'none';
+    t.classList.toggle('on', info.on);
+    t.querySelector('.tstate').textContent = info.on ? `On · ${info.bri}%` : 'Off';
+    t.querySelector('.glow').style.opacity = info.on ? (0.35 + 0.65 * info.bri / 100).toFixed(2) : 0;
+    if (!dragging[z.id]) {
+      t.querySelector('.fill').style.width = (info.on ? info.bri : 0) + '%';
+      t.querySelector('.bar b').textContent = info.on ? info.bri + '%' : '–';
+      t.querySelector('.bar').setAttribute('aria-valuenow', info.bri);
+    }
+  });
+  // one visible zone → let it fill the width
+  const visible = ZONES.filter((z) => $('#t-' + z.id).style.display !== 'none').length;
+  $('#tiles').style.gridTemplateColumns = visible < 2 ? '1fr' : '';
+}
+
+/* ---------- actions ---------- */
+function lightCall(service, ids, data) {
+  if (!ids.length) return;
+  if (DEMO) return demoApply(service, ids, data);
+  send({ type: 'call_service', domain: 'light', service, service_data: Object.assign({ transition: FADE_SECONDS }, data || {}), target: { entity_id: ids } });
+}
+function toggleZone(zid) {
+  const info = zoneInfo(zid);
+  if (info.on) lightCall('turn_off', info.ids);
+  else lightCall('turn_on', info.ids);   // Hue remembers the last brightness
+}
+function setZoneBri(zid, pct) {
+  lightCall('turn_on', zoneInfo(zid).ids, { brightness_pct: pct });
+}
+function runScene(s) {
+  ['room', 'island'].forEach((zid) => {
+    const a = s[zid]; if (!a) return;
+    const ids = zoneInfo(zid).ids;
+    if (a === 'off') lightCall('turn_off', ids);
+    else lightCall('turn_on', ids, { brightness_pct: a.pct, color_temp_kelvin: a.k });
+  });
+}
+
+/* ---------- brightness bar (drag anywhere on it) ---------- */
+function bindBar(bar) {
+  const zid = bar.dataset.zone;
+  let last = 0, val = 0;
+  const pctAt = (e) => {
+    const r = bar.getBoundingClientRect();
+    return Math.min(100, Math.max(1, Math.round((e.clientX - r.left) / r.width * 100)));
+  };
+  const show = (p) => { bar.querySelector('.fill').style.width = p + '%'; bar.querySelector('b').textContent = p + '%'; };
+  bar.addEventListener('pointerdown', (e) => {
+    bar.setPointerCapture(e.pointerId); dragging[zid] = true; bar.classList.add('drag');
+    val = pctAt(e); show(val);
+  });
+  bar.addEventListener('pointermove', (e) => {
+    if (!dragging[zid]) return;
+    val = pctAt(e); show(val);
+    const now = Date.now();
+    if (now - last > 300) { last = now; setZoneBri(zid, val); }   // live, but not flooding the bridge
+  });
+  const end = () => {
+    if (!dragging[zid]) return;
+    dragging[zid] = false; bar.classList.remove('drag');
+    setZoneBri(zid, val);
+  };
+  bar.addEventListener('pointerup', end);
+  bar.addEventListener('pointercancel', end);
+}
+
+/* ---------- Home Assistant connection ---------- */
+function setConn(cls, text) { const c = $('#conn'); c.className = 'conn ' + cls; c.querySelector('span').textContent = text; }
+
+function send(msg) {
+  if (!ws || ws.readyState !== 1) return Promise.reject(new Error('not connected'));
+  msg.id = msgId++;
+  ws.send(JSON.stringify(msg));
+  return new Promise((res, rej) => { pending[msg.id] = { res, rej }; });
+}
+
+function wsUrl(base) { return base.replace(/\/+$/, '').replace(/^http/, 'ws') + '/api/websocket'; }
+
+function connect(url, token, onReady) {
+  if (ws) { ws.onclose = null; ws.close(); }
+  setConn('', 'Connecting…');
+  let sock;
+  try { sock = new WebSocket(wsUrl(url)); } catch (e) { onReady && onReady(e); return; }
+  ws = sock;
+  sock.onmessage = (ev) => {
+    const m = JSON.parse(ev.data);
+    if (m.type === 'auth_required') sock.send(JSON.stringify({ type: 'auth', access_token: token }));
+    else if (m.type === 'auth_invalid') { onReady && onReady(new Error('Home Assistant rejected the token.')); onReady = null; sock.onclose = null; sock.close(); setConn('bad', 'Token rejected — hold the clock to fix'); }
+    else if (m.type === 'auth_ok') {
+      retry = 1000; setConn('ok', 'Connected');
+      send({ type: 'get_states' }).then((list) => {
+        states = {}; list.forEach((s) => { if (s.entity_id.startsWith('light.')) states[s.entity_id] = s; });
+        render(); onReady && onReady(null); onReady = null;
+      });
+      send({ type: 'subscribe_events', event_type: 'state_changed' });
+    }
+    else if (m.type === 'result' && pending[m.id]) {
+      const p = pending[m.id]; delete pending[m.id];
+      m.success ? p.res(m.result) : p.rej(new Error(m.error && m.error.message));
+    }
+    else if (m.type === 'event' && m.event.event_type === 'state_changed') {
+      const d = m.event.data;
+      if (d.entity_id.startsWith('light.')) { if (d.new_state) states[d.entity_id] = d.new_state; else delete states[d.entity_id]; render(); }
+    }
+  };
+  sock.onerror = () => { if (onReady) { onReady(new Error("Couldn't reach Home Assistant at that address.")); onReady = null; } };
+  sock.onclose = () => {
+    if (ws !== sock) return;
+    setConn('bad', 'Reconnecting…');
+    setTimeout(() => connect(url, token), retry);
+    retry = Math.min(retry * 2, 30000);
+  };
+}
+// Wake from sleep → reconnect right away if the socket died
+document.addEventListener('visibilitychange', () => {
+  if (!document.hidden && cfg && !DEMO && (!ws || ws.readyState > 1)) connect(cfg.url, cfg.token);
+});
+
+/* ---------- setup screen ---------- */
+let draftZones = {};
+function openSetup() {
+  if (DEMO) return;
+  $('#setup').classList.add('show');
+  $('#step1').hidden = false; $('#step2').hidden = true;
+  const guess = /^https?:$/.test(location.protocol) ? location.origin : '';
+  $('#haUrl').value = (cfg && cfg.url) || guess;
+  $('#haToken').value = (cfg && cfg.token) || '';
+  $('#err1').textContent = '';
+}
+$('#connectBtn').addEventListener('click', () => {
+  const url = $('#haUrl').value.trim(), token = $('#haToken').value.trim();
+  if (!url || !token) { $('#err1').textContent = 'Fill in both fields.'; return; }
+  $('#err1').textContent = 'Connecting…';
+  connect(url, token, (err) => {
+    if (err) { $('#err1').textContent = err.message; return; }
+    $('#err1').textContent = '';
+    cfg = Object.assign({ zones: { room: [], island: [] } }, cfg || {}, { url, token });
+    showLightPicker();
+  });
+});
+function showLightPicker() {
+  $('#step1').hidden = true; $('#step2').hidden = false;
+  const lights = Object.values(states).sort((a, b) =>
+    (b.attributes.is_hue_group ? 1 : 0) - (a.attributes.is_hue_group ? 1 : 0) ||
+    (a.attributes.friendly_name || a.entity_id).localeCompare(b.attributes.friendly_name || b.entity_id));
+  draftZones = {};
+  const saved = cfg.zones.room.length || cfg.zones.island.length;
+  const hasGroups = lights.some((s) => s.attributes.is_hue_group);
+  lights.forEach((s) => {
+    const name = (s.attributes.friendly_name || '').toLowerCase();
+    let z = 'none';
+    if (saved) z = cfg.zones.room.includes(s.entity_id) ? 'room' : cfg.zones.island.includes(s.entity_id) ? 'island' : 'none';
+    else if (!hasGroups) z = /island/.test(name) ? 'island' : 'room';   // first-time guess
+    draftZones[s.entity_id] = z;
+  });
+  $('#lightList').innerHTML = lights.length ? lights.map((s) => `
+    <div class="row">
+      <div>${s.attributes.friendly_name || s.entity_id}${s.attributes.is_hue_group ? '<span class="tag">Hue room/zone</span>' : ''}<small>${s.entity_id}</small></div>
+      <div class="seg" data-id="${s.entity_id}">
+        ${['room', 'island', 'none'].map((z) => `<button data-z="${z}" class="${draftZones[s.entity_id] === z ? 'sel' : ''}">${z === 'none' ? 'Skip' : z[0].toUpperCase() + z.slice(1)}</button>`).join('')}
+      </div>
+    </div>`).join('') : '<p>No lights found. Check that the Hue integration is set up in Home Assistant.</p>';
+  document.querySelectorAll('.seg').forEach((seg) => seg.addEventListener('click', (e) => {
+    const b = e.target.closest('button'); if (!b) return;
+    draftZones[seg.dataset.id] = b.dataset.z;
+    seg.querySelectorAll('button').forEach((x) => x.classList.toggle('sel', x === b));
+  }));
+}
+$('#backBtn').addEventListener('click', () => { $('#step1').hidden = false; $('#step2').hidden = true; });
+$('#saveBtn').addEventListener('click', () => {
+  const zones = { room: [], island: [] };
+  Object.entries(draftZones).forEach(([id, z]) => { if (zones[z]) zones[z].push(id); });
+  if (!zones.room.length && !zones.island.length) { $('#err2').textContent = 'Pick at least one light.'; return; }
+  cfg.zones = zones; store.set('cfg', cfg);
+  $('#setup').classList.remove('show');
+  render();
+});
+
+/* ---------- demo mode (open with ?demo) ---------- */
+function demoInit() {
+  const mk = (id, name, on, b) => ({ entity_id: id, state: on ? 'on' : 'off', attributes: { friendly_name: name, brightness: Math.round(b * 2.55) } });
+  [mk('light.grashoppa', 'Gräshoppa', 1, 60), mk('light.stemlite', 'Stemlite', 1, 60), mk('light.bedside', 'Bedside', 1, 60),
+   mk('light.island_1', 'Island 1', 0, 80), mk('light.island_2', 'Island 2', 0, 80)].forEach((s) => (states[s.entity_id] = s));
+  cfg = { zones: { room: ['light.grashoppa', 'light.stemlite', 'light.bedside'], island: ['light.island_1', 'light.island_2'] } };
+  setConn('ok', 'Demo');
+}
+function demoApply(service, ids, data) {
+  ids.forEach((id) => {
+    const s = states[id];
+    if (service === 'turn_off') s.state = 'off';
+    else { s.state = 'on'; if (data && data.brightness_pct) s.attributes.brightness = Math.round(data.brightness_pct * 2.55); }
+  });
+  render();
+}
+
+/* ---------- auto-update ----------
+   The tablet loads this file from GitHub through a small loader on Home Assistant.
+   Every 10 minutes, check for a newer version and reload when one is out
+   (but never while setup is open or a brightness bar is being dragged). */
+const PANEL_SRC = 'https://raw.githubusercontent.com/amontgomery57/room-panel/main/panel.html';
+function checkForUpdate() {
+  let current = null; try { current = localStorage.getItem('panel.code'); } catch (e) {}
+  if (!current || DEMO) return;
+  fetch(PANEL_SRC + '?t=' + Date.now(), { cache: 'no-store' })
+    .then((r) => (r.ok ? r.text() : null))
+    .then((code) => {
+      if (!code || code === current) return;
+      if ($('#setup').classList.contains('show') || Object.values(dragging).some(Boolean)) return;
+      location.reload();
+    }).catch(() => {});
+}
+setInterval(checkForUpdate, 10 * 60 * 1000);
+
+/* ---------- start ---------- */
+buildUI();
+if (DEMO) { demoInit(); render(); }
+else if (cfg && cfg.token && cfg.zones) { connect(cfg.url, cfg.token); render(); }
+else { render(); openSetup(); }
+</script>
+</body>
+</html>
