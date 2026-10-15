@@ -28,7 +28,8 @@ button{font:inherit;color:inherit;cursor:pointer}
 header{display:flex;justify-content:space-between;align-items:flex-start}
 .clock{font-size:clamp(40px,7vh,64px);font-weight:300;letter-spacing:-.03em;line-height:1}
 .date{margin-top:6px;font-size:16px;color:var(--muted)}
-.conn{display:flex;align-items:center;gap:8px;font-size:14px;color:var(--muted);padding-top:10px}
+.hright{display:flex;align-items:center;gap:14px}
+.conn{display:flex;align-items:center;gap:8px;font-size:14px;color:var(--muted)}
 .conn i{width:8px;height:8px;border-radius:50%;background:var(--dim)}
 .conn.ok i{background:#6fbf73}.conn.ok span{display:none}
 .conn.bad i{background:#e0654b}
@@ -69,6 +70,10 @@ header{display:flex;justify-content:space-between;align-items:flex-start}
 .lt.on .lt-pow{color:rgb(var(--c))}
 .lt-pow svg{width:20px;height:20px}
 .lt.na{opacity:.45}
+.lt-add{height:64px;border-radius:18px;border:1px dashed var(--line);background:none;color:var(--muted);font-size:15px}
+.lt-add:active{border-color:var(--accent);color:var(--text)}
+.sh-foot{display:flex;justify-content:flex-end}
+.link{border:0;background:none;color:var(--muted);font-size:15px;text-decoration:underline;padding:8px 0}
 
 /* sliders: whole bar is the touch target */
 .bar{position:relative;height:68px;border-radius:22px;background:rgba(255,255,255,.05);overflow:hidden;touch-action:none;flex-shrink:0}
@@ -132,6 +137,15 @@ header{display:flex;justify-content:space-between;align-items:flex-start}
 .seg button.sel{background:var(--text);color:var(--bg)}
 .err{color:#ef8a73;min-height:22px;margin:8px 0}
 .actions{display:flex;gap:12px;margin-top:24px}
+.chips{display:flex;flex-wrap:wrap;gap:6px;justify-content:flex-end}
+.chips button{height:44px;padding:0 16px;border-radius:12px;border:1px solid var(--line);background:var(--tile);color:var(--muted);font-size:15px}
+.chips button.sel{background:var(--text);color:var(--bg);border-color:var(--text)}
+#setup h2{font-weight:400;font-size:22px;margin:34px 0 4px}
+.prow{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--line);max-width:860px}
+.prow input{flex:1;min-width:0;font:inherit;font-size:17px;color:var(--text);background:var(--tile);border:1px solid var(--line);border-radius:12px;padding:10px 14px}
+.prow .chk{height:44px;padding:0 14px;border-radius:12px;border:1px solid var(--line);background:var(--tile);color:var(--muted);font-size:14px;white-space:nowrap}
+.prow .chk.sel{background:var(--text);color:var(--bg)}
+.prow .del{width:44px;height:44px;border-radius:12px;border:1px solid var(--line);background:none;color:#ef8a73;font-size:22px}
 .tag{font-size:12px;color:#e9cfa6;border:1px solid #5a4a33;border-radius:999px;padding:2px 8px;margin-left:8px}
 </style>
 </head>
@@ -143,7 +157,10 @@ header{display:flex;justify-content:space-between;align-items:flex-start}
       <div class="clock" id="clock">--:--</div>
       <div class="date" id="date"></div>
     </div>
-    <div class="conn" id="conn"><i></i><span>Connecting…</span></div>
+    <div class="hright">
+      <div class="conn" id="conn"><i></i><span>Connecting…</span></div>
+      <button class="pill" id="editBtn">Edit</button>
+    </div>
   </header>
 
   <main class="tiles" id="tiles"></main>
@@ -163,6 +180,18 @@ header{display:flex;justify-content:space-between;align-items:flex-start}
     <div class="bar temp" id="lsTemp" role="slider" aria-label="Warmth"><div class="knob"></div><label><span>Warm</span><b>–</b><span>Cool</span></label></div>
     <div class="sh-label" id="lsColorLabel">Color</div>
     <div class="swatches" id="lsSw"></div>
+    <div class="sh-foot"><button class="link" id="lsRemove" hidden></button></div>
+  </div>
+</div>
+
+<!-- add a light to a panel -->
+<div class="backdrop" id="addSheet">
+  <div class="sheet">
+    <div class="sh-head">
+      <div class="sh-title"><div class="sh-name" id="asName">Add a light</div><div class="sh-state">Tap a light to add it to this panel</div></div>
+      <button class="close" data-close aria-label="Close">×</button>
+    </div>
+    <div class="hscene-list" id="asList"></div>
   </div>
 </div>
 
@@ -187,11 +216,15 @@ header{display:flex;justify-content:space-between;align-items:flex-start}
     <div class="actions"><button class="btn" id="connectBtn">Connect</button></div>
   </div>
   <div id="step2" hidden>
-    <h1>Which lights go where?</h1>
-    <p>"Room" lights all turn on and off together. "Island" is controlled on its own. You can pick a Hue room/zone or individual bulbs — either way, each bulb also gets its own little card on the panel.</p>
+    <h1>Panels &amp; lights</h1>
+    <p>Each panel's lights turn on and off together, and every bulb also gets its own card. "In scenes" means Bright, Evening and Night change that panel; All off always turns everything off.</p>
+    <div id="panelList"></div>
+    <div class="actions" style="margin-top:14px"><button class="btn ghost" id="addPanelBtn">+ New panel</button></div>
+    <h2>Lights</h2>
+    <p>Pick a Hue room/zone or individual bulbs for each panel. Skipped lights can be added back any time.</p>
     <div id="lightList"></div>
     <div class="err" id="err2"></div>
-    <div class="actions"><button class="btn" id="saveBtn">Save</button><button class="btn ghost" id="backBtn">Back</button></div>
+    <div class="actions"><button class="btn" id="saveBtn">Save</button><button class="btn ghost" id="cancelBtn">Cancel</button><button class="btn ghost" id="backBtn">Connection</button></div>
   </div>
 </div>
 
@@ -199,17 +232,18 @@ header{display:flex;justify-content:space-between;align-items:flex-start}
 /* =========================================================
    SETTINGS YOU MIGHT WANT TO CHANGE
    ========================================================= */
-const ZONES = [
-  { id: 'room',   name: 'Room'   },
-  { id: 'island', name: 'Island' }
+// Starting panels. You can add, rename and delete panels on the tablet (Edit button).
+const DEFAULT_PANELS = [
+  { id: 'room',   name: 'Room',   scenes: true  },
+  { id: 'island', name: 'Island', scenes: false }
 ];
-// Scenes only touch the Room lights — the island is left alone,
-// except "All off", which turns everything off.
+// Bright/Evening/Night change the panels marked "In scenes".
+// "All off" turns everything off.
 const SCENES = [
-  { name: 'Bright',  icon: 'sun',   room: { pct: 100, k: 4000 } },
-  { name: 'Evening', icon: 'lamp',  room: { pct: 45,  k: 2700 } },
-  { name: 'Night',   icon: 'moon',  room: { pct: 5,   k: 2200 } },
-  { name: 'All off', icon: 'power', room: 'off', island: 'off' }
+  { name: 'Bright',  icon: 'sun',   set: { pct: 100, k: 4000 } },
+  { name: 'Evening', icon: 'lamp',  set: { pct: 45,  k: 2700 } },
+  { name: 'Night',   icon: 'moon',  set: { pct: 5,   k: 2200 } },
+  { name: 'All off', icon: 'power', off: true }
 ];
 // Color swatches in a light's controls
 const COLORS = [[255,59,48],[255,128,32],[255,196,64],[255,92,160],[176,88,255],[64,96,255],[48,200,224],[80,216,120]];
@@ -232,7 +266,11 @@ const store = {
 };
 
 const DEMO = new URLSearchParams(location.search).has('demo');
-let cfg = store.get('cfg', null);            // { url, token, zones: { room: [ids], island: [ids] } }
+let cfg = store.get('cfg', null);            // { url, token, panels: [{id,name,scenes}], zones: { panelId: [entity ids] } }
+// older saves had no panel list: give them the two starting panels
+if (cfg && cfg.zones && !cfg.panels) cfg.panels = DEFAULT_PANELS.map((p) => Object.assign({}, p));
+const panels = () => (cfg && cfg.panels) || DEFAULT_PANELS;
+const panelName = (id) => (panels().find((p) => p.id === id) || {}).name || '';
 let states = {};                              // light.* entity_id -> state object
 let scenes = {};                              // scene.* entity_id -> state object (Hue scenes)
 let ws = null, msgId = 1, pending = {}, retry = 1000;
@@ -276,53 +314,63 @@ function membersOf(id) {
 }
 function zoneBulbs(zid) {
   const seen = new Set(), out = [];
-  ((cfg && cfg.zones[zid]) || []).forEach((id) => membersOf(id).forEach((m) => { if (!seen.has(m)) { seen.add(m); out.push(m); } }));
+  ((cfg && cfg.zones && cfg.zones[zid]) || []).forEach((id) => membersOf(id).forEach((m) => { if (!seen.has(m)) { seen.add(m); out.push(m); } }));
   return out;
 }
 // Hue scenes that belong to the Hue rooms/zones (or bulbs' rooms) in a zone
 function zoneHueScenes(zid) {
-  const groups = new Set(((cfg && cfg.zones[zid]) || []).map((id) => states[id]).filter(isGroup).map(nameOf));
+  const groups = new Set(((cfg && cfg.zones && cfg.zones[zid]) || []).map((id) => states[id]).filter(isGroup).map(nameOf));
   return Object.values(scenes).filter((s) => groups.has(s.attributes.group_name))
     .sort((a, b) => (a.attributes.name || nameOf(a)).localeCompare(b.attributes.name || nameOf(b)));
 }
 
 /* ---------- build the screen ---------- */
-function buildUI() {
-  $('#tiles').innerHTML = ZONES.map((z) => `
-    <section class="tile" id="t-${z.id}">
+let tilesKey = '';
+function buildTiles() {
+  const ps = panels();
+  tilesKey = ps.map((p) => p.id + ':' + p.name).join('|');
+  $('#tiles').innerHTML = ps.map((z) => `
+    <section class="tile" id="t-${esc(z.id)}">
       <div class="glow"></div>
       <div class="thead">
-        <button class="toggle" data-zone="${z.id}" aria-label="Turn ${z.name} on or off">
-          <div class="tname">${z.name}</div><div class="tstate">Off</div>
+        <button class="toggle" data-zone="${esc(z.id)}" aria-label="Turn ${esc(z.name)} on or off">
+          <div class="tname">${esc(z.name)}</div><div class="tstate">Off</div>
         </button>
-        <button class="pill hs-btn" data-zone="${z.id}" hidden>Scenes</button>
-        <button class="power" data-zone="${z.id}" aria-label="Turn ${z.name} on or off">${svg('power')}</button>
+        <button class="pill hs-btn" data-zone="${esc(z.id)}" hidden>Scenes</button>
+        <button class="power" data-zone="${esc(z.id)}" aria-label="Turn ${esc(z.name)} on or off">${svg('power')}</button>
       </div>
-      <div class="lights" id="l-${z.id}"></div>
-      <div class="bar" data-zone="${z.id}" role="slider" aria-label="${z.name} brightness" aria-valuemin="1" aria-valuemax="100">
+      <div class="lights"></div>
+      <div class="bar" data-zone="${esc(z.id)}" role="slider" aria-label="${esc(z.name)} brightness" aria-valuemin="1" aria-valuemax="100">
         <div class="fill"></div>
         <label><span>Brightness</span><b>–</b></label>
       </div>
     </section>`).join('');
-  $('#scenes').innerHTML = SCENES.map((s, i) =>
-    `<button class="scene" data-scene="${i}">${svg(s.icon)}<span>${s.name}</span></button>`).join('');
-
-  document.querySelectorAll('.thead .toggle, .thead .power').forEach((b) => b.addEventListener('click', () => toggleZone(b.dataset.zone)));
-  document.querySelectorAll('.hs-btn').forEach((b) => b.addEventListener('click', () => openSceneSheet(b.dataset.zone)));
-  document.querySelectorAll('.tile .bar').forEach((bar) => {
+  $('#tiles').querySelectorAll('.tile .bar').forEach((bar) => {
     const zid = bar.dataset.zone;
     bindBar(bar, 'z-' + zid, (p) => setZoneBri(zid, p));
   });
-  // per-light cards: tap the card for controls, tap the power icon to switch
-  document.querySelectorAll('.lights').forEach((box) => box.addEventListener('click', (e) => {
-    const pow = e.target.closest('.lt-pow'), open = e.target.closest('.lt-open');
-    if (pow) toggleLight(pow.dataset.id);
-    else if (open) openLightSheet(open.dataset.id);
-  }));
+}
+
+function buildUI() {
+  buildTiles();
+  $('#scenes').innerHTML = SCENES.map((s, i) =>
+    `<button class="scene" data-scene="${i}">${svg(s.icon)}<span>${s.name}</span></button>`).join('');
+
+  // everything inside the panels, handled in one place (panels can be rebuilt)
+  $('#tiles').addEventListener('click', (e) => {
+    const t = (sel) => e.target.closest(sel);
+    let b;
+    if ((b = t('.lt-pow'))) toggleLight(b.dataset.id);
+    else if ((b = t('.lt-open'))) openLightSheet(b.dataset.id, b.dataset.zone);
+    else if ((b = t('.lt-add'))) openAddSheet(b.dataset.zone);
+    else if ((b = t('.hs-btn'))) openSceneSheet(b.dataset.zone);
+    else if ((b = t('.thead .toggle, .thead .power'))) toggleZone(b.dataset.zone);
+  });
   $('#scenes').querySelectorAll('.scene').forEach((b) => b.addEventListener('click', () => {
     b.classList.add('flash'); setTimeout(() => b.classList.remove('flash'), 350);
     runScene(SCENES[+b.dataset.scene]);
   }));
+  $('#editBtn').addEventListener('click', openEditor);
 
   // sheets
   document.querySelectorAll('.backdrop').forEach((bd) => bd.addEventListener('click', (e) => {
@@ -333,6 +381,11 @@ function buildUI() {
   bindBar($('#lsBri'), 'ls-bri', (p) => sheetId && lightCall('turn_on', [sheetId], { brightness_pct: p }), (p) => p + '%');
   bindBar($('#lsTemp'), 'ls-temp', (p) => sheetId && lightCall('turn_on', [sheetId], { color_temp_kelvin: kelvinAt(p) }), (p) => kelvinAt(p) + 'K');
   $('#lsSw').innerHTML = COLORS.map((c) => `<button class="sw" data-c="${c.join(',')}" style="--c:${c.join(',')}" aria-label="Color"></button>`).join('');
+  $('#lsRemove').addEventListener('click', () => {
+    if (!sheetId || !sheetZone || !cfg) return;
+    cfg.zones[sheetZone] = (cfg.zones[sheetZone] || []).filter((x) => x !== sheetId);
+    store.set('cfg', cfg); closeSheets(); render();
+  });
   $('#lsSw').addEventListener('click', (e) => {
     const b = e.target.closest('.sw'); if (!b || !sheetId) return;
     lightCall('turn_on', [sheetId], { rgb_color: b.dataset.c.split(',').map(Number) });
@@ -341,13 +394,13 @@ function buildUI() {
   // Hold the clock for 2 seconds to open setup
   let hold;
   const cb = $('#clockbox');
-  cb.addEventListener('pointerdown', () => { hold = setTimeout(openSetup, 2000); });
+  cb.addEventListener('pointerdown', () => { hold = setTimeout(openEditor, 2000); });
   ['pointerup', 'pointerleave', 'pointercancel'].forEach((e) => cb.addEventListener(e, () => clearTimeout(hold)));
 }
 
 /* ---------- zone state from entity states ---------- */
 function zoneInfo(zid) {
-  const ids = (cfg && cfg.zones[zid]) || [];
+  const ids = (cfg && cfg.zones && cfg.zones[zid]) || [];
   const on = ids.map((id) => states[id]).filter((s) => s && s.state === 'on');
   const bri = on.length ? Math.round(on.reduce((n, s) => n + (s.attributes.brightness || 255), 0) / on.length / 2.55) : 0;
   return { ids, on: on.length > 0, bri: Math.max(bri, on.length ? 1 : 0) };
@@ -355,7 +408,9 @@ function zoneInfo(zid) {
 
 const dragging = {};
 function render() {
-  ZONES.forEach((z) => {
+  const ps = panels();
+  if (ps.map((p) => p.id + ':' + p.name).join('|') !== tilesKey) buildTiles();
+  ps.forEach((z) => {
     const t = $('#t-' + z.id); if (!t) return;
     const info = zoneInfo(z.id);
     t.style.display = info.ids.length || DEMO ? '' : 'none';
@@ -371,28 +426,37 @@ function render() {
     t.querySelector('.lights').innerHTML = zoneBulbs(z.id).map((id) => {
       const s = states[id], on = s.state === 'on', na = s.state === 'unavailable';
       return `<div class="lt${on ? ' on' : ''}${na ? ' na' : ''}" style="--c:${colorOf(s)}">
-        <button class="lt-open" data-id="${esc(id)}"><i class="dot"></i><span class="lt-txt"><span class="ln">${esc(nameOf(s))}</span><span class="lp">${na ? 'Unavailable' : on ? pctOf(s) + '%' : 'Off'}</span></span></button>
+        <button class="lt-open" data-id="${esc(id)}" data-zone="${esc(z.id)}"><i class="dot"></i><span class="lt-txt"><span class="ln">${esc(nameOf(s))}</span><span class="lp">${na ? 'Unavailable' : on ? pctOf(s) + '%' : 'Off'}</span></span></button>
         <button class="lt-pow" data-id="${esc(id)}" aria-label="Turn ${esc(nameOf(s))} on or off">${svg('power')}</button>
       </div>`;
-    }).join('');
+    }).join('') + (DEMO ? '' : `<button class="lt-add" data-zone="${esc(z.id)}">+ Add light</button>`);
     t.querySelector('.hs-btn').hidden = !zoneHueScenes(z.id).length;
   });
-  // one visible zone → let it fill the width
-  const visible = ZONES.filter((z) => $('#t-' + z.id).style.display !== 'none').length;
-  $('#tiles').style.gridTemplateColumns = visible < 2 ? '1fr' : '';
+  layoutTiles(ps.filter((z) => $('#t-' + z.id).style.display !== 'none').length);
   renderLightSheet();
 }
 
+// 1 panel fills the screen; 2 use the original layout; 3+ share a grid
+function layoutTiles(n) {
+  const el = $('#tiles'), portrait = innerHeight > innerWidth;
+  if (n <= 1) { el.style.gridTemplateColumns = '1fr'; el.style.gridTemplateRows = '1fr'; return; }
+  if (n === 2) { el.style.gridTemplateColumns = ''; el.style.gridTemplateRows = ''; return; }
+  const cols = portrait ? (n === 3 ? 1 : 2) : (n === 3 ? 3 : 2);
+  el.style.gridTemplateColumns = `repeat(${cols},minmax(0,1fr))`;
+  el.style.gridTemplateRows = `repeat(${Math.ceil(n / cols)},minmax(0,1fr))`;
+}
+addEventListener('resize', () => render());
+
 /* ---------- one light's controls ---------- */
-let sheetId = null;
+let sheetId = null, sheetZone = null;
 const TEMP_MIN = 2200, TEMP_MAX = 6500;
 function tempRange(s) {
   const a = (s && s.attributes) || {};
   return [a.min_color_temp_kelvin || TEMP_MIN, a.max_color_temp_kelvin || TEMP_MAX];
 }
 function kelvinAt(p) { const [lo, hi] = tempRange(states[sheetId]); return Math.round((lo + (hi - lo) * (p - 1) / 99) / 50) * 50; }
-function openLightSheet(id) { sheetId = id; $('#lightSheet').classList.add('show'); renderLightSheet(); }
-function closeSheets() { sheetId = null; document.querySelectorAll('.backdrop').forEach((b) => b.classList.remove('show')); }
+function openLightSheet(id, zone) { sheetId = id; sheetZone = zone || null; $('#lightSheet').classList.add('show'); renderLightSheet(); }
+function closeSheets() { sheetId = null; sheetZone = null; document.querySelectorAll('.backdrop').forEach((b) => b.classList.remove('show')); }
 function renderLightSheet() {
   if (!sheetId) return;
   const s = states[sheetId]; if (!s) return closeSheets();
@@ -411,6 +475,9 @@ function renderLightSheet() {
     if (p != null) temp.querySelector('.knob').style.left = p + '%';
     temp.querySelector('b').textContent = p == null ? '' : k + 'K';
   }
+  const direct = sheetZone && cfg && (cfg.zones[sheetZone] || []).includes(sheetId);
+  $('#lsRemove').hidden = !direct || DEMO;
+  if (direct) $('#lsRemove').textContent = 'Remove from ' + panelName(sheetZone);
   const col = supports(s, 'color');
   $('#lsColorLabel').hidden = !col; $('#lsSw').hidden = !col;
   const cur = on && a.color_mode !== 'color_temp' && Array.isArray(a.rgb_color) ? a.rgb_color : null;
@@ -423,7 +490,7 @@ function renderLightSheet() {
 /* ---------- Hue scenes ---------- */
 function openSceneSheet(zid) {
   const list = zoneHueScenes(zid);
-  $('#ssName').textContent = ZONES.find((z) => z.id === zid).name + ' · Hue scenes';
+  $('#ssName').textContent = panelName(zid) + ' · Hue scenes';
   $('#ssList').innerHTML = list.map((s) => `<button class="hscene" data-id="${esc(s.entity_id)}">${esc(s.attributes.name || nameOf(s))}<small>${esc(s.attributes.group_name || '')}</small></button>`).join('');
   $('#ssList').onclick = (e) => {
     const b = e.target.closest('.hscene'); if (!b) return;
@@ -432,6 +499,25 @@ function openSceneSheet(zid) {
     closeSheets();
   };
   $('#sceneSheet').classList.add('show');
+}
+
+/* ---------- add a light to a panel ---------- */
+function openAddSheet(zid) {
+  const shown = new Set(zoneBulbs(zid)), direct = new Set((cfg && cfg.zones[zid]) || []);
+  const where = (id) => { const p = panels().find((x) => x.id !== zid && ((cfg.zones[x.id] || []).includes(id))); return p ? 'In ' + p.name : 'Skipped'; };
+  const list = Object.values(states).filter((s) => !direct.has(s.entity_id) && (isGroup(s) ? membersOf(s.entity_id).some((m) => !shown.has(m)) : !shown.has(s.entity_id)))
+    .sort((a, b) => (isGroup(b) ? 1 : 0) - (isGroup(a) ? 1 : 0) || nameOf(a).localeCompare(nameOf(b)));
+  $('#asName').textContent = 'Add to ' + panelName(zid);
+  $('#asList').innerHTML = list.length ? list.map((s) => `<button class="hscene" data-id="${esc(s.entity_id)}">${esc(nameOf(s))}${isGroup(s) ? ' (Hue room/zone)' : ''}<small>${where(s.entity_id)}</small></button>`).join('')
+    : '<p style="color:var(--muted)">Every light is already in this panel.</p>';
+  $('#asList').onclick = (e) => {
+    const b = e.target.closest('.hscene'); if (!b) return;
+    const id = b.dataset.id;
+    panels().forEach((p) => { cfg.zones[p.id] = (cfg.zones[p.id] || []).filter((x) => x !== id); });   // a light lives in one panel
+    cfg.zones[zid].push(id);
+    store.set('cfg', cfg); closeSheets(); render();
+  };
+  $('#addSheet').classList.add('show');
 }
 
 /* ---------- actions ---------- */
@@ -453,11 +539,10 @@ function setZoneBri(zid, pct) {
   lightCall('turn_on', zoneInfo(zid).ids, { brightness_pct: pct });
 }
 function runScene(s) {
-  ['room', 'island'].forEach((zid) => {
-    const a = s[zid]; if (!a) return;
-    const ids = zoneInfo(zid).ids;
-    if (a === 'off') lightCall('turn_off', ids);
-    else lightCall('turn_on', ids, { brightness_pct: a.pct, color_temp_kelvin: a.k });
+  panels().forEach((p) => {
+    const ids = zoneInfo(p.id).ids;
+    if (s.off) lightCall('turn_off', ids);
+    else if (p.scenes) lightCall('turn_on', ids, { brightness_pct: s.set.pct, color_temp_kelvin: s.set.k });
   });
 }
 
@@ -554,7 +639,14 @@ document.addEventListener('visibilitychange', () => {
 });
 
 /* ---------- setup screen ---------- */
-let draftZones = {};
+let draftZones = {}, draftPanels = [];
+// Edit button / hold the clock: straight to panels & lights when connected, otherwise the connection step
+function openEditor() {
+  if (DEMO) return;
+  if (cfg && cfg.token && ws && ws.readyState === 1 && Object.keys(states).length) {
+    closeSheets(); $('#setup').classList.add('show'); showLightPicker();
+  } else openSetup();
+}
 function openSetup() {
   if (DEMO) return;
   closeSheets();
@@ -572,43 +664,82 @@ $('#connectBtn').addEventListener('click', () => {
   connect(url, token, (err) => {
     if (err) { $('#err1').textContent = err.message; return; }
     $('#err1').textContent = '';
-    cfg = Object.assign({ zones: { room: [], island: [] } }, cfg || {}, { url, token });
+    cfg = Object.assign({ zones: {} }, cfg || {}, { url, token });
+    if (!cfg.panels) cfg.panels = DEFAULT_PANELS.map((p) => Object.assign({}, p));
     showLightPicker();
   });
 });
 function showLightPicker() {
-  $('#step1').hidden = true; $('#step2').hidden = false;
-  const lights = Object.values(states).sort((a, b) =>
-    (isGroup(b) ? 1 : 0) - (isGroup(a) ? 1 : 0) || nameOf(a).localeCompare(nameOf(b)));
-  draftZones = {};
-  const saved = cfg.zones.room.length || cfg.zones.island.length;
+  $('#step1').hidden = true; $('#step2').hidden = false; $('#err2').textContent = '';
+  draftPanels = panels().map((p) => Object.assign({}, p));
+  const lights = Object.values(states);
+  const saved = draftPanels.some((p) => (cfg.zones[p.id] || []).length);
   const hasGroups = lights.some(isGroup);
+  draftZones = {};
   lights.forEach((s) => {
-    const name = nameOf(s).toLowerCase();
     let z = 'none';
-    if (saved) z = cfg.zones.room.includes(s.entity_id) ? 'room' : cfg.zones.island.includes(s.entity_id) ? 'island' : 'none';
-    else if (!hasGroups) z = /island/.test(name) ? 'island' : 'room';   // first-time guess
+    if (saved) { const p = draftPanels.find((p) => (cfg.zones[p.id] || []).includes(s.entity_id)); if (p) z = p.id; }
+    else if (!hasGroups && draftPanels.length) z = /island/.test(nameOf(s).toLowerCase()) && draftPanels.some((p) => p.id === 'island') ? 'island' : draftPanels[0].id;   // first-time guess
     draftZones[s.entity_id] = z;
   });
+  renderPanelList(); renderLightList();
+}
+function renderPanelList() {
+  $('#panelList').innerHTML = draftPanels.map((p, i) => `
+    <div class="prow" data-i="${i}">
+      <input value="${esc(p.name)}" placeholder="Panel name" maxlength="24" aria-label="Panel name">
+      <button class="chk${p.scenes ? ' sel' : ''}">In scenes</button>
+      <button class="del" aria-label="Delete panel"${draftPanels.length < 2 ? ' disabled style="opacity:.3"' : ''}>×</button>
+    </div>`).join('');
+}
+$('#panelList').addEventListener('input', (e) => {
+  const row = e.target.closest('.prow'); if (!row) return;
+  draftPanels[+row.dataset.i].name = e.target.value; renderLightList();
+});
+$('#panelList').addEventListener('click', (e) => {
+  const row = e.target.closest('.prow'); if (!row) return;
+  const p = draftPanels[+row.dataset.i];
+  if (e.target.closest('.chk')) { p.scenes = !p.scenes; e.target.closest('.chk').classList.toggle('sel', p.scenes); }
+  if (e.target.closest('.del') && draftPanels.length > 1) {
+    draftPanels.splice(+row.dataset.i, 1);
+    Object.keys(draftZones).forEach((id) => { if (draftZones[id] === p.id) draftZones[id] = 'none'; });   // its lights go back to Skip
+    renderPanelList(); renderLightList();
+  }
+});
+$('#addPanelBtn').addEventListener('click', () => {
+  draftPanels.push({ id: 'p' + Date.now().toString(36), name: 'New panel', scenes: true });
+  renderPanelList(); renderLightList();
+  const inputs = $('#panelList').querySelectorAll('input'); const last = inputs[inputs.length - 1]; last.focus(); last.select();
+});
+function renderLightList() {
+  const lights = Object.values(states).sort((a, b) =>
+    (isGroup(b) ? 1 : 0) - (isGroup(a) ? 1 : 0) || nameOf(a).localeCompare(nameOf(b)));
+  const opts = draftPanels.map((p) => ({ id: p.id, name: p.name.trim() || 'Panel' })).concat([{ id: 'none', name: 'Skip' }]);
   $('#lightList').innerHTML = lights.length ? lights.map((s) => `
     <div class="row">
       <div>${esc(nameOf(s))}${isGroup(s) ? '<span class="tag">Hue room/zone</span>' : ''}<small>${esc(s.entity_id)}</small></div>
-      <div class="seg" data-id="${esc(s.entity_id)}">
-        ${['room', 'island', 'none'].map((z) => `<button data-z="${z}" class="${draftZones[s.entity_id] === z ? 'sel' : ''}">${z === 'none' ? 'Skip' : z[0].toUpperCase() + z.slice(1)}</button>`).join('')}
+      <div class="chips" data-id="${esc(s.entity_id)}">
+        ${opts.map((o) => `<button data-z="${esc(o.id)}" class="${draftZones[s.entity_id] === o.id ? 'sel' : ''}">${esc(o.name)}</button>`).join('')}
       </div>
     </div>`).join('') : '<p>No lights found. Check that the Hue integration is set up in Home Assistant.</p>';
-  document.querySelectorAll('.seg').forEach((seg) => seg.addEventListener('click', (e) => {
-    const b = e.target.closest('button'); if (!b) return;
-    draftZones[seg.dataset.id] = b.dataset.z;
-    seg.querySelectorAll('button').forEach((x) => x.classList.toggle('sel', x === b));
-  }));
 }
-$('#backBtn').addEventListener('click', () => { $('#step1').hidden = false; $('#step2').hidden = true; });
+$('#lightList').addEventListener('click', (e) => {
+  const b = e.target.closest('.chips button'); if (!b) return;
+  const box = b.closest('.chips');
+  draftZones[box.dataset.id] = b.dataset.z;
+  box.querySelectorAll('button').forEach((x) => x.classList.toggle('sel', x === b));
+});
+$('#backBtn').addEventListener('click', () => openSetup());
+$('#cancelBtn').addEventListener('click', () => {
+  if (cfg && cfg.token && cfg.zones && cfg.panels) { $('#setup').classList.remove('show'); render(); }
+  else openSetup();
+});
 $('#saveBtn').addEventListener('click', () => {
-  const zones = { room: [], island: [] };
+  const ps = draftPanels.map((p) => ({ id: p.id, name: p.name.trim() || 'Panel', scenes: !!p.scenes }));
+  const zones = {}; ps.forEach((p) => (zones[p.id] = []));
   Object.entries(draftZones).forEach(([id, z]) => { if (zones[z]) zones[z].push(id); });
-  if (!zones.room.length && !zones.island.length) { $('#err2').textContent = 'Pick at least one light.'; return; }
-  cfg.zones = zones; store.set('cfg', cfg);
+  if (!ps.some((p) => zones[p.id].length)) { $('#err2').textContent = 'Pick at least one light.'; return; }
+  cfg.panels = ps; cfg.zones = zones; store.set('cfg', cfg);
   $('#setup').classList.remove('show');
   render();
 });
@@ -625,7 +756,7 @@ function demoInit() {
   mk('light.bedroom', "Aaron's Bedroom", 1, 60, { is_hue_group: true, entity_id: ['light.grashoppa', 'light.stemlite', 'light.bedside', 'light.floor_arm'] });
   scenes['scene.bedroom_relax'] = { entity_id: 'scene.bedroom_relax', state: 'unknown', attributes: { name: 'Relax', group_name: "Aaron's Bedroom" } };
   scenes['scene.bedroom_sunset'] = { entity_id: 'scene.bedroom_sunset', state: 'unknown', attributes: { name: 'Savanna sunset', group_name: "Aaron's Bedroom" } };
-  cfg = { zones: { room: ['light.bedroom'], island: ['light.island_1', 'light.island_2', 'light.island_3'] } };
+  cfg = { panels: DEFAULT_PANELS, zones: { room: ['light.bedroom'], island: ['light.island_1', 'light.island_2', 'light.island_3'] } };
   setConn('ok', 'Demo');
 }
 function demoApply(service, ids, data) {
