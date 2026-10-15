@@ -21,13 +21,13 @@ html,body{margin:0;height:100%;background:var(--bg);color:var(--text);
   -webkit-user-select:none;user-select:none;overflow:hidden;touch-action:manipulation}
 button{font:inherit;color:inherit;cursor:pointer}
 
-#app{height:100%;display:flex;flex-direction:column;gap:clamp(16px,3vh,28px);
-  padding:clamp(20px,4.5vh,44px) clamp(20px,3.5vw,48px)}
+#app{height:100%;display:flex;flex-direction:column;gap:clamp(14px,2.4vh,24px);
+  padding:clamp(18px,3.6vh,40px) clamp(20px,3.5vw,48px)}
 
 /* header */
 header{display:flex;justify-content:space-between;align-items:flex-start}
-.clock{font-size:clamp(44px,8vh,72px);font-weight:300;letter-spacing:-.03em;line-height:1}
-.date{margin-top:8px;font-size:17px;color:var(--muted)}
+.clock{font-size:clamp(40px,7vh,64px);font-weight:300;letter-spacing:-.03em;line-height:1}
+.date{margin-top:6px;font-size:16px;color:var(--muted)}
 .conn{display:flex;align-items:center;gap:8px;font-size:14px;color:var(--muted);padding-top:10px}
 .conn i{width:8px;height:8px;border-radius:50%;background:var(--dim)}
 .conn.ok i{background:#6fbf73}.conn.ok span{display:none}
@@ -35,41 +35,86 @@ header{display:flex;justify-content:space-between;align-items:flex-start}
 
 /* zone tiles */
 .tiles{flex:1;min-height:0;display:grid;grid-template-columns:1.6fr 1fr;gap:clamp(14px,2vw,24px)}
-@media (orientation:portrait){.tiles{grid-template-columns:1fr;grid-template-rows:1.6fr 1fr}}
+@media (orientation:portrait){.tiles{grid-template-columns:1fr;grid-template-rows:1.4fr 1fr}}
 .tile{position:relative;border-radius:var(--radius);background:var(--tile);border:1px solid var(--line);
-  overflow:hidden;display:flex;flex-direction:column;transition:background .4s}
+  overflow:hidden;display:flex;flex-direction:column;transition:background .4s;min-height:0}
 .tile.on{background:var(--tile-on)}
 .glow{position:absolute;inset:0;pointer-events:none;opacity:0;transition:opacity .5s;
   background:radial-gradient(120% 90% at 30% 0%,rgba(var(--warm),.42),rgba(var(--warm),0) 60%)}
-.toggle{position:relative;flex:1;border:0;background:none;text-align:left;
-  padding:clamp(22px,3.5vh,34px) clamp(22px,2.4vw,34px);display:flex;flex-direction:column;justify-content:space-between}
-.tname{font-size:clamp(26px,4.2vh,36px);font-weight:400}
-.tstate{font-size:18px;color:var(--muted);margin-top:6px}
+.thead{position:relative;display:flex;align-items:center;gap:12px;padding:clamp(18px,3vh,28px) clamp(18px,2.2vw,28px) 12px}
+.toggle{flex:1;min-width:0;border:0;background:none;text-align:left;padding:0}
+.tname{font-size:clamp(24px,3.8vh,32px);font-weight:400}
+.tstate{font-size:17px;color:var(--muted);margin-top:4px}
 .tile.on .tstate{color:#e9cfa6}
-.power{width:72px;height:72px;border-radius:50%;border:1px solid var(--line);display:grid;place-items:center;
+.power{width:64px;height:64px;flex-shrink:0;border-radius:50%;border:1px solid var(--line);display:grid;place-items:center;
   background:rgba(255,255,255,.03);transition:background .3s,color .3s;color:var(--muted)}
-.tile.on .power{background:var(--accent);border-color:var(--accent);color:#1a1208}
-.power svg{width:30px;height:30px}
+.tile.on .thead .power,.sheet.on .power{background:var(--accent);border-color:var(--accent);color:#1a1208}
+.power svg{width:28px;height:28px}
+.pill{height:44px;padding:0 16px;border-radius:999px;border:1px solid var(--line);background:rgba(255,255,255,.04);
+  color:var(--muted);font-size:15px;flex-shrink:0}
 
-/* brightness bar: whole bar is the touch target */
-.bar{position:relative;margin:0 clamp(16px,2vw,24px) clamp(16px,2vw,24px);height:72px;border-radius:22px;
-  background:rgba(255,255,255,.05);overflow:hidden;touch-action:none}
+/* individual lights inside a zone */
+.lights{position:relative;flex:1;min-height:0;overflow-y:auto;padding:4px clamp(16px,2vw,24px) 12px;
+  display:grid;grid-template-columns:repeat(auto-fill,minmax(168px,1fr));gap:10px;align-content:start}
+.lt{--c:255,176,96;display:flex;align-items:stretch;height:64px;border-radius:18px;background:rgba(255,255,255,.035);
+  border:1px solid var(--line);overflow:hidden;transition:background .3s,border-color .3s}
+.lt.on{background:rgba(var(--c),.14);border-color:rgba(var(--c),.35)}
+.lt-open{flex:1;min-width:0;border:0;background:none;display:flex;align-items:center;gap:10px;padding:0 0 0 14px;text-align:left}
+.dot{width:14px;height:14px;border-radius:50%;flex-shrink:0;background:var(--dim)}
+.lt.on .dot{background:rgb(var(--c));box-shadow:0 0 12px rgba(var(--c),.8)}
+.lt-txt{min-width:0}
+.ln{display:block;font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.lp{display:block;font-size:13px;color:var(--muted);margin-top:2px}
+.lt-pow{width:52px;flex-shrink:0;border:0;background:none;color:var(--muted);display:grid;place-items:center}
+.lt.on .lt-pow{color:rgb(var(--c))}
+.lt-pow svg{width:20px;height:20px}
+.lt.na{opacity:.45}
+
+/* sliders: whole bar is the touch target */
+.bar{position:relative;height:68px;border-radius:22px;background:rgba(255,255,255,.05);overflow:hidden;touch-action:none;flex-shrink:0}
+.tile .bar{margin:0 clamp(16px,2vw,24px) clamp(16px,2vw,24px)}
 .fill{position:absolute;inset:0 auto 0 0;width:0;background:rgba(var(--warm),.28);transition:width .25s}
 .bar.drag .fill{transition:none}
 .tile:not(.on) .fill{background:rgba(255,255,255,.06)}
 .bar label{position:absolute;inset:0;display:flex;align-items:center;justify-content:space-between;
   padding:0 22px;font-size:15px;color:var(--muted);pointer-events:none}
 .bar b{font-weight:500;color:var(--text);font-variant-numeric:tabular-nums}
+.bar.temp{background:linear-gradient(90deg,#ffa448,#ffd7a8 45%,#f4f6ff 75%,#cfdcff)}
+.bar.temp .fill{display:none}
+.bar.temp label,.bar.temp b{color:#2a2016}
+.knob{position:absolute;top:10px;bottom:10px;width:6px;margin-left:-3px;border-radius:3px;background:#1a1208;
+  box-shadow:0 0 0 2px rgba(255,255,255,.8);left:50%;transition:left .25s}
+.bar.drag .knob{transition:none}
 
 /* scenes */
 .scenes{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:clamp(10px,1.4vw,16px)}
-.scene{height:clamp(64px,10vh,84px);border-radius:24px;border:1px solid var(--line);background:var(--tile);
+.scene{height:clamp(60px,9vh,80px);border-radius:24px;border:1px solid var(--line);background:var(--tile);
   font-size:18px;display:flex;align-items:center;justify-content:center;gap:12px;transition:background .2s,border-color .2s}
 .scene svg{width:22px;height:22px;color:var(--muted)}
 .scene:active,.scene.flash{background:#2a2620;border-color:var(--accent)}
 
+/* bottom sheets: one light's controls, Hue scenes */
+.backdrop{position:fixed;inset:0;background:rgba(0,0,0,.55);display:none;align-items:flex-end;justify-content:center;z-index:5}
+.backdrop.show{display:flex}
+.sheet{width:min(720px,100%);max-height:92%;overflow:auto;background:#1b1a17;border:1px solid var(--line);border-bottom:0;
+  border-radius:32px 32px 0 0;padding:26px clamp(20px,3vw,32px) 32px;display:flex;flex-direction:column;gap:16px}
+.sh-head{display:flex;align-items:center;gap:14px}
+.sh-title{flex:1;min-width:0}
+.sh-name{font-size:28px;font-weight:400}
+.sh-state{font-size:16px;color:var(--muted);margin-top:4px}
+.sheet.on .sh-state{color:#e9cfa6}
+.close{width:52px;height:52px;border-radius:50%;border:1px solid var(--line);background:none;color:var(--muted);font-size:26px;line-height:1}
+.sh-label{font-size:14px;color:var(--muted);margin:4px 0 -6px}
+.swatches{display:grid;grid-template-columns:repeat(8,minmax(0,1fr));gap:10px}
+.sw{aspect-ratio:1;border-radius:50%;border:2px solid transparent;background:rgb(var(--c));min-width:0}
+.sw.sel{border-color:var(--text)}
+.hscene-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px}
+.hscene{height:64px;border-radius:18px;border:1px solid var(--line);background:rgba(255,255,255,.04);font-size:16px;text-align:left;padding:0 18px}
+.hscene:active{border-color:var(--accent)}
+.hscene small{display:block;font-size:12px;color:var(--muted)}
+
 /* setup */
-#setup{position:fixed;inset:0;background:var(--bg);overflow:auto;padding:40px clamp(20px,6vw,80px);display:none;
+#setup{position:fixed;inset:0;background:var(--bg);overflow:auto;padding:40px clamp(20px,6vw,80px);display:none;z-index:10;
   -webkit-user-select:text;user-select:text}
 #setup.show{display:block}
 #setup h1{font-weight:400;font-size:32px;margin:0 0 6px}
@@ -106,18 +151,44 @@ header{display:flex;justify-content:space-between;align-items:flex-start}
   <nav class="scenes" id="scenes"></nav>
 </div>
 
+<!-- one light's controls -->
+<div class="backdrop" id="lightSheet">
+  <div class="sheet" id="ls">
+    <div class="sh-head">
+      <div class="sh-title"><div class="sh-name" id="lsName"></div><div class="sh-state" id="lsState"></div></div>
+      <button class="power" id="lsPow" aria-label="Turn on or off"></button>
+      <button class="close" data-close aria-label="Close">×</button>
+    </div>
+    <div class="bar" id="lsBri" role="slider" aria-label="Brightness"><div class="fill"></div><label><span>Brightness</span><b>–</b></label></div>
+    <div class="bar temp" id="lsTemp" role="slider" aria-label="Warmth"><div class="knob"></div><label><span>Warm</span><b>–</b><span>Cool</span></label></div>
+    <div class="sh-label" id="lsColorLabel">Color</div>
+    <div class="swatches" id="lsSw"></div>
+  </div>
+</div>
+
+<!-- Hue scenes for a zone -->
+<div class="backdrop" id="sceneSheet">
+  <div class="sheet">
+    <div class="sh-head">
+      <div class="sh-title"><div class="sh-name" id="ssName">Hue scenes</div><div class="sh-state">From your Hue app</div></div>
+      <button class="close" data-close aria-label="Close">×</button>
+    </div>
+    <div class="hscene-list" id="ssList"></div>
+  </div>
+</div>
+
 <div id="setup">
   <div id="step1">
     <h1>Set up the panel</h1>
     <p>Connect to Home Assistant. Make a long-lived access token in Home Assistant under your profile → Security → Long-lived access tokens, then paste it here. It's saved only on this tablet.</p>
-    <div class="field">Home Assistant address<input id="haUrl" placeholder="http://192.168.1.50:8123" autocomplete="off"></div>
+    <div class="field">Home Assistant address<input id="haUrl" placeholder="http://192.168.1.48" autocomplete="off"></div>
     <div class="field">Access token<textarea id="haToken" placeholder="eyJ0eXAiOiJKV1Qi…" autocomplete="off"></textarea></div>
     <div class="err" id="err1"></div>
     <div class="actions"><button class="btn" id="connectBtn">Connect</button></div>
   </div>
   <div id="step2" hidden>
     <h1>Which lights go where?</h1>
-    <p>"Room" lights all turn on and off together. "Island" is controlled on its own. If you made Hue zones for these, pick the zone and leave the individual bulbs out — the lights then switch at exactly the same moment.</p>
+    <p>"Room" lights all turn on and off together. "Island" is controlled on its own. You can pick a Hue room/zone or individual bulbs — either way, each bulb also gets its own little card on the panel.</p>
     <div id="lightList"></div>
     <div class="err" id="err2"></div>
     <div class="actions"><button class="btn" id="saveBtn">Save</button><button class="btn ghost" id="backBtn">Back</button></div>
@@ -140,10 +211,13 @@ const SCENES = [
   { name: 'Night',   icon: 'moon',  room: { pct: 5,   k: 2200 } },
   { name: 'All off', icon: 'power', room: 'off', island: 'off' }
 ];
+// Color swatches in a light's controls
+const COLORS = [[255,59,48],[255,128,32],[255,196,64],[255,92,160],[176,88,255],[64,96,255],[48,200,224],[80,216,120]];
 const FADE_SECONDS = 0.6;   // how softly lights change
 /* ========================================================= */
 
 const $ = (s) => document.querySelector(s);
+const esc = (t) => String(t).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 const ICONS = {
   power: '<path d="M12 3v8"/><path d="M6.3 7.2a8 8 0 1 0 11.4 0"/>',
   sun:   '<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/>',
@@ -159,7 +233,8 @@ const store = {
 
 const DEMO = new URLSearchParams(location.search).has('demo');
 let cfg = store.get('cfg', null);            // { url, token, zones: { room: [ids], island: [ids] } }
-let states = {};                              // entity_id -> state object
+let states = {};                              // light.* entity_id -> state object
+let scenes = {};                              // scene.* entity_id -> state object (Hue scenes)
 let ws = null, msgId = 1, pending = {}, retry = 1000;
 
 /* ---------- clock ---------- */
@@ -170,15 +245,60 @@ function tick() {
 }
 tick(); setInterval(tick, 10000);
 
+/* ---------- light helpers ---------- */
+const isGroup = (s) => !!(s && s.attributes.is_hue_group);
+const nameOf = (s) => (s && (s.attributes.friendly_name || s.entity_id)) || '';
+const pctOf = (s) => (s && s.state === 'on' ? Math.max(1, Math.round((s.attributes.brightness || 255) / 2.55)) : 0);
+function colorOf(s) {
+  const a = (s && s.attributes) || {};
+  if (Array.isArray(a.rgb_color)) return a.rgb_color.join(',');
+  return '255,176,96';
+}
+function supports(s, kind) {
+  const modes = (s && s.attributes.supported_color_modes) || [];
+  if (kind === 'temp') return modes.includes('color_temp') || modes.some((m) => ['rgbww', 'rgbw'].includes(m));
+  if (kind === 'color') return modes.some((m) => ['hs', 'xy', 'rgb', 'rgbw', 'rgbww'].includes(m));
+  if (kind === 'bri') return modes.length === 0 || !(modes.length === 1 && modes[0] === 'onoff');
+  return false;
+}
+// The bulbs behind an entity: a Hue room/zone lists its members; a bulb is just itself.
+function membersOf(id) {
+  const s = states[id]; if (!s) return [];
+  if (!isGroup(s)) return [id];
+  const a = s.attributes;
+  let ids = Array.isArray(a.entity_id) ? a.entity_id.filter((x) => states[x] && !isGroup(states[x])) : [];
+  if (!ids.length && Array.isArray(a.lights)) {
+    const byName = {};
+    Object.values(states).forEach((x) => { if (!isGroup(x)) byName[nameOf(x)] = x.entity_id; });
+    ids = a.lights.map((n) => byName[n]).filter(Boolean);
+  }
+  return ids;
+}
+function zoneBulbs(zid) {
+  const seen = new Set(), out = [];
+  ((cfg && cfg.zones[zid]) || []).forEach((id) => membersOf(id).forEach((m) => { if (!seen.has(m)) { seen.add(m); out.push(m); } }));
+  return out;
+}
+// Hue scenes that belong to the Hue rooms/zones (or bulbs' rooms) in a zone
+function zoneHueScenes(zid) {
+  const groups = new Set(((cfg && cfg.zones[zid]) || []).map((id) => states[id]).filter(isGroup).map(nameOf));
+  return Object.values(scenes).filter((s) => groups.has(s.attributes.group_name))
+    .sort((a, b) => (a.attributes.name || nameOf(a)).localeCompare(b.attributes.name || nameOf(b)));
+}
+
 /* ---------- build the screen ---------- */
 function buildUI() {
   $('#tiles').innerHTML = ZONES.map((z) => `
     <section class="tile" id="t-${z.id}">
       <div class="glow"></div>
-      <button class="toggle" data-zone="${z.id}" aria-label="Turn ${z.name} on or off">
-        <div><div class="tname">${z.name}</div><div class="tstate">Off</div></div>
-        <div class="power">${svg('power')}</div>
-      </button>
+      <div class="thead">
+        <button class="toggle" data-zone="${z.id}" aria-label="Turn ${z.name} on or off">
+          <div class="tname">${z.name}</div><div class="tstate">Off</div>
+        </button>
+        <button class="pill hs-btn" data-zone="${z.id}" hidden>Scenes</button>
+        <button class="power" data-zone="${z.id}" aria-label="Turn ${z.name} on or off">${svg('power')}</button>
+      </div>
+      <div class="lights" id="l-${z.id}"></div>
       <div class="bar" data-zone="${z.id}" role="slider" aria-label="${z.name} brightness" aria-valuemin="1" aria-valuemax="100">
         <div class="fill"></div>
         <label><span>Brightness</span><b>–</b></label>
@@ -187,12 +307,36 @@ function buildUI() {
   $('#scenes').innerHTML = SCENES.map((s, i) =>
     `<button class="scene" data-scene="${i}">${svg(s.icon)}<span>${s.name}</span></button>`).join('');
 
-  document.querySelectorAll('.toggle').forEach((b) => b.addEventListener('click', () => toggleZone(b.dataset.zone)));
-  document.querySelectorAll('.bar').forEach(bindBar);
-  document.querySelectorAll('.scene').forEach((b) => b.addEventListener('click', () => {
+  document.querySelectorAll('.thead .toggle, .thead .power').forEach((b) => b.addEventListener('click', () => toggleZone(b.dataset.zone)));
+  document.querySelectorAll('.hs-btn').forEach((b) => b.addEventListener('click', () => openSceneSheet(b.dataset.zone)));
+  document.querySelectorAll('.tile .bar').forEach((bar) => {
+    const zid = bar.dataset.zone;
+    bindBar(bar, 'z-' + zid, (p) => setZoneBri(zid, p));
+  });
+  // per-light cards: tap the card for controls, tap the power icon to switch
+  document.querySelectorAll('.lights').forEach((box) => box.addEventListener('click', (e) => {
+    const pow = e.target.closest('.lt-pow'), open = e.target.closest('.lt-open');
+    if (pow) toggleLight(pow.dataset.id);
+    else if (open) openLightSheet(open.dataset.id);
+  }));
+  $('#scenes').querySelectorAll('.scene').forEach((b) => b.addEventListener('click', () => {
     b.classList.add('flash'); setTimeout(() => b.classList.remove('flash'), 350);
     runScene(SCENES[+b.dataset.scene]);
   }));
+
+  // sheets
+  document.querySelectorAll('.backdrop').forEach((bd) => bd.addEventListener('click', (e) => {
+    if (e.target === bd || e.target.closest('[data-close]')) closeSheets();
+  }));
+  $('#lsPow').innerHTML = svg('power');
+  $('#lsPow').addEventListener('click', () => sheetId && toggleLight(sheetId));
+  bindBar($('#lsBri'), 'ls-bri', (p) => sheetId && lightCall('turn_on', [sheetId], { brightness_pct: p }), (p) => p + '%');
+  bindBar($('#lsTemp'), 'ls-temp', (p) => sheetId && lightCall('turn_on', [sheetId], { color_temp_kelvin: kelvinAt(p) }), (p) => kelvinAt(p) + 'K');
+  $('#lsSw').innerHTML = COLORS.map((c) => `<button class="sw" data-c="${c.join(',')}" style="--c:${c.join(',')}" aria-label="Color"></button>`).join('');
+  $('#lsSw').addEventListener('click', (e) => {
+    const b = e.target.closest('.sw'); if (!b || !sheetId) return;
+    lightCall('turn_on', [sheetId], { rgb_color: b.dataset.c.split(',').map(Number) });
+  });
 
   // Hold the clock for 2 seconds to open setup
   let hold;
@@ -218,15 +362,76 @@ function render() {
     t.classList.toggle('on', info.on);
     t.querySelector('.tstate').textContent = info.on ? `On · ${info.bri}%` : 'Off';
     t.querySelector('.glow').style.opacity = info.on ? (0.35 + 0.65 * info.bri / 100).toFixed(2) : 0;
-    if (!dragging[z.id]) {
-      t.querySelector('.fill').style.width = (info.on ? info.bri : 0) + '%';
+    if (!dragging['z-' + z.id]) {
+      t.querySelector('.bar .fill').style.width = (info.on ? info.bri : 0) + '%';
       t.querySelector('.bar b').textContent = info.on ? info.bri + '%' : '–';
       t.querySelector('.bar').setAttribute('aria-valuenow', info.bri);
     }
+    // the bulbs
+    t.querySelector('.lights').innerHTML = zoneBulbs(z.id).map((id) => {
+      const s = states[id], on = s.state === 'on', na = s.state === 'unavailable';
+      return `<div class="lt${on ? ' on' : ''}${na ? ' na' : ''}" style="--c:${colorOf(s)}">
+        <button class="lt-open" data-id="${esc(id)}"><i class="dot"></i><span class="lt-txt"><span class="ln">${esc(nameOf(s))}</span><span class="lp">${na ? 'Unavailable' : on ? pctOf(s) + '%' : 'Off'}</span></span></button>
+        <button class="lt-pow" data-id="${esc(id)}" aria-label="Turn ${esc(nameOf(s))} on or off">${svg('power')}</button>
+      </div>`;
+    }).join('');
+    t.querySelector('.hs-btn').hidden = !zoneHueScenes(z.id).length;
   });
   // one visible zone → let it fill the width
   const visible = ZONES.filter((z) => $('#t-' + z.id).style.display !== 'none').length;
   $('#tiles').style.gridTemplateColumns = visible < 2 ? '1fr' : '';
+  renderLightSheet();
+}
+
+/* ---------- one light's controls ---------- */
+let sheetId = null;
+const TEMP_MIN = 2200, TEMP_MAX = 6500;
+function tempRange(s) {
+  const a = (s && s.attributes) || {};
+  return [a.min_color_temp_kelvin || TEMP_MIN, a.max_color_temp_kelvin || TEMP_MAX];
+}
+function kelvinAt(p) { const [lo, hi] = tempRange(states[sheetId]); return Math.round((lo + (hi - lo) * (p - 1) / 99) / 50) * 50; }
+function openLightSheet(id) { sheetId = id; $('#lightSheet').classList.add('show'); renderLightSheet(); }
+function closeSheets() { sheetId = null; document.querySelectorAll('.backdrop').forEach((b) => b.classList.remove('show')); }
+function renderLightSheet() {
+  if (!sheetId) return;
+  const s = states[sheetId]; if (!s) return closeSheets();
+  const on = s.state === 'on', a = s.attributes;
+  $('#ls').classList.toggle('on', on);
+  $('#lsName').textContent = nameOf(s);
+  $('#lsState').textContent = s.state === 'unavailable' ? 'Unavailable — check the bulb\'s power switch' : on ? `On · ${pctOf(s)}%` : 'Off';
+  const bri = $('#lsBri'), temp = $('#lsTemp');
+  bri.hidden = !supports(s, 'bri');
+  if (!dragging['ls-bri']) { bri.querySelector('.fill').style.width = pctOf(s) + '%'; bri.querySelector('b').textContent = on ? pctOf(s) + '%' : '–'; }
+  temp.hidden = !supports(s, 'temp');
+  if (!dragging['ls-temp']) {
+    const [lo, hi] = tempRange(s), k = a.color_temp_kelvin;
+    const p = on && k && a.color_mode === 'color_temp' ? Math.min(100, Math.max(1, 1 + 99 * (k - lo) / (hi - lo))) : null;
+    temp.querySelector('.knob').style.display = p == null ? 'none' : '';
+    if (p != null) temp.querySelector('.knob').style.left = p + '%';
+    temp.querySelector('b').textContent = p == null ? '' : k + 'K';
+  }
+  const col = supports(s, 'color');
+  $('#lsColorLabel').hidden = !col; $('#lsSw').hidden = !col;
+  const cur = on && a.color_mode !== 'color_temp' && Array.isArray(a.rgb_color) ? a.rgb_color : null;
+  $('#lsSw').querySelectorAll('.sw').forEach((b) => {
+    const c = b.dataset.c.split(',').map(Number);
+    b.classList.toggle('sel', !!cur && c.every((v, i) => Math.abs(v - cur[i]) < 40));
+  });
+}
+
+/* ---------- Hue scenes ---------- */
+function openSceneSheet(zid) {
+  const list = zoneHueScenes(zid);
+  $('#ssName').textContent = ZONES.find((z) => z.id === zid).name + ' · Hue scenes';
+  $('#ssList').innerHTML = list.map((s) => `<button class="hscene" data-id="${esc(s.entity_id)}">${esc(s.attributes.name || nameOf(s))}<small>${esc(s.attributes.group_name || '')}</small></button>`).join('');
+  $('#ssList').onclick = (e) => {
+    const b = e.target.closest('.hscene'); if (!b) return;
+    if (DEMO) return closeSheets();
+    send({ type: 'call_service', domain: 'scene', service: 'turn_on', service_data: { transition: FADE_SECONDS }, target: { entity_id: b.dataset.id } });
+    closeSheets();
+  };
+  $('#sceneSheet').classList.add('show');
 }
 
 /* ---------- actions ---------- */
@@ -240,6 +445,10 @@ function toggleZone(zid) {
   if (info.on) lightCall('turn_off', info.ids);
   else lightCall('turn_on', info.ids);   // Hue remembers the last brightness
 }
+function toggleLight(id) {
+  const s = states[id]; if (!s) return;
+  lightCall(s.state === 'on' ? 'turn_off' : 'turn_on', [id]);
+}
 function setZoneBri(zid, pct) {
   lightCall('turn_on', zoneInfo(zid).ids, { brightness_pct: pct });
 }
@@ -252,29 +461,34 @@ function runScene(s) {
   });
 }
 
-/* ---------- brightness bar (drag anywhere on it) ---------- */
-function bindBar(bar) {
-  const zid = bar.dataset.zone;
+/* ---------- sliders (drag anywhere on the bar) ---------- */
+function bindBar(bar, key, apply, fmt) {
+  fmt = fmt || ((p) => p + '%');
   let last = 0, val = 0;
   const pctAt = (e) => {
     const r = bar.getBoundingClientRect();
     return Math.min(100, Math.max(1, Math.round((e.clientX - r.left) / r.width * 100)));
   };
-  const show = (p) => { bar.querySelector('.fill').style.width = p + '%'; bar.querySelector('b').textContent = p + '%'; };
+  const show = (p) => {
+    const f = bar.querySelector('.fill'), k = bar.querySelector('.knob');
+    if (f) f.style.width = p + '%';
+    if (k) { k.style.display = ''; k.style.left = p + '%'; }
+    bar.querySelector('b').textContent = fmt(p);
+  };
   bar.addEventListener('pointerdown', (e) => {
-    bar.setPointerCapture(e.pointerId); dragging[zid] = true; bar.classList.add('drag');
+    bar.setPointerCapture(e.pointerId); dragging[key] = true; bar.classList.add('drag');
     val = pctAt(e); show(val);
   });
   bar.addEventListener('pointermove', (e) => {
-    if (!dragging[zid]) return;
+    if (!dragging[key]) return;
     val = pctAt(e); show(val);
     const now = Date.now();
-    if (now - last > 300) { last = now; setZoneBri(zid, val); }   // live, but not flooding the bridge
+    if (now - last > 300) { last = now; apply(val); }   // live, but not flooding the bridge
   });
   const end = () => {
-    if (!dragging[zid]) return;
-    dragging[zid] = false; bar.classList.remove('drag');
-    setZoneBri(zid, val);
+    if (!dragging[key]) return;
+    dragging[key] = false; bar.classList.remove('drag');
+    apply(val);
   };
   bar.addEventListener('pointerup', end);
   bar.addEventListener('pointercancel', end);
@@ -292,6 +506,12 @@ function send(msg) {
 
 function wsUrl(base) { return base.replace(/\/+$/, '').replace(/^http/, 'ws') + '/api/websocket'; }
 
+function keep(s) {
+  if (s.entity_id.startsWith('light.')) { states[s.entity_id] = s; return true; }
+  if (s.entity_id.startsWith('scene.') && s.attributes.group_name) { scenes[s.entity_id] = s; return true; }
+  return false;
+}
+
 function connect(url, token, onReady) {
   if (ws) { ws.onclose = null; ws.close(); }
   setConn('', 'Connecting…');
@@ -305,7 +525,7 @@ function connect(url, token, onReady) {
     else if (m.type === 'auth_ok') {
       retry = 1000; setConn('ok', 'Connected');
       send({ type: 'get_states' }).then((list) => {
-        states = {}; list.forEach((s) => { if (s.entity_id.startsWith('light.')) states[s.entity_id] = s; });
+        states = {}; scenes = {}; list.forEach(keep);
         render(); onReady && onReady(null); onReady = null;
       });
       send({ type: 'subscribe_events', event_type: 'state_changed' });
@@ -316,7 +536,8 @@ function connect(url, token, onReady) {
     }
     else if (m.type === 'event' && m.event.event_type === 'state_changed') {
       const d = m.event.data;
-      if (d.entity_id.startsWith('light.')) { if (d.new_state) states[d.entity_id] = d.new_state; else delete states[d.entity_id]; render(); }
+      if (d.new_state) { if (keep(d.new_state)) render(); }
+      else if (states[d.entity_id] || scenes[d.entity_id]) { delete states[d.entity_id]; delete scenes[d.entity_id]; render(); }
     }
   };
   sock.onerror = () => { if (onReady) { onReady(new Error("Couldn't reach Home Assistant at that address.")); onReady = null; } };
@@ -336,6 +557,7 @@ document.addEventListener('visibilitychange', () => {
 let draftZones = {};
 function openSetup() {
   if (DEMO) return;
+  closeSheets();
   $('#setup').classList.add('show');
   $('#step1').hidden = false; $('#step2').hidden = true;
   const guess = /^https?:$/.test(location.protocol) ? location.origin : '';
@@ -357,13 +579,12 @@ $('#connectBtn').addEventListener('click', () => {
 function showLightPicker() {
   $('#step1').hidden = true; $('#step2').hidden = false;
   const lights = Object.values(states).sort((a, b) =>
-    (b.attributes.is_hue_group ? 1 : 0) - (a.attributes.is_hue_group ? 1 : 0) ||
-    (a.attributes.friendly_name || a.entity_id).localeCompare(b.attributes.friendly_name || b.entity_id));
+    (isGroup(b) ? 1 : 0) - (isGroup(a) ? 1 : 0) || nameOf(a).localeCompare(nameOf(b)));
   draftZones = {};
   const saved = cfg.zones.room.length || cfg.zones.island.length;
-  const hasGroups = lights.some((s) => s.attributes.is_hue_group);
+  const hasGroups = lights.some(isGroup);
   lights.forEach((s) => {
-    const name = (s.attributes.friendly_name || '').toLowerCase();
+    const name = nameOf(s).toLowerCase();
     let z = 'none';
     if (saved) z = cfg.zones.room.includes(s.entity_id) ? 'room' : cfg.zones.island.includes(s.entity_id) ? 'island' : 'none';
     else if (!hasGroups) z = /island/.test(name) ? 'island' : 'room';   // first-time guess
@@ -371,8 +592,8 @@ function showLightPicker() {
   });
   $('#lightList').innerHTML = lights.length ? lights.map((s) => `
     <div class="row">
-      <div>${s.attributes.friendly_name || s.entity_id}${s.attributes.is_hue_group ? '<span class="tag">Hue room/zone</span>' : ''}<small>${s.entity_id}</small></div>
-      <div class="seg" data-id="${s.entity_id}">
+      <div>${esc(nameOf(s))}${isGroup(s) ? '<span class="tag">Hue room/zone</span>' : ''}<small>${esc(s.entity_id)}</small></div>
+      <div class="seg" data-id="${esc(s.entity_id)}">
         ${['room', 'island', 'none'].map((z) => `<button data-z="${z}" class="${draftZones[s.entity_id] === z ? 'sel' : ''}">${z === 'none' ? 'Skip' : z[0].toUpperCase() + z.slice(1)}</button>`).join('')}
       </div>
     </div>`).join('') : '<p>No lights found. Check that the Hue integration is set up in Home Assistant.</p>';
@@ -394,17 +615,29 @@ $('#saveBtn').addEventListener('click', () => {
 
 /* ---------- demo mode (open with ?demo) ---------- */
 function demoInit() {
-  const mk = (id, name, on, b) => ({ entity_id: id, state: on ? 'on' : 'off', attributes: { friendly_name: name, brightness: Math.round(b * 2.55) } });
-  [mk('light.grashoppa', 'Gräshoppa', 1, 60), mk('light.stemlite', 'Stemlite', 1, 60), mk('light.bedside', 'Bedside', 1, 60),
-   mk('light.island_1', 'Island 1', 0, 80), mk('light.island_2', 'Island 2', 0, 80)].forEach((s) => (states[s.entity_id] = s));
-  cfg = { zones: { room: ['light.grashoppa', 'light.stemlite', 'light.bedside'], island: ['light.island_1', 'light.island_2'] } };
+  const modes = ['color_temp', 'xy'];
+  const mk = (id, name, on, b, extra) => (states[id] = { entity_id: id, state: on ? 'on' : 'off',
+    attributes: Object.assign({ friendly_name: name, brightness: Math.round(b * 2.55), supported_color_modes: modes,
+      color_mode: 'color_temp', color_temp_kelvin: 2700, rgb_color: [255, 167, 87], min_color_temp_kelvin: 2000, max_color_temp_kelvin: 6500 }, extra || {}) });
+  mk('light.grashoppa', 'Gräshoppa', 1, 60); mk('light.stemlite', 'Stemlite', 1, 60);
+  mk('light.bedside', 'Bedside lamp', 0, 60); mk('light.floor_arm', 'Floor lamp arm', 1, 40, { color_mode: 'xy', rgb_color: [176, 88, 255] });
+  mk('light.island_1', 'Island 1', 0, 80); mk('light.island_2', 'Island 2', 0, 80); mk('light.island_3', 'Island 3', 0, 80);
+  mk('light.bedroom', "Aaron's Bedroom", 1, 60, { is_hue_group: true, entity_id: ['light.grashoppa', 'light.stemlite', 'light.bedside', 'light.floor_arm'] });
+  scenes['scene.bedroom_relax'] = { entity_id: 'scene.bedroom_relax', state: 'unknown', attributes: { name: 'Relax', group_name: "Aaron's Bedroom" } };
+  scenes['scene.bedroom_sunset'] = { entity_id: 'scene.bedroom_sunset', state: 'unknown', attributes: { name: 'Savanna sunset', group_name: "Aaron's Bedroom" } };
+  cfg = { zones: { room: ['light.bedroom'], island: ['light.island_1', 'light.island_2', 'light.island_3'] } };
   setConn('ok', 'Demo');
 }
 function demoApply(service, ids, data) {
-  ids.forEach((id) => {
-    const s = states[id];
+  ids.flatMap(membersOf).concat(ids).forEach((id) => {
+    const s = states[id]; if (!s) return;
     if (service === 'turn_off') s.state = 'off';
-    else { s.state = 'on'; if (data && data.brightness_pct) s.attributes.brightness = Math.round(data.brightness_pct * 2.55); }
+    else {
+      s.state = 'on';
+      if (data && data.brightness_pct) s.attributes.brightness = Math.round(data.brightness_pct * 2.55);
+      if (data && data.color_temp_kelvin) { s.attributes.color_mode = 'color_temp'; s.attributes.color_temp_kelvin = data.color_temp_kelvin; s.attributes.rgb_color = [255, 200, 150]; }
+      if (data && data.rgb_color) { s.attributes.color_mode = 'xy'; s.attributes.rgb_color = data.rgb_color; }
+    }
   });
   render();
 }
@@ -412,7 +645,7 @@ function demoApply(service, ids, data) {
 /* ---------- auto-update ----------
    The tablet loads this file from GitHub through a small loader on Home Assistant.
    Every 10 minutes, check for a newer version and reload when one is out
-   (but never while setup is open or a brightness bar is being dragged). */
+   (but never while setup or a light's controls are open, or a slider is being dragged). */
 const PANEL_SRC = 'https://raw.githubusercontent.com/amontgomery57/room-panel/main/panel.html';
 function checkForUpdate() {
   let current = null; try { current = localStorage.getItem('panel.code'); } catch (e) {}
@@ -421,7 +654,7 @@ function checkForUpdate() {
     .then((r) => (r.ok ? r.text() : null))
     .then((code) => {
       if (!code || code === current) return;
-      if ($('#setup').classList.contains('show') || Object.values(dragging).some(Boolean)) return;
+      if ($('#setup').classList.contains('show') || document.querySelector('.backdrop.show') || Object.values(dragging).some(Boolean)) return;
       location.reload();
     }).catch(() => {});
 }
