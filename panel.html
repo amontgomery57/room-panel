@@ -128,7 +128,7 @@ body.mapview #tiles,body.mapview #scenes,body.mapview #viewBtn{display:none!impo
 .panel{background:linear-gradient(180deg,#1c1b18,#181714);border:1px solid var(--line);border-radius:20px}
 #nav{flex-direction:column;gap:4px;padding:10px;overflow-y:auto;scrollbar-width:none}
 #nav::-webkit-scrollbar{display:none}
-.nitem{display:flex;align-items:center;gap:14px;min-height:52px;white-space:nowrap;padding:0 14px;border-radius:14px;border:1px solid transparent;background:none;
+.nitem{display:flex;align-items:center;gap:14px;min-height:52px;white-space:nowrap;cursor:pointer;user-select:none;padding:0 14px;border-radius:14px;border:1px solid transparent;background:none;
   color:#cfc7b9;font-size:16px;text-align:left;transition:background .2s,border-color .2s,color .2s;position:relative}
 .nitem svg{width:24px;height:24px;flex-shrink:0;color:#a89d8b}
 .nitem small{display:block;font-size:12px;color:var(--muted);margin-top:1px}
@@ -176,9 +176,54 @@ body.mapview #tiles,body.mapview #scenes,body.mapview #viewBtn{display:none!impo
 .mlight text{fill:#e7dfd0;font-size:12px;text-anchor:middle;dominant-baseline:middle;pointer-events:none;display:none;letter-spacing:.03em;paint-order:stroke;stroke:#151412;stroke-width:3}
 .mapbox.arranging .mlight text,.mlight.sel text{display:block}
 
+/* Hue-style light cards: name + power on top, a thick brightness bar underneath */
+.lc{--c:226,196,146;border:1px solid var(--line);border-radius:16px;padding:8px 10px 10px 14px;margin-bottom:8px;background:rgba(255,255,255,.018);transition:border-color .25s,background .25s}
+.lc.on{border-color:rgba(var(--c),.3);background:rgba(var(--c),.05)}
+.lc .top{display:flex;align-items:center;gap:12px;min-height:46px}
+.lc .li{flex:1;border:0;background:none;padding:0;display:flex;align-items:center;gap:12px;min-width:0;text-align:left}
+.lc .li svg{width:22px;height:22px;flex-shrink:0;color:#b9ae9a}
+.lc.on .li svg{color:rgb(var(--c))}
+.lc .li .chev{width:16px;height:16px;color:var(--dim);margin-left:auto}
+.pw{width:46px;height:46px;border-radius:50%;border:1.5px solid var(--line-2);background:rgba(255,255,255,.02);color:#a89d8b;display:grid;place-items:center;flex-shrink:0;transition:all .2s}
+.pw svg{width:21px;height:21px}
+.pw.on{background:var(--accent);border-color:var(--accent);color:var(--accent-ink);box-shadow:0 0 16px rgba(217,189,142,.35)}
+.pw:active{transform:scale(.94)}
+.pw.big{width:62px;height:62px}
+.pw.big svg{width:27px;height:27px}
+.hs{--p:0%;position:relative;height:38px;margin-top:6px;border-radius:12px;background:#262420;overflow:hidden;touch-action:none;cursor:pointer}
+.hs .hf{position:absolute;inset:0 auto 0 0;width:var(--p);background:linear-gradient(90deg,rgba(var(--c),.22),rgba(var(--c),.6));transition:width .18s ease}
+.hs.drag .hf{transition:none}
+.hs .hf::after{content:'';position:absolute;right:6px;top:8px;bottom:8px;width:3px;border-radius:2px;background:rgba(255,248,235,.85)}
+.off .hs .hf,.hs.off .hf{background:rgba(255,255,255,.06)}
+.off .hs .hf::after,.hs.off .hf::after{background:rgba(255,255,255,.25)}
+.hs .hl{position:absolute;inset:0;display:flex;align-items:center;justify-content:space-between;padding:0 14px;font-size:13.5px;color:var(--muted);pointer-events:none}
+.hs .hl b{font-weight:500;color:var(--text);font-variant-numeric:tabular-nums}
+.hs.big{height:52px;border-radius:14px;margin-top:14px}
+.hs.big .hl{font-size:15px}
+.gact{display:flex;gap:8px;margin-top:10px}
+.gact button{flex:1;height:46px;border-radius:12px;border:1px solid var(--line-2);background:none;color:var(--text);font-size:14.5px;display:flex;align-items:center;justify-content:center;gap:8px}
+.gact button svg{width:18px;height:18px;color:var(--champ)}
+.gact .sw-dots{display:flex;gap:3px}
+.gact .sw-dots i{width:8px;height:8px;border-radius:50%}
+/* room power in the left rail */
+.nitem .npw{margin-left:auto;width:34px;height:34px;border-radius:50%;border:1px solid var(--line-2);display:grid;place-items:center;color:#8b8274;flex-shrink:0;transition:all .2s}
+.nitem .npw svg{width:16px;height:16px;color:inherit}
+.nitem .npw.on{background:rgba(217,189,142,.92);border-color:transparent;color:var(--accent-ink);box-shadow:0 0 12px rgba(217,189,142,.35)}
+.nitem .npw.on svg{color:var(--accent-ink)}
+.nitem.sel .npw:not(.on) svg{color:#8b8274}
+/* hue slider in a light's controls */
+.bar.hue{background:linear-gradient(90deg,#ff3b30,#ff9500,#ffcc00,#4cd964,#34c7c9,#3f6cff,#a855f7,#ff2d92,#ff3b30);border-color:transparent}
+.bar.hue .fill{display:none}
+.bar.hue label,.bar.hue b{color:#fff;text-shadow:0 1px 3px rgba(0,0,0,.5)}
+.fxs{display:flex;flex-wrap:wrap;gap:8px}
+.fxs button{height:42px;padding:0 14px;border-radius:12px;border:1px solid var(--line-2);background:none;color:var(--muted);font-size:14px;text-transform:capitalize}
+.fxs button.sel{background:var(--text);color:var(--bg);border-color:var(--text)}
+
 /* right detail panel */
 #detail{flex-direction:column;padding:22px 22px 18px;overflow-y:auto;scrollbar-width:none;min-height:0}
 #detail::-webkit-scrollbar{display:none}
+#detail>*{flex-shrink:0}
+#detail>.nfill{flex-shrink:1}
 .eyebrow{font-size:11.5px;letter-spacing:.24em;text-transform:uppercase;color:var(--muted)}
 .dtitle{display:flex;align-items:center;gap:14px;margin:8px 0 6px}
 .dtitle>svg{width:34px;height:34px;color:#cfc4b0;flex-shrink:0}
@@ -358,7 +403,10 @@ body.mapview #tiles,body.mapview #scenes,body.mapview #viewBtn{display:none!impo
     <div class="bar" id="lsBri" role="slider" aria-label="Brightness"><div class="fill"></div><label><span>Brightness</span><b>–</b></label></div>
     <div class="bar temp" id="lsTemp" role="slider" aria-label="Warmth"><div class="knob"></div><label><span>Warm</span><b>–</b><span>Cool</span></label></div>
     <div class="sh-label" id="lsColorLabel">Color</div>
+    <div class="bar hue" id="lsHue" role="slider" aria-label="Color"><div class="knob"></div><label><span>Color</span><b></b><span></span></label></div>
     <div class="swatches" id="lsSw"></div>
+    <div class="sh-label" id="lsFxLabel">Effects</div>
+    <div class="fxs" id="lsFx"></div>
     <div class="sh-foot"><button class="link" id="lsRemove" hidden></button></div>
   </div>
 </div>
@@ -595,9 +643,19 @@ function buildUI() {
   }));
   $('#ds').addEventListener('click', (e) => { const b = e.target.closest('[data-act]'); if (b) devAction(b.dataset.act, b.dataset.v); });
   $('#lsPow').innerHTML = svg('power');
-  $('#lsPow').addEventListener('click', () => sheetId && toggleLight(sheetId));
-  bindBar($('#lsBri'), 'ls-bri', (p) => sheetId && lightCall('turn_on', [sheetId], { brightness_pct: p }), (p) => p + '%');
-  bindBar($('#lsTemp'), 'ls-temp', (p) => sheetId && lightCall('turn_on', [sheetId], { color_temp_kelvin: kelvinAt(p) }), (p) => kelvinAt(p) + 'K');
+  $('#lsPow').addEventListener('click', () => { if (!sheetId) return; if (isRoomSheet()) toggleRoom(sheetId.slice(5)); else toggleLight(sheetId); });
+  bindBar($('#lsBri'), 'ls-bri', (p) => sheetId && lightCall('turn_on', sheetTargets(), { brightness_pct: p }, 0.25), (p) => p + '%');
+  bindBar($('#lsTemp'), 'ls-temp', (p) => sheetId && lightCall('turn_on', sheetTargets('temp'), { color_temp_kelvin: kelvinAt(p) }, 0.25), (p) => kelvinAt(p) + 'K');
+  bindBar($('#lsHue'), 'ls-hue', (p) => sheetId && lightCall('turn_on', sheetTargets('color'), { hs_color: [Math.round((p - 1) / 99 * 360), 100] }, 0.25), () => '');
+  $('#lsFx').addEventListener('click', (e) => {
+    const b = e.target.closest('button'); if (!b || !sheetId) return;
+    const ids = sheetTargets().filter((id) => (states[id].attributes.effect_list || []).length);
+    ids.forEach((id) => {
+      const list = states[id].attributes.effect_list, none = list.find((x) => /^(none|off)$/i.test(x)) || 'off';
+      const fx = b.dataset.fx === '__none' ? none : b.dataset.fx;
+      if (fx === none || list.includes(fx)) lightCall('turn_on', [id], { effect: fx });
+    });
+  });
   $('#lsSw').innerHTML = COLORS.map((c) => `<button class="sw" data-c="${c.join(',')}" style="--c:${c.join(',')}" aria-label="Color"></button>`).join('');
   $('#lsRemove').addEventListener('click', () => {
     if (!sheetId || !sheetZone || !cfg) return;
@@ -606,7 +664,7 @@ function buildUI() {
   });
   $('#lsSw').addEventListener('click', (e) => {
     const b = e.target.closest('.sw'); if (!b || !sheetId) return;
-    lightCall('turn_on', [sheetId], { rgb_color: b.dataset.c.split(',').map(Number) });
+    lightCall('turn_on', sheetTargets('color'), { rgb_color: b.dataset.c.split(',').map(Number) });
   });
 
   // Hold the clock for 2 seconds to open setup
@@ -983,6 +1041,7 @@ function initMap() {
   buildMapSvg();
   $('#editBtn').innerHTML = svg('gear');
   $('#nav').addEventListener('click', (e) => {
+    const pw = e.target.closest('[data-pw]'); if (pw) { toggleRoom(pw.dataset.pw); return; }
     const b = e.target.closest('[data-nav]'); if (!b) return;
     const v = b.dataset.nav;
     if (v === 'panels') setView('panels');
@@ -1012,11 +1071,11 @@ function initMap() {
   d.addEventListener('click', (e) => {
     const t = (sel) => e.target.closest(sel);
     let b;
-    if ((b = t('.tg[data-id]'))) toggleLight(b.dataset.id);
-    else if ((b = t('.tg[data-room]'))) toggleRoom(b.dataset.room);
+    if ((b = t('.pw[data-id], .tg[data-id]'))) toggleLight(b.dataset.id);
+    else if ((b = t('.pw[data-room], .tg[data-room]'))) toggleRoom(b.dataset.room);
+    else if ((b = t('[data-group]'))) { const r = b.getBoundingClientRect(); openLightSheet('room:' + b.dataset.group, null, { x: r.left, y: r.top + r.height / 2 }); }
     else if ((b = t('.li[data-open]'))) { const r = b.closest('.lrow,.drow').getBoundingClientRect(); const id = b.dataset.open, a = { x: r.left, y: r.top + r.height / 2 }; isDev(id) ? openDevSheet(id, a) : openLightSheet(id, zoneOfLight(id), a); }
     else if ((b = t('.li[data-goto]'))) selectRoom(b.dataset.goto);
-    else if ((b = t('.mpill'))) toggleRoom(selRoom);
     else if ((b = t('.sc'))) runRoomScene(b.dataset.key);
     else if ((b = t('[data-ac]'))) { devId = b.dataset.dev; devAction(b.dataset.ac); devId = null; }
     else if ((b = t('[data-ctl="arrange"]'))) setArranging(!arranging);
@@ -1024,7 +1083,7 @@ function initMap() {
   });
   d.addEventListener('pointerdown', (e) => {
     const c = e.target.closest('.chip'); if (c && arranging) return startDrag(e, c.dataset.id);
-    const sl = e.target.closest('.rs'); if (sl) startSlide(e, sl);
+    const sl = e.target.closest('.hs'); if (sl) startSlide(e, sl);
   });
   addEventListener('pointermove', (e) => {
     if (mapDrag) { mapDrag.ghost.style.left = e.clientX + 'px'; mapDrag.ghost.style.top = e.clientY + 'px'; }
@@ -1034,25 +1093,36 @@ function initMap() {
   setView(view);
 }
 
-/* sliders in the right panel: drag anywhere on the row's track */
+/* brightness bars in the right panel: drag anywhere on the bar, or tap a spot */
 let slide = null;
 function startSlide(e, el) {
   e.preventDefault();
-  slide = { el, last: 0, val: 0 }; dragging.detail = true; el.classList.add('drag'); moveSlide(e, true);
+  try { el.setPointerCapture(e.pointerId); } catch (x) {}
+  slide = { el, last: 0, val: 0, sent: -1 }; dragging.detail = true; el.classList.add('drag'); moveSlide(e);
 }
-function moveSlide(e, first) {
+function moveSlide(e) {
   const r = slide.el.getBoundingClientRect();
   const v = Math.min(100, Math.max(1, Math.round((e.clientX - r.left) / r.width * 100)));
+  if (v === slide.val) return;
   slide.val = v;
-  slide.el.querySelector('.tf').style.width = v + '%'; slide.el.querySelector('.kn').style.left = v + '%';
-  const pc = slide.el.parentNode.querySelector('.pc'); if (pc) pc.textContent = v + '%';
+  slide.el.style.setProperty('--p', v + '%');
+  slide.el.classList.remove('off'); const card = slide.el.closest('.lc'); if (card) card.classList.remove('off');
+  const b = slide.el.querySelector('.hl b'); if (b) b.textContent = v + '%';
   const now = Date.now();
-  if (!first && now - slide.last > 300) { slide.last = now; applySlide(); }
+  if (now - slide.last > 250) { slide.last = now; applySlide(); }
+}
+function slideTargets(el) {
+  if (el.dataset.id) return [el.dataset.id];
+  if (el.dataset.room === 'home') return Object.values(states).filter((s) => !isGroup(s) && posOf(s.entity_id)).map((s) => s.entity_id);
+  return roomLights(el.dataset.room).map((s) => s.entity_id);
 }
 function applySlide() {
-  const el = slide.el;
-  if (el.dataset.id) lightCall('turn_on', [el.dataset.id], { brightness_pct: slide.val });
-  else if (el.dataset.room) lightCall('turn_on', roomLights(el.dataset.room).map((s) => s.entity_id), { brightness_pct: slide.val });
+  if (slide.sent === slide.val) return;
+  slide.sent = slide.val;
+  // only update the screen at the end, so the bar under your finger never redraws
+  const ids = slideTargets(slide.el);
+  optimistic('turn_on', ids, { brightness_pct: slide.val });
+  if (!DEMO) send({ type: 'call_service', domain: 'light', service: 'turn_on', service_data: { transition: 0.25, brightness_pct: slide.val }, target: { entity_id: ids } }).catch(() => {});
 }
 function endSlide() {
   if (!slide) return;
@@ -1060,7 +1130,8 @@ function endSlide() {
 }
 
 function toggleRoom(rid) {
-  const ls = roomLights(rid), any = ls.some((s) => s.state === 'on');
+  const ls = rid === 'home' ? Object.values(states).filter((s) => !isGroup(s) && posOf(s.entity_id)) : roomLights(rid);
+  const any = ls.some((s) => s.state === 'on');
   lightCall(any ? 'turn_off' : 'turn_on', ls.map((s) => s.entity_id));
   if (any) delete lastScene[rid];
 }
@@ -1177,11 +1248,12 @@ function renderHeader() {
 }
 
 function renderNav() {
-  const counts = (rid) => roomLights(rid).filter((s) => s.state === 'on').length;
+  const counts = (rid) => (rid === 'home' ? Object.values(states).filter((s) => !isGroup(s) && posOf(s.entity_id)) : roomLights(rid)).filter((s) => s.state === 'on').length;
   const rooms = ROOMSEL.filter((r) => r.id === 'home' || r.always || roomItems(r.id).length);
   $('#nav').innerHTML = rooms.map((r) => {
     const n = counts(r.id);
-    return `<button class="nitem${r.id === 'home' ? ' home' : ''}${r.id === selRoom && !arranging ? ' sel' : ''}" data-nav="${r.id}">${svg(r.icon)}<span>${esc(r.name)}${r.sub ? `<small>${r.sub}</small>` : ''}</span>${n && r.id !== 'home' ? `<span class="ncount">${n}</span>` : ''}</button>`
+    const has = r.id === 'home' ? Object.values(states).some((s) => !isGroup(s) && posOf(s.entity_id)) : roomLights(r.id).length;
+    return `<div class="nitem${r.id === 'home' ? ' home' : ''}${r.id === selRoom && !arranging ? ' sel' : ''}" data-nav="${r.id}" role="button">${svg(r.icon)}<span>${esc(r.name)}${r.sub ? `<small>${r.sub}</small>` : ''}</span>${has ? `<button class="npw${n ? ' on' : ''}" data-pw="${r.id}" aria-label="Turn ${esc(r.name)} on or off">${svg('power')}</button>` : ''}</div>`
       + (r.id === 'home' ? '<div class="nsep"></div>' : '');
   }).join('') + `<div class="nfill"></div><div class="nsep"></div>
     <button class="nitem${arranging ? ' sel' : ''}" data-nav="arrange">${svg('move')}<span>Arrange</span></button>
@@ -1199,13 +1271,17 @@ function describe(rid, ls) {
   const level = avg < 20 ? 'dim' : avg < 55 ? 'set low' : avg < 85 ? 'at a good level' : 'at full brightness';
   return `${mood}, ${level}. ${on.length} of ${ls.length} lights on.`;
 }
+const chev = '<svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg>';
 function lightRow(s) {
   const on = s.state === 'on', pct = pctOf(s), na = s.state === 'unavailable';
-  return `<div class="lrow${on ? ' on' : ''}">
-    <button class="li" data-open="${esc(s.entity_id)}">${svg(lightIcon(s))}<span class="ln2">${esc(nameOf(s))}${na ? '<small>Unavailable</small>' : ''}</span></button>
-    <span class="pc">${on ? pct + '%' : 'Off'}</span>
-    <div class="rs" data-id="${esc(s.entity_id)}"><div class="tr"></div><div class="tf" style="width:${on ? pct : 0}%"></div><div class="kn" style="left:${on ? pct : 0}%"></div></div>
-    <button class="tg${on ? ' on' : ''}" data-id="${esc(s.entity_id)}" aria-label="Turn ${esc(nameOf(s))} on or off"><i></i></button></div>`;
+  return `<div class="lc ${on ? 'on' : 'off'}" style="--c:${colorOf(s)}">
+    <div class="top"><button class="li" data-open="${esc(s.entity_id)}">${svg(lightIcon(s))}<span class="ln2">${esc(nameOf(s))}${na ? '<small>Unavailable</small>' : ''}</span>${chev}</button>
+      <button class="pw${on ? ' on' : ''}" data-id="${esc(s.entity_id)}" aria-label="Turn ${esc(nameOf(s))} on or off">${svg('power')}</button></div>
+    <div class="hs" data-id="${esc(s.entity_id)}" style="--p:${on ? pct : 0}%"><div class="hf"></div><div class="hl"><span>${on ? '' : 'Off'}</span><b>${on ? pct + '%' : ''}</b></div></div></div>`;
+}
+function groupColor(ls) {
+  const on = ls.filter((x) => x.state === 'on');
+  return on.length ? on.map(colorOf)[0] : '226,196,146';
 }
 function devRow(s) {
   const dom = s.entity_id.split('.')[0], a = s.attributes, on = !['off', 'unavailable', 'standby'].includes(s.state);
@@ -1228,18 +1304,30 @@ function renderDetail() {
     return;
   }
   const room = roomById(selRoom), rid = room.id;
-  const ls = roomLights(rid), on = ls.filter((s) => s.state === 'on');
+  const ls = rid === 'home' ? Object.values(states).filter((s) => !isGroup(s) && posOf(s.entity_id)) : roomLights(rid);
+  const on = ls.filter((s) => s.state === 'on');
+  const avg = on.length ? Math.round(on.reduce((n, s) => n + pctOf(s), 0) / on.length) : 0;
   const sceneKey = lastScene[rid];
-  const sceneName = sceneKey && (sceneKey.startsWith('b:') ? SCENES[+sceneKey.slice(2)].name : scenes[sceneKey] && (scenes[sceneKey].attributes.name || nameOf(scenes[sceneKey])));
   let body = '';
+  // the whole room at once: brightness bar + color & warmth, like a Hue room
+  if (ls.length) {
+    body += `<div class="hs big${on.length ? '' : ' off'}" data-room="${rid}" style="--p:${avg}%;--c:${groupColor(ls)}"><div class="hf"></div><div class="hl"><span>${rid === 'home' ? 'All lights' : 'Room brightness'}</span><b>${on.length ? avg + '%' : 'Off'}</b></div></div>`;
+    if (rid !== 'home') body += `<div class="gact"><button data-group="${rid}">${svg('sparkle')}Color &amp; warmth for all</button></div>`;
+  }
+  // scenes
+  const cards = rid === 'home'
+    ? presetKeys().filter(presetInfo).map((k) => { const i = presetInfo(k); const b = ROOM_SCENES.find((x) => x.key === k); return { key: k, name: i.name, sub: b ? b.sub : (i.sub || 'Hue scene'), icon: b ? b.icon : 'sparkle' }; })
+    : ROOM_SCENES.concat(roomHueScenes(rid).map((sc) => ({ key: sc.entity_id, name: sc.attributes.name || nameOf(sc), sub: 'Hue scene', icon: 'sparkle' })));
+  cards.push({ key: 'off', name: 'All Off', sub: '', icon: 'power' });
+  body += `<div class="shead"><span>Scenes</span><span></span></div><div class="scgrid">${cards.map((c) => `<button class="sc${c.key === sceneKey && on.length ? ' sel' : ''}" data-key="${esc(c.key)}">${svg(c.icon)}<span>${esc(c.name)}</span>${c.sub ? `<small>${esc(c.sub)}</small>` : ''}</button>`).join('')}</div>`;
   if (rid === 'home') {
     const rooms = ROOMSEL.filter((r) => r.id !== 'home' && roomLights(r.id).length);
     body += `<div class="shead"><span>Rooms</span><span>${on.length} on</span></div>` + (rooms.map((r) => {
-      const rl = roomLights(r.id), ro = rl.filter((s) => s.state === 'on'), avg = ro.length ? Math.round(ro.reduce((n, s) => n + pctOf(s), 0) / ro.length) : 0;
-      return `<div class="lrow${ro.length ? ' on' : ''}"><button class="li" data-goto="${r.id}">${svg(r.icon)}<span class="ln2">${esc(r.name)}<small>${ro.length} of ${rl.length} on</small></span></button>
-        <span class="pc">${ro.length ? avg + '%' : 'Off'}</span>
-        <div class="rs" data-room="${r.id}"><div class="tr"></div><div class="tf" style="width:${avg}%"></div><div class="kn" style="left:${avg}%"></div></div>
-        <button class="tg${ro.length ? ' on' : ''}" data-room="${r.id}"><i></i></button></div>`;
+      const rl = roomLights(r.id), ro = rl.filter((s) => s.state === 'on'), ra = ro.length ? Math.round(ro.reduce((n, s) => n + pctOf(s), 0) / ro.length) : 0;
+      return `<div class="lc ${ro.length ? 'on' : 'off'}" style="--c:${groupColor(rl)}">
+        <div class="top"><button class="li" data-goto="${r.id}">${svg(r.icon)}<span class="ln2">${esc(r.name)}<small>${ro.length} of ${rl.length} on</small></span>${chev}</button>
+          <button class="pw${ro.length ? ' on' : ''}" data-room="${r.id}" aria-label="Turn ${esc(r.name)} on or off">${svg('power')}</button></div>
+        <div class="hs" data-room="${r.id}" style="--p:${ra}%"><div class="hf"></div><div class="hl"><span>${ro.length ? '' : 'Off'}</span><b>${ro.length ? ra + '%' : ''}</b></div></div></div>`;
     }).join('') || `<div class="empty">${describe('home', [])}</div>`);
     const unplaced = placeable().filter((s) => !posOf(s.entity_id)).length;
     if (unplaced) body += `<div class="empty">${unplaced} not on the plan yet — tap Arrange to place ${unplaced === 1 ? 'it' : 'them'}.</div>`;
@@ -1248,16 +1336,10 @@ function renderDetail() {
   }
   const devs = roomDevs(rid);
   if (devs.length) body += `<div class="shead"><span>Climate & media</span><span></span></div>` + devs.map(devRow).join('');
-  // scenes
-  const cards = rid === 'home'
-    ? presetKeys().filter(presetInfo).map((k) => { const i = presetInfo(k); const b = ROOM_SCENES.find((x) => x.key === k); return { key: k, name: i.name, sub: b ? b.sub : (i.sub || 'Hue scene'), icon: b ? b.icon : 'sparkle' }; })
-    : ROOM_SCENES.concat(roomHueScenes(rid).map((sc) => ({ key: sc.entity_id, name: sc.attributes.name || nameOf(sc), sub: 'Hue scene', icon: 'sparkle' })));
-  cards.push({ key: 'off', name: 'All Off', sub: '', icon: 'power' });
-  body += `<div class="shead"><span>Scenes</span><span></span></div><div class="scgrid">${cards.map((c) => `<button class="sc${c.key === sceneKey && on.length ? ' sel' : ''}" data-key="${esc(c.key)}">${svg(c.icon)}<span>${esc(c.name)}</span>${c.sub ? `<small>${esc(c.sub)}</small>` : ''}</button>`).join('')}</div>`;
   body += `<div class="nfill"></div><div class="ctl"><button data-ctl="arrange">${svg('move')}Arrange</button><button data-ctl="edit">${svg('gear')}Settings</button></div>`;
   d.innerHTML = `<div class="eyebrow">${esc(room.eyebrow)}</div>
-    <div class="dtitle"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round">${ICONS[room.icon]}</svg><h2>${esc(room.id === 'home' ? 'Home' : room.eyebrow.split(' ')[0] === 'Primary' ? 'Primary' : room.name)}</h2>
-      ${ls.length ? `<button class="mpill${on.length ? ' on' : ''}"><i></i>${on.length ? esc(sceneName || 'On') : 'Off'}</button>` : ''}</div>
+    <div class="dtitle"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round">${ICONS[room.icon]}</svg><h2>${esc(room.id === 'home' ? 'Home' : room.name)}</h2>
+      ${ls.length ? `<button class="pw big${on.length ? ' on' : ''}" data-room="${rid}" aria-label="Turn ${rid === 'home' ? 'everything' : 'the room'} on or off">${svg('power')}</button>` : ''}</div>
     <div class="ddesc">${esc(describe(rid, ls))}</div>${body}`;
 }
 
@@ -1363,14 +1445,31 @@ function devAction(act, v) {
     if (act === 'source') devCall('media_player', 'select_source', { source: v });
   }
 }
+const isRoomSheet = () => !!sheetId && sheetId.startsWith('room:');
+// which lights the open controls act on; kind narrows to the ones that can do it
+function sheetTargets(kind) {
+  const ids = isRoomSheet() ? roomLights(sheetId.slice(5)).map((s) => s.entity_id) : [sheetId];
+  return kind ? ids.filter((id) => supports(states[id], kind)) : ids;
+}
+function sheetState() {
+  if (!isRoomSheet()) return states[sheetId];
+  const ls = roomLights(sheetId.slice(5)); if (!ls.length) return null;
+  const on = ls.filter((x) => x.state === 'on'), rep0 = on[0] || ls[0];
+  const avg = on.length ? Math.round(on.reduce((n, x) => n + (x.attributes.brightness || 255), 0) / on.length) : 0;
+  const modes = [...new Set(ls.flatMap((x) => x.attributes.supported_color_modes || []))];
+  const fx = [...new Set(ls.flatMap((x) => x.attributes.effect_list || []))];
+  return { entity_id: sheetId, state: on.length ? 'on' : 'off', group: true, n: on.length, total: ls.length,
+    attributes: Object.assign({}, rep0.attributes, { friendly_name: roomById(sheetId.slice(5)).eyebrow, brightness: avg, supported_color_modes: modes, effect_list: fx }) };
+}
 function renderLightSheet() {
   if (!sheetId) return;
-  const s = states[sheetId]; if (!s) return closeSheets();
+  const s = sheetState(); if (!s) return closeSheets();
   const on = s.state === 'on', a = s.attributes;
   $('#ls').classList.toggle('on', on);
-  $('#lsName').textContent = nameOf(s);
-  $('#lsState').textContent = s.state === 'unavailable' ? 'Unavailable — check the bulb\'s power switch' : on ? `On · ${pctOf(s)}%` : 'Off';
-  const bri = $('#lsBri'), temp = $('#lsTemp');
+  $('#lsName').textContent = s.group ? a.friendly_name + ' · all lights' : nameOf(s);
+  $('#lsState').textContent = s.state === 'unavailable' ? 'Unavailable — check the bulb\'s power switch'
+    : s.group ? (on ? `${s.n} of ${s.total} on · ${pctOf(s)}%` : 'All off') : on ? `On · ${pctOf(s)}%` : 'Off';
+  const bri = $('#lsBri'), temp = $('#lsTemp'), hue = $('#lsHue');
   bri.hidden = !supports(s, 'bri');
   if (!dragging['ls-bri']) { bri.querySelector('.fill').style.width = pctOf(s) + '%'; bri.querySelector('b').textContent = on ? pctOf(s) + '%' : '–'; }
   temp.hidden = !supports(s, 'temp');
@@ -1381,16 +1480,24 @@ function renderLightSheet() {
     if (p != null) temp.querySelector('.knob').style.left = p + '%';
     temp.querySelector('b').textContent = p == null ? '' : k + 'K';
   }
-  const direct = sheetZone && cfg && (cfg.zones[sheetZone] || []).includes(sheetId);
+  const direct = !s.group && sheetZone && cfg && (cfg.zones[sheetZone] || []).includes(sheetId);
   $('#lsRemove').hidden = !direct || DEMO;
   if (direct) $('#lsRemove').textContent = 'Remove from ' + panelName(sheetZone);
   const col = supports(s, 'color');
-  $('#lsColorLabel').hidden = !col; $('#lsSw').hidden = !col;
+  $('#lsColorLabel').hidden = !col; $('#lsSw').hidden = !col; hue.hidden = !col;
+  if (col && !dragging['ls-hue']) {
+    const hs = on && a.color_mode !== 'color_temp' && Array.isArray(a.hs_color) ? a.hs_color[0] : null;
+    hue.querySelector('.knob').style.display = hs == null ? 'none' : '';
+    if (hs != null) hue.querySelector('.knob').style.left = (1 + hs / 360 * 99) + '%';
+  }
   const cur = on && a.color_mode !== 'color_temp' && Array.isArray(a.rgb_color) ? a.rgb_color : null;
   $('#lsSw').querySelectorAll('.sw').forEach((b) => {
     const c = b.dataset.c.split(',').map(Number);
     b.classList.toggle('sel', !!cur && c.every((v, i) => Math.abs(v - cur[i]) < 40));
   });
+  const fx = (a.effect_list || []).filter((x) => !/^(none|off)$/i.test(x));
+  $('#lsFxLabel').hidden = $('#lsFx').hidden = !fx.length;
+  $('#lsFx').innerHTML = fx.length ? `<button data-fx="__none" class="${!a.effect || /^(none|off)$/i.test(a.effect) ? 'sel' : ''}">None</button>` + fx.map((x) => `<button data-fx="${esc(x)}" class="${a.effect === x ? 'sel' : ''}">${esc(x.replace(/_/g, ' '))}</button>`).join('') : '';
 }
 
 /* ---------- Hue scenes ---------- */
@@ -1427,10 +1534,55 @@ function openAddSheet(zid) {
 }
 
 /* ---------- actions ---------- */
-function lightCall(service, ids, data) {
+// Show a change on screen the moment it's made, and ignore Home Assistant's in-between
+// updates for that light for a moment, so sliders don't jump back while the bulb catches up.
+const hold = {}, latest = {};
+let holdTimer = 0;
+function kelvinRgb(k) {
+  const t = k / 100;
+  const r = t <= 66 ? 255 : 329.7 * Math.pow(t - 60, -0.1332);
+  const g = t <= 66 ? 99.47 * Math.log(t) - 161.12 : 288.12 * Math.pow(t - 60, -0.0755);
+  const b = t >= 66 ? 255 : t <= 19 ? 0 : 138.52 * Math.log(t - 10) - 305.04;
+  return [r, g, b].map((v) => Math.round(Math.min(255, Math.max(0, v))));
+}
+function hsRgb(h, sat) {
+  const f = (n) => { const k = (n + h / 60) % 6; return 255 * (1 - sat / 100 * Math.max(0, Math.min(k, 4 - k, 1))); };
+  return [f(5), f(3), f(1)].map(Math.round);
+}
+function optimistic(service, ids, data) {
+  const all = new Set();
+  ids.forEach((id) => { all.add(id); membersOf(id).forEach((m) => all.add(m)); });
+  const until = Date.now() + (DEMO ? 0 : 2200);
+  all.forEach((id) => {
+    const old = states[id]; if (!old) return;
+    const s = JSON.parse(JSON.stringify(old)), a = s.attributes;
+    if (service === 'turn_off') s.state = 'off';
+    else {
+      s.state = 'on';
+      if (!a.brightness) a.brightness = 255;
+      if (data && data.brightness_pct) a.brightness = Math.round(data.brightness_pct * 2.55);
+      if (data && data.color_temp_kelvin) { a.color_mode = 'color_temp'; a.color_temp_kelvin = data.color_temp_kelvin; a.rgb_color = kelvinRgb(data.color_temp_kelvin); }
+      if (data && data.rgb_color) { a.color_mode = 'hs'; a.rgb_color = data.rgb_color; a.hs_color = null; }
+      if (data && data.hs_color) { a.color_mode = 'hs'; a.hs_color = data.hs_color; a.rgb_color = hsRgb(data.hs_color[0], data.hs_color[1]); }
+      if (data && data.effect) a.effect = data.effect;
+    }
+    states[id] = s;
+    if (until > Date.now()) hold[id] = until;
+  });
+  clearTimeout(holdTimer); holdTimer = setTimeout(releaseHolds, 2300);
+}
+function releaseHolds() {
+  const now = Date.now();
+  Object.keys(hold).forEach((id) => { if (hold[id] <= now) { delete hold[id]; if (latest[id]) { states[id] = latest[id]; delete latest[id]; } } });
+  render();
+  if (Object.keys(hold).length) holdTimer = setTimeout(releaseHolds, 300);
+}
+function lightCall(service, ids, data, fade) {
   if (!ids.length) return;
-  if (DEMO) return demoApply(service, ids, data);
-  send({ type: 'call_service', domain: 'light', service, service_data: Object.assign({ transition: FADE_SECONDS }, data || {}), target: { entity_id: ids } });
+  optimistic(service, ids, data);
+  render();
+  if (DEMO) return;
+  send({ type: 'call_service', domain: 'light', service, service_data: Object.assign({ transition: fade != null ? fade : FADE_SECONDS }, data || {}), target: { entity_id: ids } }).catch(() => {});
 }
 function toggleZone(zid) {
   const info = zoneInfo(zid);
@@ -1498,7 +1650,10 @@ function send(msg) {
 function wsUrl(base) { return base.replace(/\/+$/, '').replace(/^http/, 'ws') + '/api/websocket'; }
 
 function keep(s) {
-  if (s.entity_id.startsWith('light.')) { states[s.entity_id] = s; return true; }
+  if (s.entity_id.startsWith('light.')) {
+    if (hold[s.entity_id] > Date.now()) { latest[s.entity_id] = s; return false; }   // a change of ours is still landing
+    states[s.entity_id] = s; return true;
+  }
   if (s.entity_id.startsWith('scene.') && s.attributes.group_name) { scenes[s.entity_id] = s; return true; }
   if (/^(climate|media_player)\./.test(s.entity_id)) { devices[s.entity_id] = s; return true; }
   if (s.entity_id.startsWith('weather.')) { weather[s.entity_id] = s; return true; }
@@ -1701,7 +1856,7 @@ function demoDev(service, data) {
   if (service === 'select_source') a.source = data.source;
   render();
 }
-function demoApply(service, ids, data) {
+function demoApply_unused(service, ids, data) {
   ids.flatMap(membersOf).concat(ids).forEach((id) => {
     const s = states[id]; if (!s) return;
     if (service === 'turn_off') s.state = 'off';
