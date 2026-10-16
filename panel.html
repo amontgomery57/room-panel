@@ -219,6 +219,15 @@ body.mapview #tiles,body.mapview #scenes,body.mapview #viewBtn{display:none!impo
 .fxs button{height:42px;padding:0 14px;border-radius:12px;border:1px solid var(--line-2);background:none;color:var(--muted);font-size:14px;text-transform:capitalize}
 .fxs button.sel{background:var(--text);color:var(--bg);border-color:var(--text)}
 
+/* panels view: one control for every light */
+.master{display:flex;align-items:center;gap:16px;padding:12px 14px 12px 20px;border-radius:var(--radius);background:var(--tile);border:1px solid var(--line);flex-shrink:0}
+.master .mt{min-width:110px}
+.master .mt div{font-size:20px;font-weight:400}
+.master .mt small{font-size:14px;color:var(--muted)}
+.master.on .mt small{color:var(--champ)}
+.master .hs{flex:1;height:52px;margin:0;border-radius:14px}
+body.mapview .master{display:none!important}
+
 /* right detail panel */
 #detail{flex-direction:column;padding:22px 22px 18px;overflow-y:auto;scrollbar-width:none;min-height:0}
 #detail::-webkit-scrollbar{display:none}
@@ -383,6 +392,7 @@ body.mapview #tiles,body.mapview #scenes,body.mapview #viewBtn{display:none!impo
     </div>
   </header>
 
+  <section class="master" id="master"></section>
   <main class="tiles" id="tiles"></main>
 
   <nav class="panel" id="nav"></nav>
@@ -710,6 +720,7 @@ function render() {
   });
   layoutTiles(ps.filter((z) => $('#t-' + z.id).style.display !== 'none').length);
   renderPresets();
+  renderMaster();
   renderMap();
   renderLightSheet();
   renderDevSheet();
@@ -1066,6 +1077,9 @@ function initMap() {
     const rid = roomAt(posOf(id)); if (rid && rid !== selRoom) { selRoom = rid; store.set('room', rid); }
     if (isDev(id)) openDevSheet(id, anchor); else openLightSheet(id, zoneOfLight(id), anchor);
   });
+  // master control on the panels view
+  $('#master').addEventListener('click', (e) => { if (e.target.closest('.pw')) toggleRoom('__all'); });
+  $('#master').addEventListener('pointerdown', (e) => { const sl = e.target.closest('.hs'); if (sl) startSlide(e, sl); });
   // right panel
   const d = $('#detail');
   d.addEventListener('click', (e) => {
@@ -1111,8 +1125,20 @@ function moveSlide(e) {
   const now = Date.now();
   if (now - slide.last > 250) { slide.last = now; applySlide(); }
 }
+const allPanelLights = () => { const seen = new Set(); panels().forEach((p) => zoneBulbs(p.id).forEach((id) => seen.add(id))); return [...seen].map((id) => states[id]).filter(Boolean); };
+function renderMaster() {
+  const m = $('#master'); if (!m || view === 'map' || (slide && m.contains(slide.el))) return;
+  const ls = allPanelLights(), on = ls.filter((s) => s.state === 'on');
+  const avg = on.length ? Math.round(on.reduce((n, s) => n + pctOf(s), 0) / on.length) : 0;
+  m.hidden = !ls.length;
+  m.className = 'master' + (on.length ? ' on' : '');
+  m.innerHTML = `<div class="mt"><div>All lights</div><small>${on.length ? `${on.length} of ${ls.length} on` : 'All off'}</small></div>
+    <div class="hs${on.length ? '' : ' off'}" data-room="__all" style="--p:${avg}%;--c:${on.length ? colorOf(on[0]) : '226,196,146'}"><div class="hf"></div><div class="hl"><span>Brightness</span><b>${on.length ? avg + '%' : 'Off'}</b></div></div>
+    <button class="pw big${on.length ? ' on' : ''}" data-room="__all" aria-label="Turn every light on or off">${svg('power')}</button>`;
+}
 function slideTargets(el) {
   if (el.dataset.id) return [el.dataset.id];
+  if (el.dataset.room === '__all') return allPanelLights().map((s) => s.entity_id);
   if (el.dataset.room === 'home') return Object.values(states).filter((s) => !isGroup(s) && posOf(s.entity_id)).map((s) => s.entity_id);
   return roomLights(el.dataset.room).map((s) => s.entity_id);
 }
@@ -1130,7 +1156,7 @@ function endSlide() {
 }
 
 function toggleRoom(rid) {
-  const ls = rid === 'home' ? Object.values(states).filter((s) => !isGroup(s) && posOf(s.entity_id)) : roomLights(rid);
+  const ls = rid === '__all' ? allPanelLights() : rid === 'home' ? Object.values(states).filter((s) => !isGroup(s) && posOf(s.entity_id)) : roomLights(rid);
   const any = ls.some((s) => s.state === 'on');
   lightCall(any ? 'turn_off' : 'turn_on', ls.map((s) => s.entity_id));
   if (any) delete lastScene[rid];
@@ -1568,6 +1594,16 @@ function optimistic(service, ids, data) {
     }
     states[id] = s;
     if (until > Date.now()) hold[id] = until;
+  });
+  // Hue rooms/zones that contain these bulbs follow along
+  Object.values(states).filter(isGroup).forEach((g) => {
+    const m = membersOf(g.entity_id).map((id) => states[id]).filter(Boolean);
+    if (!m.some((x) => all.has(x.entity_id))) return;
+    const on = m.filter((x) => x.state === 'on'), n = JSON.parse(JSON.stringify(g));
+    n.state = on.length ? 'on' : 'off';
+    n.attributes.brightness = on.length ? Math.round(on.reduce((t, x) => t + (x.attributes.brightness || 255), 0) / on.length) : null;
+    states[g.entity_id] = n;
+    if (until > Date.now()) hold[g.entity_id] = until;
   });
   clearTimeout(holdTimer); holdTimer = setTimeout(releaseHolds, 2300);
 }
