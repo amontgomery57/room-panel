@@ -10,10 +10,10 @@
 <style>
 /* ---------- Look ---------- */
 :root{
-  --bg:#11100e; --tile:#1b1a17; --tile-on:#24211c; --line:#2b2924;
-  --text:#f3efe8; --muted:#9b958b; --dim:#5f5a52;
-  --warm:255,176,96; --accent:#f2a54a;
-  --radius:32px;
+  --bg:#151412; --tile:#1c1b18; --tile-on:#23211d; --line:#2c2a25; --line-2:#3b3831;
+  --text:#efe9de; --muted:#9a9184; --dim:#5e584f;
+  --warm:226,196,146; --accent:#d9bd8e; --accent-ink:#1b170f; --champ:#e6d2ac;
+  --radius:22px;
 }
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{margin:0;height:100%;background:var(--bg);color:var(--text);
@@ -21,48 +21,51 @@ html,body{margin:0;height:100%;background:var(--bg);color:var(--text);
   -webkit-user-select:none;user-select:none;overflow:hidden;touch-action:manipulation}
 button{font:inherit;color:inherit;cursor:pointer}
 
-#app{height:100%;display:flex;flex-direction:column;gap:clamp(14px,2.4vh,24px);
-  padding:clamp(18px,3.6vh,40px) clamp(20px,3.5vw,48px)}
+#app{height:100%;display:flex;flex-direction:column;gap:clamp(12px,2vh,20px);
+  padding:clamp(14px,2.4vh,24px) clamp(18px,3vw,36px) clamp(14px,2.4vh,24px)}
 
 /* header */
-header{display:flex;justify-content:space-between;align-items:flex-start}
-.clock{font-size:clamp(40px,7vh,64px);font-weight:300;letter-spacing:-.03em;line-height:1}
-.date{margin-top:6px;font-size:16px;color:var(--muted)}
+header{display:flex;justify-content:space-between;align-items:center;min-height:48px}
+#clockbox{display:flex;align-items:baseline;gap:14px}
+.clock{font-size:clamp(30px,4.6vh,40px);font-weight:300;letter-spacing:-.03em;line-height:1}
+.date{font-size:16px;color:var(--muted)}
 .hright{display:flex;align-items:center;gap:14px}
 .conn{display:flex;align-items:center;gap:8px;font-size:14px;color:var(--muted)}
 .conn i{width:8px;height:8px;border-radius:50%;background:var(--dim)}
-.conn.ok i{background:#6fbf73}.conn.ok span{display:none}
+.conn.ok i{background:#8fb985}.conn.ok span{display:none}
 .conn.bad i{background:#e0654b}
 
 /* zone tiles */
-.tiles{flex:1;min-height:0;display:grid;grid-template-columns:1.6fr 1fr;gap:clamp(14px,2vw,24px)}
-@media (orientation:portrait){.tiles{grid-template-columns:1fr;grid-template-rows:1.4fr 1fr}}
+.tiles{flex:1;min-height:0;overflow-y:auto;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));align-content:start;gap:clamp(12px,1.6vw,20px);scrollbar-width:none}
+.tiles::-webkit-scrollbar{display:none}
+@media (orientation:portrait){.tiles{grid-template-columns:1fr}}
 .tile{position:relative;border-radius:var(--radius);background:var(--tile);border:1px solid var(--line);
-  overflow:hidden;display:flex;flex-direction:column;transition:background .4s;min-height:0}
+  overflow:hidden;display:flex;flex-direction:column;transition:background .4s}
 .tile.on{background:var(--tile-on)}
 .glow{position:absolute;inset:0;pointer-events:none;opacity:0;transition:opacity .5s;
-  background:radial-gradient(120% 90% at 30% 0%,rgba(var(--warm),.42),rgba(var(--warm),0) 60%)}
-.thead{position:relative;display:flex;align-items:center;gap:12px;padding:clamp(18px,3vh,28px) clamp(18px,2.2vw,28px) 12px}
+  background:radial-gradient(120% 90% at 30% 0%,rgba(var(--warm),.16),rgba(var(--warm),0) 60%)}
+.thead{position:relative;display:flex;align-items:center;gap:12px;padding:16px 18px 10px}
 .toggle{flex:1;min-width:0;border:0;background:none;text-align:left;padding:0}
-.tname{font-size:clamp(24px,3.8vh,32px);font-weight:400}
-.tstate{font-size:17px;color:var(--muted);margin-top:4px}
-.tile.on .tstate{color:#e9cfa6}
-.power{width:64px;height:64px;flex-shrink:0;border-radius:50%;border:1px solid var(--line);display:grid;place-items:center;
-  background:rgba(255,255,255,.03);transition:background .3s,color .3s;color:var(--muted)}
-.tile.on .thead .power,.sheet.on .power{background:var(--accent);border-color:var(--accent);color:#1a1208}
-.power svg{width:28px;height:28px}
-.pill{height:44px;padding:0 16px;border-radius:999px;border:1px solid var(--line);background:rgba(255,255,255,.04);
-  color:var(--muted);font-size:15px;flex-shrink:0}
+.tname{font-size:22px;font-weight:400;letter-spacing:-.01em}
+.tstate{font-size:15px;color:var(--muted);margin-top:2px}
+.tile.on .tstate{color:var(--champ)}
+.power{width:56px;height:56px;flex-shrink:0;border-radius:50%;border:1px solid var(--line-2);display:grid;place-items:center;
+  background:rgba(255,255,255,.02);transition:background .25s,color .25s,border-color .25s;color:var(--muted)}
+.tile.on .thead .power,.sheet.on .power{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.power svg{width:24px;height:24px}
+.pill{height:42px;padding:0 16px;border-radius:999px;border:1px solid var(--line-2);background:none;
+  color:var(--muted);font-size:15px;flex-shrink:0;transition:border-color .2s,color .2s}
+.pill.on{border-color:var(--accent);color:var(--champ)}
 
 /* individual lights inside a zone */
-.lights{position:relative;flex:1;min-height:0;overflow-y:auto;padding:4px clamp(16px,2vw,24px) 12px;
-  display:grid;grid-template-columns:repeat(auto-fill,minmax(168px,1fr));gap:10px;align-content:start}
-.lt{--c:255,176,96;display:flex;align-items:stretch;height:64px;border-radius:18px;background:rgba(255,255,255,.035);
+.lights{position:relative;padding:2px 18px 12px;
+  display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:8px;align-content:start}
+.lt{--c:226,196,146;display:flex;align-items:stretch;height:58px;border-radius:14px;background:rgba(255,255,255,.025);
   border:1px solid var(--line);overflow:hidden;transition:background .3s,border-color .3s}
-.lt.on{background:rgba(var(--c),.14);border-color:rgba(var(--c),.35)}
+.lt.on{background:rgba(var(--c),.1);border-color:rgba(var(--c),.3)}
 .lt-open{flex:1;min-width:0;border:0;background:none;display:flex;align-items:center;gap:10px;padding:0 0 0 14px;text-align:left}
 .dot{width:14px;height:14px;border-radius:50%;flex-shrink:0;background:var(--dim)}
-.lt.on .dot{background:rgb(var(--c));box-shadow:0 0 12px rgba(var(--c),.8)}
+.lt.on .dot{background:rgb(var(--c));box-shadow:0 0 10px rgba(var(--c),.6)}
 .lt-txt{min-width:0}
 .ln{display:block;font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .lp{display:block;font-size:13px;color:var(--muted);margin-top:2px}
@@ -70,79 +73,96 @@ header{display:flex;justify-content:space-between;align-items:flex-start}
 .lt.on .lt-pow{color:rgb(var(--c))}
 .lt-pow svg{width:20px;height:20px}
 .lt.na{opacity:.45}
-.lt-add{height:64px;border-radius:18px;border:1px dashed var(--line);background:none;color:var(--muted);font-size:15px}
+.lt-add{height:58px;border-radius:14px;border:1px dashed var(--line-2);background:none;color:var(--muted);font-size:14px}
 .lt-add:active{border-color:var(--accent);color:var(--text)}
 .sh-foot{display:flex;justify-content:flex-end}
 .link{border:0;background:none;color:var(--muted);font-size:15px;text-decoration:underline;padding:8px 0}
 
 /* sliders: whole bar is the touch target */
-.bar{position:relative;height:68px;border-radius:22px;background:rgba(255,255,255,.05);overflow:hidden;touch-action:none;flex-shrink:0}
-.tile .bar{margin:0 clamp(16px,2vw,24px) clamp(16px,2vw,24px)}
-.fill{position:absolute;inset:0 auto 0 0;width:0;background:rgba(var(--warm),.28);transition:width .25s}
+.bar{position:relative;height:60px;border-radius:16px;background:rgba(255,255,255,.04);border:1px solid var(--line);overflow:hidden;touch-action:none;flex-shrink:0}
+.tile .bar{margin:0 18px 18px}
+.fill{position:absolute;inset:0 auto 0 0;width:0;background:rgba(var(--warm),.22);transition:width .25s}
 .bar.drag .fill{transition:none}
 .tile:not(.on) .fill{background:rgba(255,255,255,.06)}
 .bar label{position:absolute;inset:0;display:flex;align-items:center;justify-content:space-between;
   padding:0 22px;font-size:15px;color:var(--muted);pointer-events:none}
 .bar b{font-weight:500;color:var(--text);font-variant-numeric:tabular-nums}
-.bar.temp{background:linear-gradient(90deg,#ffa448,#ffd7a8 45%,#f4f6ff 75%,#cfdcff)}
+.bar.temp{background:linear-gradient(90deg,#e9a75e,#f0d4a8 45%,#eef0f4 75%,#c9d6ec);border-color:transparent}
 .bar.temp .fill{display:none}
 .bar.temp label,.bar.temp b{color:#2a2016}
-.knob{position:absolute;top:10px;bottom:10px;width:6px;margin-left:-3px;border-radius:3px;background:#1a1208;
+.knob{position:absolute;top:9px;bottom:9px;width:5px;margin-left:-2px;border-radius:3px;background:#1b170f;
   box-shadow:0 0 0 2px rgba(255,255,255,.8);left:50%;transition:left .25s}
 .bar.drag .knob{transition:none}
 
 /* scenes */
-.scenes{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(130px,1fr);gap:clamp(10px,1.4vw,16px);overflow-x:auto;scrollbar-width:none}
+.scenes{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(130px,1fr);gap:10px;overflow-x:auto;scrollbar-width:none;flex-shrink:0}
 .scenes::-webkit-scrollbar{display:none}
 .scene .sc-txt{display:flex;flex-direction:column;align-items:flex-start;line-height:1.15;min-width:0}
-.scene .sc-txt small{font-size:12px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+.scene .sc-txt small{font-size:12px;letter-spacing:.02em;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
 .scene .sc-txt span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
 
 /* map / command center */
-#map{flex:1;min-height:0;display:none;grid-template-columns:minmax(0,1fr) clamp(260px,28vw,360px);gap:clamp(14px,2vw,24px)}
-body.mapview #map{display:grid}
+#map{display:none;min-height:0}
+#side{display:none}
+body.mapview #app{display:grid;grid-template-columns:minmax(0,1fr) clamp(230px,22vw,290px);grid-template-rows:auto minmax(0,1fr) auto;
+  grid-template-areas:"head head" "map side" "map scenes";column-gap:clamp(16px,2vw,28px)}
+body.mapview header{grid-area:head}
+body.mapview #map{grid-area:map;display:block}
+body.mapview #side{grid-area:side;display:flex}
+body.mapview #scenes{grid-area:scenes;grid-auto-flow:row;grid-auto-columns:auto;grid-template-columns:1fr;overflow:visible;padding-top:10px}
+body.mapview .scene{height:52px;justify-content:flex-start;padding:0 16px}
 body.mapview #tiles{display:none!important}
-@media (orientation:portrait){#map{grid-template-columns:1fr;grid-template-rows:minmax(0,1.6fr) minmax(0,1fr)}}
-.mapbox{position:relative;min-height:0;border-radius:var(--radius);background:#0d0c0b;border:1px solid var(--line);overflow:hidden;display:grid;place-items:center;touch-action:none}
-.mapbox svg{width:100%;height:100%;display:block}
-.room-fill{fill:#1a1916}
-.room-fill.svc{fill:#141311}
+@media (orientation:portrait){
+  body.mapview #app{grid-template-columns:1fr;grid-template-rows:auto minmax(0,1fr) auto auto;grid-template-areas:"head" "map" "side" "scenes"}
+  body.mapview #scenes{grid-auto-flow:column;grid-auto-columns:minmax(130px,1fr);overflow-x:auto}
+  body.mapview .scene{height:56px;justify-content:center}
+}
+.mapbox{position:relative;height:100%;min-height:0;touch-action:none}
+.mapbox svg{position:absolute;inset:0;width:100%;height:100%;display:block;overflow:visible}
+.room-fill{fill:#1d1c19}
+.room-fill.svc{fill:#181714}
 .room-fill.out{fill:url(#deck)}
-.room-wall{fill:none;stroke:#47433b;stroke-width:4;stroke-linejoin:round}
-.room-wall.out{stroke:#3a3731;stroke-width:2;stroke-dasharray:6 6}
-.fixture{fill:#24221e;stroke:#38352f;stroke-width:1.5}
-.rlabel{fill:#6d675d;font-size:11px;letter-spacing:.06em;text-transform:uppercase;text-anchor:middle;pointer-events:none}
+.room-wall{fill:none;stroke:#8c8372;stroke-width:1.6;stroke-linejoin:round}
+.room-wall.out{stroke:#4a463e;stroke-width:1;stroke-dasharray:5 5}
+.fixture{fill:#24221e;stroke:#403c35;stroke-width:1}
+.rlabel{fill:#8a8172;font-size:14px;letter-spacing:.14em;text-transform:uppercase;text-anchor:middle;pointer-events:none;font-weight:500}
 .mlight{cursor:pointer}
-.mlight .halo{transition:opacity .4s}
-.mlight .core{stroke:#11100e;stroke-width:2}
+.pool{pointer-events:none;transition:opacity .5s ease,r .5s ease}
+.mlight .core{stroke:#151412;stroke-width:1.5;transition:fill .4s ease}
+.mlight.off .core{fill:#2a2723;stroke:#6a6356;stroke-width:1}
+.mlight .ring{fill:none;stroke:var(--accent);stroke-width:1.2;opacity:0;transition:opacity .25s}
+.mlight.sel .ring,.mapbox.arranging .mlight .ring{opacity:1}
 .mlight .hit{fill:transparent}
-.mlight text{fill:#c9c2b6;font-size:12px;text-anchor:middle;pointer-events:none}
-.mlight text{display:none}
+.mlight text{fill:#cfc6b6;font-size:12.5px;text-anchor:middle;dominant-baseline:middle;pointer-events:none;display:none;letter-spacing:.02em}
 .mapbox.arranging .mlight text,.mlight.sel text{display:block}
-.mlight.off text{fill:#7a746a}
-.mapbox.arranging .mlight .core{stroke:var(--accent);stroke-width:3}
-.side{min-height:0;display:flex;flex-direction:column;gap:12px;overflow-y:auto}
-.card{flex-shrink:0;border-radius:24px;background:var(--tile);border:1px solid var(--line);padding:16px 18px}
-.sum{font-size:15px;color:var(--muted)}
-.sum b{display:block;font-size:30px;font-weight:300;color:var(--text);margin-bottom:2px}
-.prow2{display:flex;align-items:center;gap:12px;padding:10px 0;border-top:1px solid var(--line)}
+.mlight.off text{fill:#8a8275}
+.side{min-height:0;display:flex;flex-direction:column;gap:10px;overflow-y:auto;scrollbar-width:none}
+.side::-webkit-scrollbar{display:none}
+.card{flex-shrink:0;border-radius:18px;background:var(--tile);border:1px solid var(--line);padding:14px 16px}
+.sum{font-size:14px;color:var(--muted);line-height:1.4}
+.sum b{display:block;font-size:30px;font-weight:300;color:var(--text);letter-spacing:-.02em;margin-bottom:2px}
+.sum b small{font-size:14px;color:var(--muted);font-weight:400;letter-spacing:0;margin-left:6px}
+.prow2{display:flex;align-items:center;gap:10px;padding:8px 0;border-top:1px solid var(--line)}
 .prow2:first-child{border-top:0;padding-top:0}
+.prow2:last-child{padding-bottom:0}
 .prow2 .pn{flex:1;min-width:0}
-.prow2 .pn div{font-size:18px}
-.prow2 .pn small{font-size:14px;color:var(--muted)}
-.prow2.on .pn small{color:#e9cfa6}
-.prow2 .power{width:52px;height:52px}
-.prow2.on .power{background:var(--accent);border-color:var(--accent);color:#1a1208}
-.prow2 .power svg{width:22px;height:22px}
+.prow2 .pn div{font-size:17px}
+.prow2 .pn small{font-size:13px;color:var(--muted)}
+.prow2.on .pn small{color:var(--champ)}
+.prow2 .power{width:46px;height:46px}
+.prow2.on .power{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.prow2 .power svg{width:20px;height:20px}
 .tray{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
-.tray .chip{height:44px;padding:0 14px;border-radius:12px;border:1px dashed #5a4a33;background:none;color:var(--text);font-size:14px;touch-action:none}
+.tray .chip{height:42px;padding:0 14px;border-radius:12px;border:1px dashed var(--line-2);background:none;color:var(--text);font-size:14px;touch-action:none}
 .tray-hint{font-size:13px;color:var(--muted);line-height:1.45;margin-top:8px}
-.dragdot{position:fixed;width:30px;height:30px;margin:-15px 0 0 -15px;border-radius:50%;background:var(--accent);box-shadow:0 0 24px var(--accent);pointer-events:none;z-index:20}
-.wide{width:100%;margin-top:10px}
-.scene{height:clamp(60px,9vh,80px);border-radius:24px;border:1px solid var(--line);background:var(--tile);
-  font-size:18px;display:flex;align-items:center;justify-content:center;gap:12px;transition:background .2s,border-color .2s}
-.scene svg{width:22px;height:22px;color:var(--muted)}
-.scene:active,.scene.flash{background:#2a2620;border-color:var(--accent)}
+.dragdot{position:fixed;width:26px;height:26px;margin:-13px 0 0 -13px;border-radius:50%;background:var(--accent);box-shadow:0 0 18px rgba(217,189,142,.6);pointer-events:none;z-index:20}
+.wide{width:100%}
+.btn.ghost.sm{height:46px;font-size:15px}
+.scene{height:58px;border-radius:16px;border:1px solid var(--line-2);background:none;
+  font-size:16px;display:flex;align-items:center;justify-content:center;gap:10px;padding:0 14px;transition:background .2s,border-color .2s}
+.scene svg{width:20px;height:20px;color:var(--muted);flex-shrink:0}
+.scene:active,.scene.flash{background:rgba(var(--warm),.08);border-color:var(--accent)}
+.scene[data-key="off"]{color:var(--muted)}
 
 /* bottom sheets: one light's controls, Hue scenes */
 .backdrop{position:fixed;inset:0;background:rgba(0,0,0,.55);display:none;align-items:flex-end;justify-content:center;z-index:5}
@@ -150,46 +170,47 @@ body.mapview #tiles{display:none!important}
 /* on the map, controls open as a card next to the thing you tapped */
 .backdrop.pop{background:transparent;display:none}
 .backdrop.pop.show{display:block}
-.backdrop.pop .sheet{position:fixed;width:min(400px,calc(100vw - 32px));max-height:calc(100vh - 32px);border-radius:26px;border:1px solid #3a372f;
-  padding:20px 22px 22px;gap:14px;box-shadow:0 24px 60px rgba(0,0,0,.6)}
-.backdrop.pop .sh-name{font-size:23px}
+.backdrop.pop .sheet{position:fixed;width:min(380px,calc(100vw - 32px));max-height:calc(100vh - 32px);border-radius:20px;border:1px solid var(--line-2);
+  padding:18px 20px 20px;gap:12px;box-shadow:0 20px 50px rgba(0,0,0,.55);animation:pop .18s ease-out}
+@keyframes pop{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.backdrop.pop .sh-name{font-size:22px}
 .backdrop.pop .power{width:56px;height:56px}
 .backdrop.pop .close{width:46px;height:46px}
-.backdrop.pop .bar{height:60px}
+.backdrop.pop .bar{height:56px}
 .backdrop.pop .swatches{gap:8px}
 /* devices (AC, TV) */
 .dev-big{display:flex;align-items:center;justify-content:space-between;gap:12px}
-.dev-temp{font-size:56px;font-weight:300;letter-spacing:-.03em;line-height:1;font-variant-numeric:tabular-nums}
+.dev-temp{font-size:52px;font-weight:300;letter-spacing:-.03em;line-height:1;font-variant-numeric:tabular-nums}
 .dev-temp small{font-size:20px;color:var(--muted);margin-left:2px}
 .stepper{display:flex;gap:10px}
-.stepper button{width:64px;height:64px;border-radius:20px;border:1px solid var(--line);background:rgba(255,255,255,.04);font-size:30px;line-height:1}
+.stepper button{width:58px;height:58px;border-radius:16px;border:1px solid var(--line);background:rgba(255,255,255,.04);font-size:30px;line-height:1}
 .stepper button:active{border-color:var(--accent)}
 .dev-sub{font-size:15px;color:var(--muted)}
 .opts{display:flex;flex-wrap:wrap;gap:8px}
 .opts button{height:46px;padding:0 16px;border-radius:14px;border:1px solid var(--line);background:rgba(255,255,255,.04);color:var(--muted);font-size:15px;text-transform:capitalize}
 .opts button.sel{background:var(--text);color:var(--bg);border-color:var(--text)}
-.mdev .box{fill:#24221e;stroke:#5a5348;stroke-width:2}
-.mdev.on .box{fill:#2d2a24;stroke:#8fc7ff}
-.mdev.on.heat .box{stroke:#ff9c6b}
+.mdev .box{fill:#22201c;stroke:#6a6356;stroke-width:1.2}
+.mdev.on .box{fill:#262420;stroke:#a9c4dc}
+.mdev.on.heat .box{stroke:#d9a27a}
 .mdev .ico{fill:none;stroke:#bdb6aa;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
-.mdev.on .ico{stroke:#e8f3ff}
-.mdev .val{fill:#f3efe8;font-size:12px;text-anchor:middle;font-weight:500}
-.mlight.sel .core,.mdev.sel .box{stroke:var(--accent);stroke-width:3}
-.furn{fill:none;stroke:#2f2c27;stroke-width:1.5}
-.furn.solid{fill:#1f1d1a}
-.flabel{fill:#4f4a42;font-size:10px;text-anchor:middle;pointer-events:none;letter-spacing:.05em}
-.sheet{width:min(720px,100%);max-height:92%;overflow:auto;background:#1b1a17;border:1px solid var(--line);border-bottom:0;
-  border-radius:32px 32px 0 0;padding:26px clamp(20px,3vw,32px) 32px;display:flex;flex-direction:column;gap:16px}
+.mdev.on .ico{stroke:#e6eef5}
+.mdev .val{fill:#efe9de;font-size:12.5px;text-anchor:middle;font-weight:500}
+.mdev.sel .box{stroke:var(--accent);stroke-width:1.8}
+.furn{fill:none;stroke:#3a362f;stroke-width:1}
+.furn.solid{fill:#21201c}
+.flabel{fill:#5c564d;font-size:10px;text-anchor:middle;pointer-events:none;letter-spacing:.08em}
+.sheet{width:min(720px,100%);max-height:92%;overflow:auto;background:#1e1d1a;border:1px solid var(--line-2);border-bottom:0;
+  border-radius:24px 24px 0 0;padding:24px clamp(20px,3vw,32px) 30px;display:flex;flex-direction:column;gap:14px}
 .sh-head{display:flex;align-items:center;gap:14px}
 .sh-title{flex:1;min-width:0}
 .sh-name{font-size:28px;font-weight:400}
 .sh-state{font-size:16px;color:var(--muted);margin-top:4px}
-.sheet.on .sh-state{color:#e9cfa6}
+.sheet.on .sh-state{color:var(--champ)}
 .close{width:52px;height:52px;border-radius:50%;border:1px solid var(--line);background:none;color:var(--muted);font-size:26px;line-height:1}
 .sh-label{font-size:14px;color:var(--muted);margin:4px 0 -6px}
 .swatches{display:grid;grid-template-columns:repeat(8,minmax(0,1fr));gap:10px}
-.sw{aspect-ratio:1;border-radius:50%;border:2px solid transparent;background:rgb(var(--c));min-width:0}
-.sw.sel{border-color:var(--text)}
+.sw{aspect-ratio:1;border-radius:50%;border:2px solid transparent;background:rgb(var(--c));min-width:0;opacity:.85}
+.sw.sel{border-color:var(--text);opacity:1}
 .hscene-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px}
 .hscene{height:64px;border-radius:18px;border:1px solid var(--line);background:rgba(255,255,255,.04);font-size:16px;text-align:left;padding:0 18px}
 .hscene:active{border-color:var(--accent)}
@@ -205,7 +226,7 @@ body.mapview #tiles{display:none!important}
 .field input,.field textarea{font:inherit;font-size:16px;color:var(--text);background:var(--tile);border:1px solid var(--line);
   border-radius:14px;padding:14px 16px}
 .field textarea{min-height:110px;resize:vertical}
-.btn{height:56px;padding:0 28px;border-radius:16px;border:0;background:var(--accent);color:#1a1208;font-size:17px;font-weight:500}
+.btn{height:54px;padding:0 26px;border-radius:14px;border:0;background:var(--accent);color:var(--accent-ink);font-size:16px;font-weight:500}
 .btn.ghost{background:var(--tile);color:var(--text);border:1px solid var(--line)}
 .row{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:14px 0;border-bottom:1px solid var(--line);max-width:860px}
 .row small{display:block;color:var(--muted);font-size:13px;margin-top:2px}
@@ -223,7 +244,7 @@ body.mapview #tiles{display:none!important}
 .prow .chk{height:44px;padding:0 14px;border-radius:12px;border:1px solid var(--line);background:var(--tile);color:var(--muted);font-size:14px;white-space:nowrap}
 .prow .chk.sel{background:var(--text);color:var(--bg)}
 .prow .del{width:44px;height:44px;border-radius:12px;border:1px solid var(--line);background:none;color:#ef8a73;font-size:22px}
-.tag{font-size:12px;color:#e9cfa6;border:1px solid #5a4a33;border-radius:999px;padding:2px 8px;margin-left:8px}
+.tag{font-size:12px;color:var(--champ);border:1px solid #5a4e3a;border-radius:999px;padding:2px 8px;margin-left:8px}
 </style>
 </head>
 <body>
@@ -236,27 +257,25 @@ body.mapview #tiles{display:none!important}
     </div>
     <div class="hright">
       <div class="conn" id="conn"><i></i><span>Connecting…</span></div>
-      <button class="pill" id="viewBtn">Map</button>
+      <button class="pill" id="viewBtn">Panels</button>
       <button class="pill" id="editBtn">Edit</button>
     </div>
   </header>
 
   <main class="tiles" id="tiles"></main>
 
-  <section id="map">
-    <div class="mapbox" id="mapbox"></div>
-    <aside class="side">
+  <section id="map"><div class="mapbox" id="mapbox"></div></section>
+    <aside class="side" id="side">
       <div class="card sum" id="mapSum"></div>
       <div class="card" id="mapPanels"></div>
       <div class="card" id="mapArrange">
-        <button class="btn ghost wide" id="arrangeBtn">Arrange the map</button>
+        <button class="btn ghost sm wide" id="arrangeBtn">Arrange the map</button>
         <div id="trayBox" hidden>
           <div class="tray-hint">Drag a light, the AC or the TV onto its spot. Drag one already on the map to move it, or back here to take it off.</div>
           <div class="tray" id="tray"></div>
         </div>
       </div>
     </aside>
-  </section>
 
   <nav class="scenes" id="scenes"></nav>
 </div>
@@ -570,13 +589,10 @@ function renderPresets() {
 // 1 panel fills the screen; 2 use the original layout; 3+ share a grid
 function layoutTiles(n) {
   const el = $('#tiles'), portrait = innerHeight > innerWidth;
-  if (n <= 1) { el.style.gridTemplateColumns = '1fr'; el.style.gridTemplateRows = '1fr'; return; }
-  if (n === 2) { el.style.gridTemplateColumns = ''; el.style.gridTemplateRows = ''; return; }
-  const cols = portrait ? (n === 3 ? 1 : 2) : (n === 3 ? 3 : 2);
+  const cols = n <= 1 || portrait ? 1 : (n === 3 ? 3 : 2);
   el.style.gridTemplateColumns = `repeat(${cols},minmax(0,1fr))`;
-  el.style.gridTemplateRows = `repeat(${Math.ceil(n / cols)},minmax(0,1fr))`;
 }
-addEventListener('resize', () => render());
+addEventListener('resize', () => { if ($('#mapsvg') && (innerWidth > innerHeight) !== landscape) { closeSheets(); buildMapSvg(); } render(); });
 
 /* ---------- apartment map ----------
    Floor plan of 17D, traced off the listing plan in inches (same geometry as pranav.golf/17d).
@@ -584,7 +600,7 @@ addEventListener('resize', () => render());
 const PLAN = [
   { name: 'Bedroom', x: 85, y: 50, w: 123, d: 205 },
   { name: 'Primary bedroom', x: 279, y: 50, w: 140, d: 205 },
-  { name: 'Living / dining', x: 252, y: 261, poly: [[0,0],[167,0],[167,315],[6,315],[6,108],[0,108]], label: [339, 470] },
+  { name: 'Living', x: 252, y: 261, poly: [[0,0],[167,0],[167,315],[6,315],[6,108],[0,108]], label: [288, 410], label2: ['Kitchen', [339, 316]] },
   { name: 'Foyer', x: 181, y: 261, w: 71, d: 120, label: [216, 330] },
   { name: 'Terrace', kind: 'out', x: 259, y: 49, poly: [[160,0],[296,0],[296,614],[0,614],[0,527],[160,527]], label: [487, 330] },
   { name: 'Bath', kind: 'svc', x: 7, y: 7, w: 71, d: 113 },
@@ -609,14 +625,14 @@ const FURN = [
   { t: 'rect', x: 258, y: 488, w: 18, h: 64, solid: true, label: 'TV' },
   { t: 'rect', x: 258, y: 404, w: 14, h: 62, solid: true }               // console
 ];
-const VB = { x: -12, y: -12, w: 579, h: 687 };
+const VB = { x: 0, y: 0, w: 562, h: 670 };
 // first-time guesses for where a light or device goes, by its name (drag to fix)
 const GUESS = [
   [/gr[aä]s+hop+a/i, [406, 548]],
   [/island|pendant/i, [[312, 351], [354, 351], [396, 351]]]
 ];
 
-let view = store.get('view', 'panels'), arranging = false, mapDrag = null;
+let view = store.get('view2', 'map'), arranging = false, mapDrag = null;   // the map is the home screen
 const placeable = () => Object.values(states).filter((s) => !isGroup(s)).concat(Object.values(devices));
 const isDev = (id) => /^(climate|media_player)\./.test(id);
 function autoPlace() {
@@ -639,28 +655,41 @@ const posOf = (id) => cfg && cfg.map && cfg.map[id];
 function zoneOfLight(id) { const p = panels().find((p) => zoneBulbs(p.id).includes(id)); return p ? p.id : null; }
 
 function setView(v) {
-  view = v; try { localStorage.setItem('panel.view', JSON.stringify(v)); } catch (e) {}
+  view = v; store.set('view2', v);
   document.body.classList.toggle('mapview', v === 'map');
   $('#viewBtn').textContent = v === 'map' ? 'Panels' : 'Map';
+  $('#viewBtn').classList.toggle('on', v !== 'map');
   if (v !== 'map') setArranging(false);
   render();
 }
-function initMap() {
+let landscape = null, TR = '';
+function buildMapSvg() {
   const poly = (pts) => pts.map((q) => q.join(',')).join(' ');
-  $('#mapbox').innerHTML = `<svg id="mapsvg" viewBox="${VB.x} ${VB.y} ${VB.w} ${VB.h}" preserveAspectRatio="xMidYMid meet">
+  landscape = innerWidth > innerHeight;
+  // the plan is taller than it is wide; on a landscape screen, turn it on its side (terrace at the bottom)
+  const T = landscape ? `translate(${VB.h},0) rotate(90)` : '';
+  TR = landscape ? 'rotate(-90)' : '';                      // undoes the turn, for text and icons
+  const vb = landscape ? `0 0 ${VB.h} ${VB.w}` : `0 0 ${VB.w} ${VB.h}`;
+  const label = (cls, name, x, y, dy) => `<text class="${cls}" transform="translate(${x},${y}) ${TR} translate(0,${dy || 0})">${esc(name)}</text>`;
+  $('#mapbox').innerHTML = `<svg id="mapsvg" viewBox="${vb}" preserveAspectRatio="xMidYMid meet"><g id="plan" transform="${T}">
     <defs>
       <pattern id="deck" width="14" height="14" patternUnits="userSpaceOnUse"><rect width="14" height="14" fill="#12110f"/><path d="M0 14L14 0" stroke="#1d1b18" stroke-width="2"/></pattern>
-      <filter id="soft" x="-1" y="-1" width="3" height="3"><feGaussianBlur stdDeviation="14"/></filter>
+      <radialGradient id="poolg"><stop offset="0" stop-color="#fff" stop-opacity="1"/><stop offset=".45" stop-color="#fff" stop-opacity=".45"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></radialGradient>
+      <mask id="poolm" maskContentUnits="objectBoundingBox" maskUnits="objectBoundingBox" x="0" y="0" width="1" height="1"><circle cx=".5" cy=".5" r=".5" fill="url(#poolg)"/></mask>
     </defs>
     <g>${PLAN.map((r) => `<polygon class="room-fill ${r.kind || ''}" points="${poly(r.pts)}"/>`).join('')}</g>
     <g>${FIXTURES.map((f) => `<rect class="fixture" x="${f.x}" y="${f.y}" width="${f.w}" height="${f.d}" rx="3"/>`).join('')}</g>
     <g>${FURN.map((f) => (f.t === 'ellipse' ? `<ellipse class="furn${f.solid ? ' solid' : ''}" cx="${f.cx}" cy="${f.cy}" rx="${f.rx}" ry="${f.ry}"/>` : `<rect class="furn${f.solid ? ' solid' : ''}" x="${f.x}" y="${f.y}" width="${f.w}" height="${f.h}" rx="4"/>`)
-      + (f.label ? `<text class="flabel" x="${f.t === 'ellipse' ? f.cx : f.x + f.w / 2}" y="${(f.t === 'ellipse' ? f.cy : f.y + f.h / 2) + 3}">${f.label.toUpperCase()}</text>` : '')).join('')}</g>
-    <g id="glows"></g>
+      + (f.label ? label('flabel', f.label.toUpperCase(), f.t === 'ellipse' ? f.cx : f.x + f.w / 2, f.t === 'ellipse' ? f.cy : f.y + f.h / 2, 3) : '')).join('')}</g>
+    <clipPath id="inside">${PLAN.filter((r) => r.kind !== 'out').map((r) => `<polygon points="${poly(r.pts)}"/>`).join('')}</clipPath>
+    <g id="glows" clip-path="url(#inside)"></g>
     <g>${PLAN.map((r) => `<polygon class="room-wall ${r.kind === 'out' ? 'out' : ''}" points="${poly(r.pts)}"/>`).join('')}</g>
-    <g>${PLAN.filter((r) => r.name).map((r) => `<text class="rlabel" x="${r.label[0]}" y="${r.label[1]}">${esc(r.name)}</text>`).join('')}</g>
+    <g>${PLAN.filter((r) => r.name).map((r) => label('rlabel', r.name, r.label[0], r.label[1], 5) + (r.label2 ? label('rlabel', r.label2[0], r.label2[1][0], r.label2[1][1], 5) : '')).join('')}</g>
     <g id="mlights"></g>
-  </svg>`;
+  </g></svg>`;
+}
+function initMap() {
+  buildMapSvg();
   $('#mapPanels').addEventListener('click', (e) => { const b = e.target.closest('[data-zone]'); if (b) toggleZone(b.dataset.zone); });
   $('#arrangeBtn').addEventListener('click', () => setArranging(!arranging));
   // tap a light: open its controls (or, while arranging, pick it up)
@@ -697,7 +726,7 @@ function endDrag(e) {
   cfg.map = cfg.map || {};
   if (e.type === 'pointerup' && e.clientX >= r.left && e.clientX <= r.right && e.clientY >= r.top && e.clientY <= r.bottom) {
     const pt = svgEl.createSVGPoint(); pt.x = e.clientX; pt.y = e.clientY;
-    const q = pt.matrixTransform(svgEl.getScreenCTM().inverse());
+    const q = pt.matrixTransform($('#plan').getScreenCTM().inverse());
     cfg.map[id] = [Math.round(Math.min(VB.x + VB.w, Math.max(VB.x, q.x))), Math.round(Math.min(VB.y + VB.h, Math.max(VB.y, q.y)))];
   } else if (e.type === 'pointerup' && e.target.closest && e.target.closest('#mapArrange')) {
     delete cfg.map[id];
@@ -707,27 +736,53 @@ function endDrag(e) {
 function renderMap() {
   if (view !== 'map' || !$('#mapsvg') || dragging.map) return;
   const lights = placeable();
-  // glows + markers for placed lights
-  let glows = '', marks = '';
   autoPlace();
   const selId = sheetId || devId;
+  const glows = $('#glows'), marks = $('#mlights');
+  const keep = new Set();
   lights.forEach((s) => {
-    const p = posOf(s.entity_id); if (!p) return;
-    if (isDev(s.entity_id)) { marks += devMarker(s, p, s.entity_id === selId); return; }
+    const id = s.entity_id, p = posOf(id); if (!p) return;
+    keep.add(id);
+    if (isDev(id)) {
+      let g = marks.querySelector(`[data-id="${CSS.escape(id)}"]`);
+      const html = devMarker(s, p, id === selId);
+      if (!g || g.dataset.html !== html) { const tmp = document.createElementNS('http://www.w3.org/2000/svg', 'g'); tmp.innerHTML = html; const n = tmp.firstElementChild; n.dataset.html = html; g ? g.replaceWith(n) : marks.appendChild(n); }
+      return;
+    }
     const on = s.state === 'on', c = colorOf(s), pct = pctOf(s);
-    if (on) glows += `<circle cx="${p[0]}" cy="${p[1]}" r="${24 + pct * 0.5}" fill="rgb(${c})" opacity="${(0.35 + pct / 160).toFixed(2)}" filter="url(#soft)"/>`;
-    marks += `<g class="mlight ${on ? 'on' : 'off'}${s.entity_id === selId ? ' sel' : ''}" data-id="${esc(s.entity_id)}" transform="translate(${p[0]},${p[1]})">
-      <circle class="hit" r="28"/>
-      <circle class="core" r="10" fill="${on ? `rgb(${c})` : '#3a3731'}"/>
-      <text y="28">${esc(nameOf(s))}</text></g>`;
+    // a soft pool of light on the floor: size and strength follow brightness
+    let pool = glows.querySelector(`[data-id="${CSS.escape(id)}"]`);
+    if (!pool) {
+      pool = document.createElementNS('http://www.w3.org/2000/svg', 'g'); pool.dataset.id = id;
+      pool.innerHTML = `<circle class="pool" r="0" opacity="0"/><circle class="pool" r="0" opacity="0"/>`;
+      glows.appendChild(pool);
+    }
+    const [outer, inner] = pool.children;
+    const r = on ? 34 + pct * 0.42 : 0;
+    outer.setAttribute('cx', p[0]); outer.setAttribute('cy', p[1]); outer.setAttribute('r', r);
+    outer.setAttribute('fill', `rgb(${c})`); outer.setAttribute('opacity', on ? (0.13 + pct / 500).toFixed(3) : 0);
+    outer.style.filter = ''; outer.setAttribute('style', `mask:url(#poolm)`);
+    inner.setAttribute('cx', p[0]); inner.setAttribute('cy', p[1]); inner.setAttribute('r', on ? 9 + pct * 0.06 : 0);
+    inner.setAttribute('fill', `rgb(${c})`); inner.setAttribute('opacity', on ? 0.22 : 0);
+    inner.setAttribute('style', 'mask:url(#poolm)');
+    let g = marks.querySelector(`[data-id="${CSS.escape(id)}"]`);
+    if (!g) {
+      g = document.createElementNS('http://www.w3.org/2000/svg', 'g'); g.dataset.id = id;
+      g.innerHTML = `<circle class="hit" r="26"/><circle class="ring" r="13"/><circle class="core" r="7"/><text transform="${TR} translate(0,26)"></text>`;
+      marks.appendChild(g);
+    }
+    g.setAttribute('class', `mlight ${on ? 'on' : 'off'}${id === selId ? ' sel' : ''}`);
+    g.setAttribute('transform', `translate(${p[0]},${p[1]})`);
+    g.querySelector('.core').setAttribute('fill', on ? `rgb(${c})` : '');
+    g.querySelector('text').textContent = nameOf(s);
   });
-  $('#glows').innerHTML = glows; $('#mlights').innerHTML = marks;
+  [...glows.children, ...marks.children].forEach((n) => { if (!keep.has(n.dataset.id)) n.remove(); });
   // summary + panel switches
   const bulbs = lights.filter((s) => !isDev(s.entity_id));
   const onCount = bulbs.filter((s) => s.state === 'on').length;
   const unplaced = lights.filter((s) => !posOf(s.entity_id));
   const acs = Object.values(devices).filter((d) => d.entity_id.startsWith('climate.'));
-  $('#mapSum').innerHTML = `<b>${onCount} of ${bulbs.length}</b>lights on${unplaced.length && !arranging ? ` · ${unplaced.length} not on the map yet` : ''}`
+  $('#mapSum').innerHTML = `<b>${onCount}<small>of ${bulbs.length} lights on</small></b>${unplaced.length && !arranging ? `${unplaced.length} not placed on the map yet` : ''}`
     + acs.map((d) => `<div style="margin-top:8px">${esc(nameOf(d))}: ${d.state === 'off' ? 'off' : esc(d.state.replace('_', ' ')) + (d.attributes.temperature != null ? ' · set to ' + d.attributes.temperature + '°' : '')}${d.attributes.current_temperature != null ? ' · room ' + d.attributes.current_temperature + '°' : ''}</div>`).join('');
   $('#mapPanels').innerHTML = panels().map((p) => {
     const i = zoneInfo(p.id);
@@ -780,11 +835,11 @@ const DEV_ICONS = {
 function devMarker(s, p, sel) {
   const dom = s.entity_id.split('.')[0], a = s.attributes, on = !['off', 'unavailable', 'standby'].includes(s.state);
   const val = dom === 'climate' ? (on && a.temperature != null ? a.temperature + '°' : (a.current_temperature != null ? a.current_temperature + '°' : '')) : '';
-  return `<g class="mdev ${on ? 'on' : 'off'} ${esc(s.state)}${sel ? ' sel' : ''}" data-id="${esc(s.entity_id)}" transform="translate(${p[0]},${p[1]})">
-    <rect class="box" x="-17" y="-17" width="34" height="34" rx="9"/>
-    <g transform="translate(-10,-10) scale(.833)"><g class="ico">${DEV_ICONS[dom]}</g></g>
+  return `<g class="mdev ${on ? 'on' : 'off'} ${esc(s.state)}${sel ? ' sel' : ''}" data-id="${esc(s.entity_id)}" transform="translate(${p[0]},${p[1]})"><g transform="${TR}">
+    <rect class="box" x="-15" y="-15" width="30" height="30" rx="8"/>
+    <g transform="translate(-9,-9) scale(.75)"><g class="ico">${DEV_ICONS[dom]}</g></g>
     <circle class="hit" r="30" fill="transparent"/>
-    <text class="val" y="32">${esc(val || nameOf(s))}</text></g>`;
+    <text class="val" y="30">${esc(val || nameOf(s))}</text></g></g>`;
 }
 function openDevSheet(id, anchor) { closeSheets(); devId = id; showSheet($('#devSheet'), anchor); renderDevSheet(); renderMap(); }
 function devCall(domain, service, data) {
@@ -1159,7 +1214,7 @@ function demoInit() {
   devices['media_player.living_room_tv'] = { entity_id: 'media_player.living_room_tv', state: 'on', attributes: { friendly_name: 'Living room TV', volume_level: 0.18, is_volume_muted: false, source: 'Apple TV', source_list: ['Apple TV', 'HDMI 2', 'Netflix', 'YouTube'] } };
   scenes['scene.bedroom_relax'] = { entity_id: 'scene.bedroom_relax', state: 'unknown', attributes: { name: 'Relax', group_name: "Aaron's Bedroom" } };
   scenes['scene.bedroom_sunset'] = { entity_id: 'scene.bedroom_sunset', state: 'unknown', attributes: { name: 'Savanna sunset', group_name: "Aaron's Bedroom" } };
-  cfg = { map: { 'climate.living_room_ac': [312, 566], 'media_player.living_room_tv': [266, 520], 'light.grashoppa': [406, 548], 'light.stemlite': [268, 436], 'light.bedside': [110, 75], 'light.island_1': [312, 351], 'light.island_2': [354, 351], 'light.island_3': [396, 351] },
+  cfg = { map: { 'climate.living_room_ac': [330, 572], 'media_player.living_room_tv': [266, 520], 'light.grashoppa': [406, 548], 'light.stemlite': [268, 436], 'light.bedside': [110, 75], 'light.island_1': [312, 351], 'light.island_2': [354, 351], 'light.island_3': [396, 351] },
     presets: ['b:0', 'b:1', 'scene.bedroom_relax', 'scene.bedroom_sunset'], panels: DEFAULT_PANELS, zones: { room: ['light.bedroom'], island: ['light.island_1', 'light.island_2', 'light.island_3'] } };
   setConn('ok', 'Demo');
 }
