@@ -25,15 +25,15 @@ button{font:inherit;color:inherit;cursor:pointer}
   padding:clamp(14px,2.4vh,24px) clamp(18px,3vw,36px) clamp(14px,2.4vh,24px)}
 
 /* header */
-header{display:flex;justify-content:space-between;align-items:center;min-height:48px}
+header{display:flex;justify-content:space-between;align-items:center;min-height:52px;padding:0 6px}
 #clockbox{display:flex;align-items:baseline;gap:14px}
-.clock{font-size:clamp(30px,4.6vh,40px);font-weight:300;letter-spacing:-.03em;line-height:1}
+.clock{font-size:clamp(32px,5vh,44px);font-weight:300;letter-spacing:-.03em;line-height:1}
 .date{font-size:16px;color:var(--muted)}
-.hright{display:flex;align-items:center;gap:14px}
-.conn{display:flex;align-items:center;gap:8px;font-size:14px;color:var(--muted)}
-.conn i{width:8px;height:8px;border-radius:50%;background:var(--dim)}
-.conn.ok i{background:#8fb985}.conn.ok span{display:none}
-.conn.bad i{background:#e0654b}
+.hright{display:flex;align-items:center;gap:18px}
+.conn{display:flex;align-items:center;gap:10px;font-size:15px;color:var(--muted)}
+.conn svg{width:22px;height:22px}
+.conn.ok svg{color:#cfc4b0}
+.conn.bad svg{color:#e0806b}
 
 /* zone tiles */
 .tiles{flex:1;min-height:0;overflow-y:auto;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));align-content:start;gap:clamp(12px,1.6vw,20px);scrollbar-width:none}
@@ -101,63 +101,135 @@ header{display:flex;justify-content:space-between;align-items:center;min-height:
 .scene .sc-txt small{font-size:12px;letter-spacing:.02em;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
 .scene .sc-txt span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
 
-/* map / command center */
-#map{display:none;min-height:0}
-#side{display:none}
-body.mapview #app{display:grid;grid-template-columns:minmax(0,1fr) clamp(230px,22vw,290px);grid-template-rows:auto minmax(0,1fr) auto;
-  grid-template-areas:"head head" "map side" "map scenes";column-gap:clamp(16px,2vw,28px)}
+/* ===== map home screen (layout after Aaron's mockup) ===== */
+#map,#nav,#detail{display:none}
+body.mapview #app{display:grid;grid-template-columns:clamp(170px,15vw,200px) minmax(0,1fr) clamp(330px,29vw,400px);
+  grid-template-rows:auto minmax(0,1fr);grid-template-areas:"head head head" "nav map detail";column-gap:clamp(14px,1.6vw,22px);row-gap:clamp(10px,1.6vh,18px)}
 body.mapview header{grid-area:head}
-body.mapview #map{grid-area:map;display:block}
-body.mapview #side{grid-area:side;display:flex}
-body.mapview #scenes{grid-area:scenes;grid-auto-flow:row;grid-auto-columns:auto;grid-template-columns:1fr;overflow:visible;padding-top:10px}
-body.mapview .scene{height:52px;justify-content:flex-start;padding:0 16px}
-body.mapview #tiles{display:none!important}
+body.mapview #nav{grid-area:nav;display:flex}
+body.mapview #map{grid-area:map;display:block;min-height:0;position:relative}
+body.mapview #detail{grid-area:detail;display:flex}
+body.mapview #tiles,body.mapview #scenes,body.mapview #viewBtn{display:none!important}
 @media (orientation:portrait){
-  body.mapview #app{grid-template-columns:1fr;grid-template-rows:auto minmax(0,1fr) auto auto;grid-template-areas:"head" "map" "side" "scenes"}
-  body.mapview #scenes{grid-auto-flow:column;grid-auto-columns:minmax(130px,1fr);overflow-x:auto}
-  body.mapview .scene{height:56px;justify-content:center}
+  body.mapview #app{grid-template-columns:1fr;grid-template-rows:auto auto minmax(0,1.15fr) minmax(0,1fr);grid-template-areas:"head" "nav" "map" "detail"}
+  body.mapview #nav{flex-direction:row;overflow-x:auto;padding:6px}
+  body.mapview #nav .nsep,body.mapview #nav .nfill{display:none}
+  body.mapview #nav .nitem{flex:0 0 auto}
 }
-.mapbox{position:relative;height:100%;min-height:0;touch-action:none}
+.hicon{display:flex;align-items:center;gap:10px;color:var(--muted);font-size:15px;padding:0 4px}
+.hicon svg{width:22px;height:22px}
+.hicon b{display:block;color:var(--text);font-weight:400;font-size:16px;line-height:1.1}
+.hicon small{display:block;font-size:12px;color:var(--muted)}
+.hsep{width:1px;height:30px;background:var(--line-2)}
+.gear{width:44px;height:44px;border-radius:50%;border:0;background:none;color:var(--muted);display:grid;place-items:center}
+.gear svg{width:24px;height:24px}
+
+/* left rail */
+.panel{background:linear-gradient(180deg,#1c1b18,#181714);border:1px solid var(--line);border-radius:20px}
+#nav{flex-direction:column;gap:4px;padding:10px;overflow-y:auto;scrollbar-width:none}
+#nav::-webkit-scrollbar{display:none}
+.nitem{display:flex;align-items:center;gap:14px;min-height:52px;white-space:nowrap;padding:0 14px;border-radius:14px;border:1px solid transparent;background:none;
+  color:#cfc7b9;font-size:16px;text-align:left;transition:background .2s,border-color .2s,color .2s;position:relative}
+.nitem svg{width:24px;height:24px;flex-shrink:0;color:#a89d8b}
+.nitem small{display:block;font-size:12px;color:var(--muted);margin-top:1px}
+.nitem .ncount{margin-left:auto;font-size:12px;color:var(--champ);opacity:.9}
+.nitem.sel{border-color:rgba(217,189,142,.55);background:linear-gradient(90deg,rgba(217,189,142,.16),rgba(217,189,142,.05));color:var(--text);
+  box-shadow:inset 0 0 18px rgba(217,189,142,.06),0 0 18px rgba(217,189,142,.06)}
+.nitem.sel svg{color:var(--champ)}
+.nitem.home{min-height:62px}
+.nsep{height:1px;background:var(--line);margin:6px 10px}
+.nfill{flex:1}
+
+/* the plan */
+.mapbox{position:absolute;inset:0;touch-action:none}
 .mapbox svg{position:absolute;inset:0;width:100%;height:100%;display:block;overflow:visible}
-.room-fill{fill:#1d1c19}
-.room-fill.svc{fill:#181714}
-.room-fill.out{fill:url(#deck)}
-.room-wall{fill:none;stroke:#8c8372;stroke-width:1.6;stroke-linejoin:round}
-.room-wall.out{stroke:#4a463e;stroke-width:1;stroke-dasharray:5 5}
-.fixture{fill:#24221e;stroke:#403c35;stroke-width:1}
-.rlabel{fill:#8a8172;font-size:14px;letter-spacing:.14em;text-transform:uppercase;text-anchor:middle;pointer-events:none;font-weight:500}
+.floor{fill:url(#wood)}
+.floor.svc{fill:url(#tile)}
+.floor.out{fill:url(#deck)}
+.roomhi{fill:rgba(217,189,142,0);transition:fill .35s ease;pointer-events:none}
+.roomhi.sel{fill:rgba(217,189,142,.045)}
+.wall-o{fill:none;stroke:#5d574c;stroke-width:9;stroke-linejoin:miter}
+.wall-i{fill:none;stroke:#232120;stroke-width:6.6;stroke-linejoin:miter}
+.wall-o.out{stroke:#3a3731;stroke-width:1.2;stroke-dasharray:4 5}
+.cut{stroke:#1e1c19;stroke-width:9.5;stroke-linecap:butt}
+.win{stroke:#8d8576;stroke-width:1;fill:none}
+.door{stroke:#7d7568;stroke-width:1;fill:none}
+.door.leaf{stroke-width:1.6}
+.fixture{fill:#272521;stroke:#4a453d;stroke-width:1}
+.furn{fill:#23211e;stroke:#48433b;stroke-width:1}
+.furn.soft{fill:#2a2723}
+.furn.line{fill:none}
+.rug{fill:#201e1b;stroke:#3a362f;stroke-width:1}
+.rlabel{fill:#a3998a;font-size:12.5px;letter-spacing:.2em;text-transform:uppercase;text-anchor:middle;pointer-events:none;font-weight:500;transition:fill .3s}
+.rlabel.sel{fill:var(--champ)}
+.rlabel.sm{font-size:10px;letter-spacing:.16em;fill:#7b7366}
+.flabel{display:none}
 .mlight{cursor:pointer}
 .pool{pointer-events:none;transition:opacity .5s ease,r .5s ease}
-.mlight .core{stroke:#151412;stroke-width:1.5;transition:fill .4s ease}
-.mlight.off .core{fill:#2a2723;stroke:#6a6356;stroke-width:1}
+.mlight .halo{transition:opacity .4s ease}
+.mlight .core{stroke:#fff6e6;stroke-width:.8;stroke-opacity:.5;transition:fill .4s ease}
+.mlight.off .core{fill:#2e2b26;stroke:#6f685b;stroke-width:1;stroke-opacity:1}
 .mlight .ring{fill:none;stroke:var(--accent);stroke-width:1.2;opacity:0;transition:opacity .25s}
 .mlight.sel .ring,.mapbox.arranging .mlight .ring{opacity:1}
 .mlight .hit{fill:transparent}
-.mlight text{fill:#cfc6b6;font-size:12.5px;text-anchor:middle;dominant-baseline:middle;pointer-events:none;display:none;letter-spacing:.02em}
+.mlight text{fill:#e7dfd0;font-size:12px;text-anchor:middle;dominant-baseline:middle;pointer-events:none;display:none;letter-spacing:.03em;paint-order:stroke;stroke:#151412;stroke-width:3}
 .mapbox.arranging .mlight text,.mlight.sel text{display:block}
-.mlight.off text{fill:#8a8275}
-.side{min-height:0;display:flex;flex-direction:column;gap:10px;overflow-y:auto;scrollbar-width:none}
-.side::-webkit-scrollbar{display:none}
-.card{flex-shrink:0;border-radius:18px;background:var(--tile);border:1px solid var(--line);padding:14px 16px}
-.sum{font-size:14px;color:var(--muted);line-height:1.4}
-.sum b{display:block;font-size:30px;font-weight:300;color:var(--text);letter-spacing:-.02em;margin-bottom:2px}
-.sum b small{font-size:14px;color:var(--muted);font-weight:400;letter-spacing:0;margin-left:6px}
-.prow2{display:flex;align-items:center;gap:10px;padding:8px 0;border-top:1px solid var(--line)}
-.prow2:first-child{border-top:0;padding-top:0}
-.prow2:last-child{padding-bottom:0}
-.prow2 .pn{flex:1;min-width:0}
-.prow2 .pn div{font-size:17px}
-.prow2 .pn small{font-size:13px;color:var(--muted)}
-.prow2.on .pn small{color:var(--champ)}
-.prow2 .power{width:46px;height:46px}
-.prow2.on .power{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
-.prow2 .power svg{width:20px;height:20px}
-.tray{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
-.tray .chip{height:42px;padding:0 14px;border-radius:12px;border:1px dashed var(--line-2);background:none;color:var(--text);font-size:14px;touch-action:none}
-.tray-hint{font-size:13px;color:var(--muted);line-height:1.45;margin-top:8px}
-.dragdot{position:fixed;width:26px;height:26px;margin:-13px 0 0 -13px;border-radius:50%;background:var(--accent);box-shadow:0 0 18px rgba(217,189,142,.6);pointer-events:none;z-index:20}
-.wide{width:100%}
-.btn.ghost.sm{height:46px;font-size:15px}
+
+/* right detail panel */
+#detail{flex-direction:column;padding:22px 22px 18px;overflow-y:auto;scrollbar-width:none;min-height:0}
+#detail::-webkit-scrollbar{display:none}
+.eyebrow{font-size:11.5px;letter-spacing:.24em;text-transform:uppercase;color:var(--muted)}
+.dtitle{display:flex;align-items:center;gap:14px;margin:8px 0 6px}
+.dtitle>svg{width:34px;height:34px;color:#cfc4b0;flex-shrink:0}
+.dtitle h2{flex:1;min-width:0;margin:0;font-size:30px;font-weight:300;letter-spacing:-.01em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mpill{display:flex;align-items:center;gap:10px;height:44px;padding:0 16px;border-radius:999px;border:1px solid var(--line-2);background:rgba(255,255,255,.02);
+  color:var(--muted);font-size:15px;flex-shrink:0;transition:all .25s}
+.mpill i{width:9px;height:9px;border-radius:50%;background:var(--dim);transition:all .25s}
+.mpill.on{border-color:rgba(217,189,142,.5);color:var(--text);background:rgba(217,189,142,.07)}
+.mpill.on i{background:var(--accent);box-shadow:0 0 10px rgba(217,189,142,.9)}
+.ddesc{font-size:14.5px;color:var(--muted);line-height:1.45;padding-bottom:14px;border-bottom:1px solid var(--line)}
+.shead{display:flex;justify-content:space-between;align-items:center;margin:16px 2px 9px}
+.shead span{font-size:11.5px;letter-spacing:.24em;text-transform:uppercase;color:var(--muted)}
+.shead span+span{letter-spacing:.12em;color:var(--champ)}
+.lrow{display:flex;align-items:center;gap:12px;height:58px;padding:0 12px 0 14px;margin-bottom:8px;border-radius:14px;border:1px solid var(--line);
+  background:rgba(255,255,255,.018);transition:border-color .25s,background .25s}
+.lrow.on{border-color:rgba(217,189,142,.22);background:rgba(217,189,142,.035)}
+.lrow .li{border:0;background:none;padding:0;display:flex;align-items:center;gap:12px;min-width:0;flex:0 1 auto;width:44%;text-align:left}
+.lrow .li svg{width:22px;height:22px;flex-shrink:0;color:#b9ae9a}
+.lrow.on .li svg{color:var(--champ)}
+.ln2{font-size:15.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+.ln2 small{display:block;font-size:12px;color:var(--muted)}
+.lrow .pc{width:40px;text-align:right;font-size:13px;color:var(--muted);font-variant-numeric:tabular-nums;flex-shrink:0}
+.rs{position:relative;flex:1;height:44px;touch-action:none;min-width:50px}
+.rs .tr{position:absolute;left:0;right:0;top:50%;height:3px;margin-top:-1.5px;border-radius:2px;background:#3a3731}
+.rs .tf{position:absolute;left:0;top:50%;height:3px;margin-top:-1.5px;border-radius:2px;background:linear-gradient(90deg,#b99c6c,var(--accent));transition:width .25s}
+.rs .kn{position:absolute;top:50%;width:14px;height:14px;margin:-7px 0 0 -7px;border-radius:50%;background:#efe5d2;box-shadow:0 0 0 3px rgba(217,189,142,.22);transition:left .25s}
+.rs.drag .tf,.rs.drag .kn{transition:none}
+.lrow:not(.on) .rs .tf{background:#4a463e}
+.lrow:not(.on) .rs .kn{background:#77705f;box-shadow:none}
+.tg{width:50px;height:30px;border-radius:999px;border:1px solid var(--line-2);background:#2a2824;position:relative;flex-shrink:0;padding:0;transition:background .25s,border-color .25s}
+.tg i{position:absolute;top:3px;left:3px;width:22px;height:22px;border-radius:50%;background:#8a8273;transition:transform .25s ease,background .25s}
+.tg.on{background:linear-gradient(90deg,#c9a56c,var(--accent));border-color:transparent}
+.tg.on i{transform:translateX(20px);background:#fbf6ec}
+.drow{display:flex;align-items:center;gap:12px;min-height:62px;padding:8px 12px 8px 14px;margin-bottom:8px;border-radius:14px;border:1px solid var(--line);background:rgba(255,255,255,.018)}
+.drow .li{flex:1;border:0;background:none;padding:0;display:flex;align-items:center;gap:12px;min-width:0;text-align:left}
+.drow .li svg{width:22px;height:22px;flex-shrink:0;color:#b9ae9a}
+.mini{width:40px;height:40px;border-radius:12px;border:1px solid var(--line-2);background:none;font-size:20px;line-height:1;color:var(--text)}
+.scgrid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+.sc{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;min-height:92px;padding:10px 6px;border-radius:14px;
+  border:1px solid var(--line-2);background:rgba(255,255,255,.015);color:var(--text);font-size:15px;text-align:center;transition:all .25s}
+.sc svg{width:26px;height:26px;color:#cfc4b0;margin-bottom:2px}
+.sc small{font-size:11.5px;color:var(--muted);line-height:1.2;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sc.sel{border-color:rgba(217,189,142,.75);background:linear-gradient(180deg,rgba(217,189,142,.13),rgba(217,189,142,.04));box-shadow:0 0 22px rgba(217,189,142,.12)}
+.sc.sel svg{color:var(--champ)}
+.sc:active{border-color:var(--accent)}
+.ctl{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:16px;padding-top:16px;border-top:1px solid var(--line)}
+.ctl button{height:54px;border-radius:14px;border:1px solid var(--line-2);background:none;color:var(--text);font-size:15px;display:flex;align-items:center;justify-content:center;gap:10px}
+.ctl svg{width:20px;height:20px;color:var(--muted)}
+.empty{font-size:14px;color:var(--muted);line-height:1.5;padding:4px 2px 8px}
+.tray{display:flex;flex-wrap:wrap;gap:8px;margin-top:6px}
+.tray .chip{height:44px;padding:0 14px;border-radius:12px;border:1px dashed var(--line-2);background:none;color:var(--text);font-size:14px;touch-action:none}
+.dragdot{position:fixed;width:24px;height:24px;margin:-12px 0 0 -12px;border-radius:50%;background:#f3e3c3;box-shadow:0 0 18px rgba(217,189,142,.8);pointer-events:none;z-index:20}
 .scene{height:58px;border-radius:16px;border:1px solid var(--line-2);background:none;
   font-size:16px;display:flex;align-items:center;justify-content:center;gap:10px;padding:0 14px;transition:background .2s,border-color .2s}
 .scene svg{width:20px;height:20px;color:var(--muted);flex-shrink:0}
@@ -256,26 +328,20 @@ body.mapview #tiles{display:none!important}
       <div class="date" id="date"></div>
     </div>
     <div class="hright">
+      <div class="hicon" id="weather" hidden></div>
+      <div class="hsep" id="wsep" hidden></div>
       <div class="conn" id="conn"><i></i><span>Connecting…</span></div>
-      <button class="pill" id="viewBtn">Panels</button>
-      <button class="pill" id="editBtn">Edit</button>
+      <div class="hsep"></div>
+      <button class="pill" id="viewBtn">Map</button>
+      <button class="gear" id="editBtn" aria-label="Settings"></button>
     </div>
   </header>
 
   <main class="tiles" id="tiles"></main>
 
+  <nav class="panel" id="nav"></nav>
   <section id="map"><div class="mapbox" id="mapbox"></div></section>
-    <aside class="side" id="side">
-      <div class="card sum" id="mapSum"></div>
-      <div class="card" id="mapPanels"></div>
-      <div class="card" id="mapArrange">
-        <button class="btn ghost sm wide" id="arrangeBtn">Arrange the map</button>
-        <div id="trayBox" hidden>
-          <div class="tray-hint">Drag a light, the AC or the TV onto its spot. Drag one already on the map to move it, or back here to take it off.</div>
-          <div class="tray" id="tray"></div>
-        </div>
-      </div>
-    </aside>
+  <aside class="panel" id="detail"></aside>
 
   <nav class="scenes" id="scenes"></nav>
 </div>
@@ -377,7 +443,29 @@ const ICONS = {
   sun:   '<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/>',
   lamp:  '<path d="M8 3h8l3 8H5z"/><path d="M12 11v8"/><path d="M8 21h8"/>',
   moon:  '<path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z"/>',
-  sparkle: '<path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z"/><path d="M19 16l.7 1.8 1.8.7-1.8.7L19 21l-.7-1.8-1.8-.7 1.8-.7z"/>'
+  sparkle: '<path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z"/><path d="M19 16l.7 1.8 1.8.7-1.8.7L19 21l-.7-1.8-1.8-.7 1.8-.7z"/>',
+  home: '<path d="M3.5 11L12 4l8.5 7"/><path d="M5.5 9.5V20h13V9.5"/><path d="M10 20v-5.5h4V20"/>',
+  sofa: '<path d="M5 11V8.5A2.5 2.5 0 0 1 7.5 6h9A2.5 2.5 0 0 1 19 8.5V11"/><path d="M3 12a2 2 0 0 1 4 0v2h10v-2a2 2 0 0 1 4 0v5H3z"/><path d="M5 17v2M19 17v2"/>',
+  fork: '<path d="M7 3v7a2 2 0 0 0 4 0V3M9 10v11"/><path d="M17 21V3c-2 1-3 3-3 6v4h3"/>',
+  bed: '<path d="M3 18V7M3 13h18v5M21 18v-3.5A3.5 3.5 0 0 0 17.5 11H11v2"/><circle cx="7" cy="10.5" r="1.8"/>',
+  bed2: '<path d="M4 19v-8.5A2.5 2.5 0 0 1 6.5 8h11a2.5 2.5 0 0 1 2.5 2.5V19M4 15h16"/><path d="M7 8V5.5h4V8M13 8V5.5h4V8"/>',
+  bath: '<path d="M3 12h18v2a5 5 0 0 1-5 5H8a5 5 0 0 1-5-5z"/><path d="M6 12V5.5A2 2 0 0 1 9.5 4l.5.5M7 19l-1 2M17 19l1 2"/>',
+  door: '<path d="M6 21V4h12v17M3 21h18"/><circle cx="14.5" cy="12.5" r=".8"/>',
+  leaf: '<path d="M5 19c0-8 5-14 15-15-1 10-7 15-15 15z"/><path d="M5 19l7-7"/>',
+  grid: '<rect x="4" y="4" width="6.5" height="6.5" rx="1.5"/><rect x="13.5" y="4" width="6.5" height="6.5" rx="1.5"/><rect x="4" y="13.5" width="6.5" height="6.5" rx="1.5"/><rect x="13.5" y="13.5" width="6.5" height="6.5" rx="1.5"/>',
+  move: '<path d="M12 3v18M3 12h18M12 3l-2.5 2.5M12 3l2.5 2.5M12 21l-2.5-2.5M12 21l2.5-2.5M3 12l2.5-2.5M3 12l2.5 2.5M21 12l-2.5-2.5M21 12l-2.5 2.5"/>',
+  gear: '<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/>',
+  wifi: '<path d="M2.5 9a14 14 0 0 1 19 0M5.5 12.5a9.5 9.5 0 0 1 13 0M8.5 16a5 5 0 0 1 7 0"/><circle cx="12" cy="19.2" r=".9" fill="currentColor"/>',
+  cloud: '<path d="M7 18h10.5a4 4 0 0 0 .4-8 6 6 0 0 0-11.6 1.6A3.3 3.3 0 0 0 7 18z"/>',
+  rain: '<path d="M7 15h10.5a4 4 0 0 0 .4-8 6 6 0 0 0-11.6 1.6A3.3 3.3 0 0 0 7 15z"/><path d="M9 18l-1 2.5M13 18l-1 2.5M17 18l-1 2.5"/>',
+  pendant: '<path d="M12 2v6"/><path d="M7 15l2-7h6l2 7z"/><path d="M10.5 18a1.5 1.5 0 0 0 3 0"/>',
+  floorlamp: '<path d="M9 3h6l2.5 6h-11z"/><path d="M12 9v12M9 21h6"/>',
+  ceiling: '<path d="M12 3v4M6 11a6 4 0 0 1 12 0z"/><path d="M9 14l-1 2M12 14.5V17M15 14l1 2"/>',
+  bulb: '<path d="M9 18h6M10 21h4"/><path d="M12 3a6 6 0 0 0-3.5 10.9c.6.5 1 1.2 1 2.1h5c0-.9.4-1.6 1-2.1A6 6 0 0 0 12 3z"/>',
+  strip: '<rect x="3" y="10" width="18" height="4" rx="1"/><path d="M6 10v4M10 10v4M14 10v4M18 10v4"/>',
+  snow: '<path d="M12 3v18M4.2 7.5l15.6 9M4.2 16.5l15.6-9"/><path d="M9.5 4.5L12 7l2.5-2.5M9.5 19.5L12 17l2.5 2.5"/>',
+  tv: '<rect x="3" y="5" width="18" height="12" rx="1.5"/><path d="M8 20h8"/>',
+  cup: '<path d="M5 9h11v5a5 5 0 0 1-5 5h-1a5 5 0 0 1-5-5z"/><path d="M16 10h1.5a2.5 2.5 0 0 1 0 5H16"/><path d="M8.5 3.5c-.6.8.6 1.6 0 2.5M11.5 3.5c-.6.8.6 1.6 0 2.5"/>'
 };
 const svg = (n) => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">${ICONS[n]}</svg>`;
 
@@ -395,6 +483,7 @@ const panelName = (id) => (panels().find((p) => p.id === id) || {}).name || '';
 let states = {};                              // light.* entity_id -> state object
 let scenes = {};                              // scene.* entity_id -> state object (Hue scenes)
 let devices = {};                             // climate.* (AC) and media_player.* (TV) for the map
+let weather = {};                             // weather.* for the header
 let ws = null, msgId = 1, pending = {}, retry = 1000;
 
 /* ---------- clock ---------- */
@@ -496,7 +585,7 @@ function buildUI() {
     else send({ type: 'call_service', domain: 'scene', service: 'turn_on', service_data: { transition: FADE_SECONDS }, target: { entity_id: k } });
   });
   $('#editBtn').addEventListener('click', openEditor);
-  $('#viewBtn').addEventListener('click', () => setView(view === 'map' ? 'panels' : 'map'));
+  $('#viewBtn').addEventListener('click', () => setView('map'));
   initMap();
 
   // sheets
@@ -592,47 +681,159 @@ function layoutTiles(n) {
   const cols = n <= 1 || portrait ? 1 : (n === 3 ? 3 : 2);
   el.style.gridTemplateColumns = `repeat(${cols},minmax(0,1fr))`;
 }
-addEventListener('resize', () => { if ($('#mapsvg') && (innerWidth > innerHeight) !== landscape) { closeSheets(); buildMapSvg(); } render(); });
+addEventListener('resize', () => render());
 
 /* ---------- apartment map ----------
    Floor plan of 17D, traced off the listing plan in inches (same geometry as pranav.golf/17d).
    Origin = north-west corner; x → east, y → south. */
-const PLAN = [
-  { name: 'Bedroom', x: 85, y: 50, w: 123, d: 205 },
-  { name: 'Primary bedroom', x: 279, y: 50, w: 140, d: 205 },
-  { name: 'Living', x: 252, y: 261, poly: [[0,0],[167,0],[167,315],[6,315],[6,108],[0,108]], label: [288, 410], label2: ['Kitchen', [339, 316]] },
-  { name: 'Foyer', x: 181, y: 261, w: 71, d: 120, label: [216, 330] },
-  { name: 'Terrace', kind: 'out', x: 259, y: 49, poly: [[160,0],[296,0],[296,614],[0,614],[0,527],[160,527]], label: [487, 330] },
-  { name: 'Bath', kind: 'svc', x: 7, y: 7, w: 71, d: 113 },
-  { name: 'Bath', kind: 'svc', x: 210, y: 50, w: 62, d: 103 },
-  { name: '', kind: 'svc', x: 210, y: 165, w: 62, d: 89 },
-  { name: '', kind: 'svc', x: 103, y: 276, w: 70, d: 28 },
-  { name: 'Entry', kind: 'svc', x: 85, y: 308, w: 96, d: 73 },
-  { name: '', kind: 'svc', x: 85, y: 382, w: 58, d: 51 },
-  { name: '', kind: 'svc', x: 198, y: 382, w: 59, d: 51 }
-].map((r) => {
-  const pts = (r.poly || [[0,0],[r.w,0],[r.w,r.d],[0,r.d]]).map(([a, b]) => [a + r.x, b + r.y]);
-  const xs = pts.map((q) => q[0]), ys = pts.map((q) => q[1]);
-  return Object.assign(r, { pts, label: r.label || [(Math.min(...xs) + Math.max(...xs)) / 2, (Math.min(...ys) + Math.max(...ys)) / 2] });
-});
-const FIXTURES = [{ x: 269, y: 261, w: 150, d: 24 }, { x: 289, y: 333, w: 130, d: 36 }];   // kitchen counter, island
-// Living room furniture, placed from Aaron's photo (looking south from the kitchen island)
-const FURN = [
-  { t: 'ellipse', cx: 352, cy: 420, rx: 24, ry: 34, label: 'Dining' },
-  { t: 'rect', x: 377, y: 446, w: 38, h: 93, solid: true, label: 'Sofa' },
-  { t: 'ellipse', cx: 337, cy: 494, rx: 22, ry: 22 },
-  { t: 'rect', x: 300, y: 452, w: 70, h: 104 },                          // rug
-  { t: 'rect', x: 258, y: 488, w: 18, h: 64, solid: true, label: 'TV' },
-  { t: 'rect', x: 258, y: 404, w: 14, h: 62, solid: true }               // console
+const ROOMS17 = [
+  { id:"bedroom", name:"Bedroom", plan:true, note:"10'3\" × 17'1\"",
+    x:85, y:50, w:123, d:205,
+    features:[
+      {wall:"n", at:59,  len:23, type:"window"},
+      {wall:"n", at:83,  len:24, type:"window"},
+      {wall:"w", at:37,  len:27, type:"door", hinge:"end",   into:"out"},   // bathroom
+      {wall:"s", at:41,  len:25, type:"door", hinge:"end",   into:"in"},    // coat closet
+      {wall:"s", at:92,  len:27, type:"door", hinge:"start", into:"in"}     // foyer
+    ]},
+
+  { id:"primary", name:"Primary Bedroom", plan:true, note:"11'8\" × 17'0\"",
+    x:279, y:50, w:140, d:205,
+    features:[
+      {wall:"n", at:27,  len:23, type:"window"},
+      {wall:"n", at:52,  len:25, type:"window"},
+      {wall:"e", at:149, len:33, type:"window"},
+      {wall:"w", at:18,  len:27, type:"door", hinge:"start", into:"out"},   // ensuite bath
+      {wall:"w", at:171, len:28, type:"door", hinge:"end",   into:"out"}    // closet / hall
+    ]},
+
+  /* Living/dining and the kitchen are one open space with no wall between them,
+     so they're a single L-shaped room. Origin is the kitchen's north-west corner;
+     the living area starts 6" east and 108" south of it. */
+  { id:"living", name:"Living / Dining + Kitchen", plan:true,
+    note:"13'5\" \u00d7 17'6\" + 14'0\" \u00d7 9'0\"",
+    x:252, y:261,
+    poly:[[0,0],[167,0],[167,315],[6,315],[6,108],[0,108]],
+    fixtures:[
+      {name:"Counter",   x:17,  y:0,   w:150, d:24},
+      {name:"Island",    x:37,  y:72,  w:130, d:36},
+      {name:"", x:156, y:181, w:11, d:20},
+      {name:"", x:6,   y:301, w:11, d:14},
+      {name:"", x:156, y:301, w:11, d:14}
+    ],
+    features:[
+      {edge:1, at:12,  len:36, type:"window"},
+      {edge:1, at:115, len:33, type:"door", hinge:"start", into:"out"},
+      {edge:1, at:248, len:29, type:"window"},
+      {edge:2, at:45,  len:32, type:"window"},
+      {edge:2, at:93,  len:31, type:"window"},
+      {edge:5, at:2,   len:90, type:"opening"}
+    ]},
+
+  { id:"foyer", name:"Foyer", plan:true, note:"5'3\" × 10'0\"",
+    x:181, y:261, w:71, d:120,
+    features:[
+      {wall:"n", at:0,   len:22, type:"door", hinge:"start", into:"out"},   // bedroom
+      {wall:"n", at:30,  len:37, type:"door", hinge:"end",   into:"out"},   // closet
+      {wall:"e", at:16,  len:90, type:"opening"},                            // kitchen
+      {wall:"w", at:52,  len:64, type:"opening"}                             // entry
+    ]},
+
+  /* One continuous L-shaped terrace wrapping the east and south sides.
+     Local polygon, clockwise from the inside corner at the top. */
+  /* One continuous L-shaped terrace wrapping east and south. Its inner edges sit
+     flush against the apartment's own exterior walls, so the plan draws one wall
+     between inside and out rather than two with a gap. */
+  { id:"terrace", name:"Private Terrace", plan:true, terrace:true,
+    note:"11'4\" \u00d7 53'8\" east leg + 13'4\" \u00d7 7'3\" south leg",
+    x:259, y:49,
+    poly:[[160,0],[296,0],[296,614],[0,614],[0,527],[160,527]],
+    rail:[0,1,2,3],
+    fixtures:[{name:"", x:275, y:239, w:17, d:30}],
+    features:[
+      {edge:5, at:344, len:33, type:"window"},                               // primary bedroom
+      {edge:5, at:267, len:36, type:"window"},                               // kitchen
+      {edge:5, at:167, len:33, type:"door", hinge:"start", into:"in"},       // living / dining
+      {edge:5, at:38,  len:29, type:"window"},                               // living / dining
+      {edge:4, at:36,  len:31, type:"window"},
+      {edge:4, at:83,  len:32, type:"window"}
+    ]},
+
+  /* Service spaces — drawn for orientation, not planned */
+  { id:"bathA",   name:"Bath",  x:7,   y:7,   w:71, d:113,
+    features:[{wall:"n", at:40, len:12, type:"window"},
+              {wall:"e", at:70, len:27, type:"door", hinge:"start", into:"in"}]},
+  { id:"bathB",   name:"Bath",  x:210, y:50,  w:62, d:103,
+    features:[{wall:"n", at:24, len:12, type:"window"},
+              {wall:"e", at:18, len:27, type:"door", hinge:"end", into:"in"}]},
+  { id:"clA",     name:"CL",    x:210, y:165, w:62, d:89,
+    features:[{wall:"s", at:12, len:37, type:"door", hinge:"start", into:"out"},
+              {wall:"e", at:6,  len:28, type:"door", hinge:"start", into:"in"}]},
+  { id:"clB",     name:"CL",    x:103, y:276, w:70, d:28,
+    features:[{wall:"n", at:20, len:25, type:"door", hinge:"start", into:"out"}]},
+  { id:"entry",   name:"Entry", x:85,  y:308, w:96, d:73,
+    features:[{wall:"w", at:25, len:31, type:"door", hinge:"start", into:"in"},
+              {wall:"e", at:5,  len:64, type:"opening"}]},
+  { id:"wic",     name:"WIC",   x:85,  y:382, w:58, d:51, note:"5'0\" × 4'2\"",
+    features:[{wall:"n", at:14, len:28, type:"door", hinge:"start", into:"in"}]},
+  { id:"laundry", name:"Laundry", x:198, y:382, w:59, d:51,
+    features:[{wall:"n", at:8, len:28, type:"door", hinge:"start", into:"in"}]}
 ];
+const geomPoly = (room) => room.poly || [[0,0],[room.w,0],[room.w,room.d],[0,room.d]];
+function geomEdges(room) {
+  const p = geomPoly(room), out = [];
+  for (let i = 0; i < p.length; i++) {
+    const a = p[i], b = p[(i + 1) % p.length], dx = b[0] - a[0], dy = b[1] - a[1], L = Math.hypot(dx, dy);
+    out.push({ a, b, ux: dx / L, uy: dy / L, nx: -dy / L, ny: dx / L });
+  }
+  return out;
+}
+function featureSeg(room, f) {
+  const e = geomEdges(room)[f.edge != null ? f.edge : { n: 0, e: 1, s: 2, w: 3 }[f.wall]];
+  let t = f.at;
+  if (f.edge == null && f.wall === 's') t = room.w - (f.at + f.len);
+  if (f.edge == null && f.wall === 'w') t = room.d - (f.at + f.len);
+  return { e, x1: e.a[0] + e.ux * t + room.x, y1: e.a[1] + e.uy * t + room.y, x2: e.a[0] + e.ux * (t + f.len) + room.x, y2: e.a[1] + e.uy * (t + f.len) + room.y };
+}
+const PLAN = ROOMS17.map((r) => {
+  const pts = geomPoly(r).map(([a, b]) => [a + r.x, b + r.y]);
+  const xs = pts.map((q) => q[0]), ys = pts.map((q) => q[1]);
+  const kind = r.terrace ? 'out' : r.plan ? '' : 'svc';
+  return { id: r.id, kind, pts, src: r, label: [(Math.min(...xs) + Math.max(...xs)) / 2, (Math.min(...ys) + Math.max(...ys)) / 2] };
+});
+// rooms you can pick on the left; lights and devices belong to the room their dot sits in
+const rect = (x, y, w, d) => [[x, y], [x + w, y], [x + w, y + d], [x, y + d]];
+const ROOMSEL = [
+  { id: 'home', name: 'Home', sub: 'Apartment', icon: 'home', eyebrow: 'Apartment' },
+  { id: 'living', name: 'Living', icon: 'sofa', eyebrow: 'Living room', areas: [rect(258, 369, 161, 207)], label: [300, 432], always: true },
+  { id: 'kitchen', name: 'Kitchen', icon: 'fork', eyebrow: 'Kitchen', areas: [rect(252, 261, 167, 108)], label: [300, 312], always: true },
+  { id: 'bedroom', name: 'Bedroom', icon: 'bed', eyebrow: 'Bedroom', areas: [rect(85, 50, 123, 205)], label: [146, 152], always: true },
+  { id: 'primary', name: 'Primary', icon: 'bed2', eyebrow: 'Primary bedroom', areas: [rect(279, 50, 140, 205)], label: [349, 152], always: true },
+  { id: 'bath', name: 'Bath', icon: 'bath', eyebrow: 'Bathrooms', areas: [rect(7, 7, 71, 113), rect(210, 50, 62, 103)] },
+  { id: 'entry', name: 'Entry', icon: 'door', eyebrow: 'Entry & foyer', areas: [rect(181, 261, 71, 120), rect(85, 308, 96, 73), rect(103, 276, 70, 28), rect(210, 165, 62, 89), rect(85, 382, 58, 51), rect(198, 382, 59, 51)], label: [216, 322] },
+  { id: 'terrace', name: 'Terrace', icon: 'leaf', eyebrow: 'Outside', areas: [[[419, 49], [555, 49], [555, 663], [259, 663], [259, 576], [419, 576]]], label: [487, 330] }
+];
+const roomById = (id) => ROOMSEL.find((r) => r.id === id) || ROOMSEL[0];
+function inPoly(pt, poly) {
+  let inside = false;
+  for (let i = 0, j = poly.length - 1; i < poly.length; j = i++) {
+    const [xi, yi] = poly[i], [xj, yj] = poly[j];
+    if ((yi > pt[1]) !== (yj > pt[1]) && pt[0] < (xj - xi) * (pt[1] - yi) / (yj - yi) + xi) inside = !inside;
+  }
+  return inside;
+}
+const roomAt = (pt) => { const r = ROOMSEL.find((r) => r.areas && r.areas.some((a) => inPoly(pt, a))); return r ? r.id : null; };
+const FIXTURES = [{ x: 269, y: 261, w: 150, d: 24 }, { x: 289, y: 333, w: 130, d: 36 }];   // kitchen counter, island
 const VB = { x: 0, y: 0, w: 562, h: 670 };
-// first-time guesses for where a light or device goes, by its name (drag to fix)
+// first-time guesses for where a light goes, by its name (drag to fix)
 const GUESS = [
   [/gr[aä]s+hop+a/i, [406, 548]],
   [/island|pendant/i, [[312, 351], [354, 351], [396, 351]]]
 ];
 
 let view = store.get('view2', 'map'), arranging = false, mapDrag = null;   // the map is the home screen
+let selRoom = store.get('room', 'home');
+const lastScene = {};
 const placeable = () => Object.values(states).filter((s) => !isGroup(s)).concat(Object.values(devices));
 const isDev = (id) => /^(climate|media_player)\./.test(id);
 function autoPlace() {
@@ -641,10 +842,9 @@ function autoPlace() {
   let changed = false, islandN = 0;
   placeable().forEach((s) => {
     const id = s.entity_id; if (cfg.map[id] || cfg.guessed.includes(id)) return;
-    const name = nameOf(s);
     if (isDev(id)) return;
     for (const [re, spot] of GUESS) {
-      if (!re.test(name)) continue;
+      if (!re.test(nameOf(s))) continue;
       const pos = Array.isArray(spot[0]) ? spot[Math.min(islandN++, spot.length - 1)] : spot;
       cfg.map[id] = pos.slice(); cfg.guessed.push(id); changed = true; break;
     }
@@ -653,64 +853,210 @@ function autoPlace() {
 }
 const posOf = (id) => cfg && cfg.map && cfg.map[id];
 function zoneOfLight(id) { const p = panels().find((p) => zoneBulbs(p.id).includes(id)); return p ? p.id : null; }
+// what's in a room
+function roomItems(rid) {
+  return placeable().filter((s) => { const p = posOf(s.entity_id); return p && (rid === 'home' || roomAt(p) === rid); });
+}
+const roomLights = (rid) => roomItems(rid).filter((s) => !isDev(s.entity_id));
+const roomDevs = (rid) => roomItems(rid).filter((s) => isDev(s.entity_id));
+function lightIcon(s) {
+  const n = nameOf(s).toLowerCase();
+  if (/island|pendant/.test(n)) return 'pendant';
+  if (/floor|gr[aä]s|stem|arc|torch/.test(n)) return 'floorlamp';
+  if (/strip|accent|tv|cove/.test(n)) return 'strip';
+  if (/ceiling|overhead|recess/.test(n)) return 'ceiling';
+  if (/lamp|bedside|table|desk/.test(n)) return 'lamp';
+  return 'bulb';
+}
 
 function setView(v) {
   view = v; store.set('view2', v);
   document.body.classList.toggle('mapview', v === 'map');
-  $('#viewBtn').textContent = v === 'map' ? 'Panels' : 'Map';
-  $('#viewBtn').classList.toggle('on', v !== 'map');
   if (v !== 'map') setArranging(false);
   render();
 }
-let landscape = null, TR = '';
+function selectRoom(id) { selRoom = id; store.set('room', id); closeSheets(); render(); }
+
+let TR = '';
 function buildMapSvg() {
-  const poly = (pts) => pts.map((q) => q.join(',')).join(' ');
-  landscape = innerWidth > innerHeight;
-  // the plan is taller than it is wide; on a landscape screen, turn it on its side (terrace at the bottom)
-  const T = landscape ? `translate(${VB.h},0) rotate(90)` : '';
-  TR = landscape ? 'rotate(-90)' : '';                      // undoes the turn, for text and icons
-  const vb = landscape ? `0 0 ${VB.h} ${VB.w}` : `0 0 ${VB.w} ${VB.h}`;
-  const label = (cls, name, x, y, dy) => `<text class="${cls}" transform="translate(${x},${y}) ${TR} translate(0,${dy || 0})">${esc(name)}</text>`;
-  $('#mapbox').innerHTML = `<svg id="mapsvg" viewBox="${vb}" preserveAspectRatio="xMidYMid meet"><g id="plan" transform="${T}">
+  const poly = (pts) => pts.map((q) => q.map((n) => +n.toFixed(1)).join(',')).join(' ');
+  const label = (cls, name, x, y) => `<text class="${cls}" x="${x}" y="${y + 4}">${esc(name)}</text>`;
+  // windows, doors and openings from the listing plan
+  let cuts = '', wins = '', doors = '';
+  ROOMS17.forEach((r) => (r.features || []).forEach((f) => {
+    const g = featureSeg(r, f);
+    if (r.terrace && f.type === 'window') return;
+    if (f.type === 'window') {
+      const ox = g.e.nx * 2.2, oy = g.e.ny * 2.2;
+      cuts += `<line class="cut" x1="${g.x1}" y1="${g.y1}" x2="${g.x2}" y2="${g.y2}"/>`;
+      wins += `<line class="win" x1="${g.x1 + ox}" y1="${g.y1 + oy}" x2="${g.x2 + ox}" y2="${g.y2 + oy}"/><line class="win" x1="${g.x1 - ox}" y1="${g.y1 - oy}" x2="${g.x2 - ox}" y2="${g.y2 - oy}"/>`;
+    } else {
+      cuts += `<line class="cut" x1="${g.x1}" y1="${g.y1}" x2="${g.x2}" y2="${g.y2}"/>`;
+      if (f.type === 'door') {
+        const dir = f.into === 'in' ? 1 : -1, L = f.len;
+        const h = f.hinge === 'end' ? [g.x2, g.y2] : [g.x1, g.y1], o = f.hinge === 'end' ? [g.x1, g.y1] : [g.x2, g.y2];
+        const leaf = [h[0] + g.e.nx * L * dir, h[1] + g.e.ny * L * dir];
+        const cross = (leaf[0] - h[0]) * (o[1] - h[1]) - (leaf[1] - h[1]) * (o[0] - h[0]);
+        doors += `<line class="door leaf" x1="${h[0]}" y1="${h[1]}" x2="${leaf[0]}" y2="${leaf[1]}"/><path class="door" d="M${leaf[0]} ${leaf[1]} A${L} ${L} 0 0 ${cross > 0 ? 1 : 0} ${o[0]} ${o[1]}"/>`;
+      }
+    }
+  }));
+  const furn = [
+    `<rect class="rug" x="300" y="448" width="72" height="110" rx="2"/>`,
+    // sofa along the east wall: seat, back, arms
+    `<rect class="furn soft" x="378" y="444" width="36" height="96" rx="5"/><rect class="furn" x="404" y="444" width="10" height="96" rx="3"/><rect class="furn" x="378" y="444" width="36" height="9" rx="3"/><rect class="furn" x="378" y="531" width="36" height="9" rx="3"/>`,
+    `<line class="furn line" x1="381" y1="492" x2="403" y2="492"/>`,
+    `<circle class="furn" cx="338" cy="496" r="19"/>`,
+    // armchair + rocking chair by the TV side
+    `<rect class="furn soft" x="300" y="528" width="24" height="24" rx="6" transform="rotate(-20 312 540)"/>`,
+    // dining table with four chairs
+    `<ellipse class="furn" cx="352" cy="418" rx="23" ry="33"/>`,
+    ...[[323, 404], [323, 432], [381, 404], [381, 432]].map(([x, y]) => `<rect class="furn soft" x="${x - 6}" y="${y - 6}" width="12" height="12" rx="3"/>`),
+    // TV wall: credenza + screen
+    `<rect class="furn" x="259" y="490" width="16" height="62" rx="2"/><line x1="261.5" y1="497" x2="261.5" y2="545" stroke="#9a907f" stroke-width="2.4" stroke-linecap="round"/>`,
+    // console table
+    `<rect class="furn" x="259" y="406" width="13" height="58" rx="2"/>`,
+    // kitchen stools
+    ...[312, 336, 360, 384].map((x) => `<circle class="furn soft" cx="${x}" cy="380" r="6"/>`)
+  ].join('');
+  $('#mapbox').innerHTML = `<svg id="mapsvg" viewBox="-8 -8 ${VB.w + 4} ${VB.h + 6}" preserveAspectRatio="xMidYMid meet"><g id="plan">
     <defs>
-      <pattern id="deck" width="14" height="14" patternUnits="userSpaceOnUse"><rect width="14" height="14" fill="#12110f"/><path d="M0 14L14 0" stroke="#1d1b18" stroke-width="2"/></pattern>
-      <radialGradient id="poolg"><stop offset="0" stop-color="#fff" stop-opacity="1"/><stop offset=".45" stop-color="#fff" stop-opacity=".45"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></radialGradient>
+      <pattern id="wood" width="96" height="9" patternUnits="userSpaceOnUse"><rect width="96" height="9" fill="#1f1d1a"/><path d="M0 8.5H96M30 0v8.5M78 0v8.5" stroke="#252320" stroke-width="1"/></pattern>
+      <pattern id="tile" width="14" height="14" patternUnits="userSpaceOnUse"><rect width="14" height="14" fill="#1c1b19"/><path d="M0 13.5H14M13.5 0V14" stroke="#24221f" stroke-width="1"/></pattern>
+      <pattern id="deck" width="9" height="40" patternUnits="userSpaceOnUse"><rect width="9" height="40" fill="#161513"/><path d="M8.5 0V40" stroke="#1d1c19" stroke-width="1"/></pattern>
+      <radialGradient id="poolg"><stop offset="0" stop-color="#fff" stop-opacity="1"/><stop offset=".4" stop-color="#fff" stop-opacity=".5"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></radialGradient>
       <mask id="poolm" maskContentUnits="objectBoundingBox" maskUnits="objectBoundingBox" x="0" y="0" width="1" height="1"><circle cx=".5" cy=".5" r=".5" fill="url(#poolg)"/></mask>
+      <radialGradient id="halo"><stop offset="0" stop-color="#fff3d9" stop-opacity=".95"/><stop offset=".25" stop-color="#ffd99a" stop-opacity=".45"/><stop offset="1" stop-color="#ffd99a" stop-opacity="0"/></radialGradient>
     </defs>
-    <g>${PLAN.map((r) => `<polygon class="room-fill ${r.kind || ''}" points="${poly(r.pts)}"/>`).join('')}</g>
-    <g>${FIXTURES.map((f) => `<rect class="fixture" x="${f.x}" y="${f.y}" width="${f.w}" height="${f.d}" rx="3"/>`).join('')}</g>
-    <g>${FURN.map((f) => (f.t === 'ellipse' ? `<ellipse class="furn${f.solid ? ' solid' : ''}" cx="${f.cx}" cy="${f.cy}" rx="${f.rx}" ry="${f.ry}"/>` : `<rect class="furn${f.solid ? ' solid' : ''}" x="${f.x}" y="${f.y}" width="${f.w}" height="${f.h}" rx="4"/>`)
-      + (f.label ? label('flabel', f.label.toUpperCase(), f.t === 'ellipse' ? f.cx : f.x + f.w / 2, f.t === 'ellipse' ? f.cy : f.y + f.h / 2, 3) : '')).join('')}</g>
+    <g>${PLAN.map((r) => `<polygon class="floor ${r.kind}" points="${poly(r.pts)}"/>`).join('')}</g>
+    <g id="roomhi">${ROOMSEL.filter((r) => r.areas).map((r) => r.areas.map((a) => `<polygon class="roomhi" data-room="${r.id}" points="${poly(a)}"/>`).join('')).join('')}</g>
+    <g>${FIXTURES.map((f) => `<rect class="fixture" x="${f.x}" y="${f.y}" width="${f.w}" height="${f.d}" rx="2"/>`).join('')}</g>
+    <g>${furn}</g>
     <clipPath id="inside">${PLAN.filter((r) => r.kind !== 'out').map((r) => `<polygon points="${poly(r.pts)}"/>`).join('')}</clipPath>
     <g id="glows" clip-path="url(#inside)"></g>
-    <g>${PLAN.map((r) => `<polygon class="room-wall ${r.kind === 'out' ? 'out' : ''}" points="${poly(r.pts)}"/>`).join('')}</g>
-    <g>${PLAN.filter((r) => r.name).map((r) => label('rlabel', r.name, r.label[0], r.label[1], 5) + (r.label2 ? label('rlabel', r.label2[0], r.label2[1][0], r.label2[1][1], 5) : '')).join('')}</g>
+    <g>${PLAN.map((r) => `<polygon class="wall-o ${r.kind}" points="${poly(r.pts)}"/>`).join('')}</g>
+    <g>${PLAN.filter((r) => r.kind !== 'out').map((r) => `<polygon class="wall-i" points="${poly(r.pts)}"/>`).join('')}</g>
+    <g>${cuts}</g><g>${wins}${doors}</g>
+    <g id="rlabels">${ROOMSEL.filter((r) => r.label).map((r) => `<text class="rlabel" data-room="${r.id}" x="${r.label[0]}" y="${r.label[1] + 4}">${esc(r.id === 'primary' ? 'Primary' : r.name)}</text>`).join('')}
+      ${label('rlabel sm', 'Bath', 42, 64)}${label('rlabel sm', 'Bath', 241, 102)}</g>
     <g id="mlights"></g>
   </g></svg>`;
 }
+
 function initMap() {
   buildMapSvg();
-  $('#mapPanels').addEventListener('click', (e) => { const b = e.target.closest('[data-zone]'); if (b) toggleZone(b.dataset.zone); });
-  $('#arrangeBtn').addEventListener('click', () => setArranging(!arranging));
-  // tap a light: open its controls (or, while arranging, pick it up)
+  $('#editBtn').innerHTML = svg('gear');
+  $('#nav').addEventListener('click', (e) => {
+    const b = e.target.closest('[data-nav]'); if (!b) return;
+    const v = b.dataset.nav;
+    if (v === 'panels') setView('panels');
+    else if (v === 'arrange') setArranging(!arranging);
+    else selectRoom(v);
+  });
+  // tap a light: open its controls; tap a room: select it; while arranging, drag
   $('#mapbox').addEventListener('pointerdown', (e) => {
-    const g = e.target.closest('.mlight, .mdev'); if (!g) return;
+    const g = e.target.closest('.mlight, .mdev');
+    if (!g) {
+      if (arranging) return;
+      const svgEl = $('#mapsvg'), pt = svgEl.createSVGPoint(); pt.x = e.clientX; pt.y = e.clientY;
+      const q = pt.matrixTransform($('#plan').getScreenCTM().inverse());
+      const rid = roomAt([q.x, q.y]); if (rid && rid !== selRoom) selectRoom(rid);
+      return;
+    }
     if (arranging) return startDrag(e, g.dataset.id);
     e.preventDefault();
     const id = g.dataset.id, r = g.getBoundingClientRect(), anchor = { x: r.left + r.width / 2, y: r.top + r.height / 2 };
+    const rid = roomAt(posOf(id)); if (rid && rid !== selRoom) { selRoom = rid; store.set('room', rid); }
     if (isDev(id)) openDevSheet(id, anchor); else openLightSheet(id, zoneOfLight(id), anchor);
   });
-  $('#tray').addEventListener('pointerdown', (e) => { const c = e.target.closest('.chip'); if (c && arranging) startDrag(e, c.dataset.id); });
-  addEventListener('pointermove', (e) => { if (!mapDrag) return; mapDrag.ghost.style.left = e.clientX + 'px'; mapDrag.ghost.style.top = e.clientY + 'px'; });
-  addEventListener('pointerup', endDrag); addEventListener('pointercancel', endDrag);
+  // right panel
+  const d = $('#detail');
+  d.addEventListener('click', (e) => {
+    const t = (sel) => e.target.closest(sel);
+    let b;
+    if ((b = t('.tg[data-id]'))) toggleLight(b.dataset.id);
+    else if ((b = t('.tg[data-room]'))) toggleRoom(b.dataset.room);
+    else if ((b = t('.li[data-open]'))) { const r = b.closest('.lrow,.drow').getBoundingClientRect(); const id = b.dataset.open, a = { x: r.left, y: r.top + r.height / 2 }; isDev(id) ? openDevSheet(id, a) : openLightSheet(id, zoneOfLight(id), a); }
+    else if ((b = t('.li[data-goto]'))) selectRoom(b.dataset.goto);
+    else if ((b = t('.mpill'))) toggleRoom(selRoom);
+    else if ((b = t('.sc'))) runRoomScene(b.dataset.key);
+    else if ((b = t('[data-ac]'))) { devId = b.dataset.dev; devAction(b.dataset.ac); devId = null; }
+    else if ((b = t('[data-ctl="arrange"]'))) setArranging(!arranging);
+    else if ((b = t('[data-ctl="edit"]'))) openEditor();
+  });
+  d.addEventListener('pointerdown', (e) => {
+    const c = e.target.closest('.chip'); if (c && arranging) return startDrag(e, c.dataset.id);
+    const sl = e.target.closest('.rs'); if (sl) startSlide(e, sl);
+  });
+  addEventListener('pointermove', (e) => {
+    if (mapDrag) { mapDrag.ghost.style.left = e.clientX + 'px'; mapDrag.ghost.style.top = e.clientY + 'px'; }
+    if (slide) moveSlide(e);
+  });
+  addEventListener('pointerup', (e) => { endDrag(e); endSlide(); }); addEventListener('pointercancel', (e) => { endDrag(e); endSlide(); });
   setView(view);
 }
+
+/* sliders in the right panel: drag anywhere on the row's track */
+let slide = null;
+function startSlide(e, el) {
+  e.preventDefault();
+  slide = { el, last: 0, val: 0 }; dragging.detail = true; el.classList.add('drag'); moveSlide(e, true);
+}
+function moveSlide(e, first) {
+  const r = slide.el.getBoundingClientRect();
+  const v = Math.min(100, Math.max(1, Math.round((e.clientX - r.left) / r.width * 100)));
+  slide.val = v;
+  slide.el.querySelector('.tf').style.width = v + '%'; slide.el.querySelector('.kn').style.left = v + '%';
+  const pc = slide.el.parentNode.querySelector('.pc'); if (pc) pc.textContent = v + '%';
+  const now = Date.now();
+  if (!first && now - slide.last > 300) { slide.last = now; applySlide(); }
+}
+function applySlide() {
+  const el = slide.el;
+  if (el.dataset.id) lightCall('turn_on', [el.dataset.id], { brightness_pct: slide.val });
+  else if (el.dataset.room) lightCall('turn_on', roomLights(el.dataset.room).map((s) => s.entity_id), { brightness_pct: slide.val });
+}
+function endSlide() {
+  if (!slide) return;
+  applySlide(); slide.el.classList.remove('drag'); slide = null; dragging.detail = false; render();
+}
+
+function toggleRoom(rid) {
+  const ls = roomLights(rid), any = ls.some((s) => s.state === 'on');
+  lightCall(any ? 'turn_off' : 'turn_on', ls.map((s) => s.entity_id));
+  if (any) delete lastScene[rid];
+}
+// room scenes: Bright / Evening / Night act on just this room's lights; Hue scenes and All off as usual
+const ROOM_SCENES = [
+  { key: 'b:0', name: 'Bright', sub: 'Clear & crisp', icon: 'sun' },
+  { key: 'b:1', name: 'Evening', sub: 'Warm & relaxed', icon: 'cup' },
+  { key: 'b:2', name: 'Night', sub: 'Dim & low', icon: 'moon' }
+];
+function roomHueScenes(rid) {
+  const ids = new Set(roomLights(rid).map((s) => s.entity_id));
+  if (!ids.size) return [];
+  const groups = Object.values(states).filter(isGroup).filter((g) => { const m = membersOf(g.entity_id); return m.length && m.filter((x) => ids.has(x)).length * 2 >= m.length; }).map(nameOf);
+  return Object.values(scenes).filter((sc) => groups.includes(sc.attributes.group_name));
+}
+function runRoomScene(key) {
+  const rid = selRoom;
+  if (key === 'off') {
+    const ids = rid === 'home' ? Object.values(states).filter((s) => !isGroup(s)).map((s) => s.entity_id) : roomLights(rid).map((s) => s.entity_id);
+    if (rid === 'home') runScene(SCENES[3]); else lightCall('turn_off', ids);
+    delete lastScene[rid]; render(); return;
+  }
+  if (key.startsWith('b:')) {
+    const sc = SCENES[+key.slice(2)];
+    if (rid === 'home') runScene(sc);
+    else lightCall('turn_on', roomLights(rid).map((s) => s.entity_id), { brightness_pct: sc.set.pct, color_temp_kelvin: sc.set.k });
+  } else if (!DEMO) send({ type: 'call_service', domain: 'scene', service: 'turn_on', service_data: { transition: FADE_SECONDS }, target: { entity_id: key } });
+  lastScene[rid] = key; render();
+}
+
 function setArranging(on) {
   arranging = on && !!cfg;
   $('#mapbox').classList.toggle('arranging', arranging);
-  $('#trayBox').hidden = !arranging;
-  $('#arrangeBtn').textContent = arranging ? 'Done arranging' : 'Arrange the map';
-  renderMap();
+  closeSheets(); render();
 }
 function startDrag(e, id) {
   e.preventDefault();
@@ -724,15 +1070,16 @@ function endDrag(e) {
   const { id, ghost } = mapDrag; ghost.remove(); mapDrag = null; dragging.map = false;
   const svgEl = $('#mapsvg'), r = $('#mapbox').getBoundingClientRect();
   cfg.map = cfg.map || {};
-  if (e.type === 'pointerup' && e.clientX >= r.left && e.clientX <= r.right && e.clientY >= r.top && e.clientY <= r.bottom) {
+  const over = (el) => { const b = el.getBoundingClientRect(); return e.clientX >= b.left && e.clientX <= b.right && e.clientY >= b.top && e.clientY <= b.bottom; };
+  if (e.type === 'pointerup' && over($('#detail'))) delete cfg.map[id];
+  else if (e.type === 'pointerup' && over($('#mapbox'))) {
     const pt = svgEl.createSVGPoint(); pt.x = e.clientX; pt.y = e.clientY;
     const q = pt.matrixTransform($('#plan').getScreenCTM().inverse());
-    cfg.map[id] = [Math.round(Math.min(VB.x + VB.w, Math.max(VB.x, q.x))), Math.round(Math.min(VB.y + VB.h, Math.max(VB.y, q.y)))];
-  } else if (e.type === 'pointerup' && e.target.closest && e.target.closest('#mapArrange')) {
-    delete cfg.map[id];
+    cfg.map[id] = [Math.round(Math.min(VB.w, Math.max(0, q.x))), Math.round(Math.min(VB.h, Math.max(0, q.y)))];
   }
   store.set('cfg', cfg); render();
 }
+
 function renderMap() {
   if (view !== 'map' || !$('#mapsvg') || dragging.map) return;
   const lights = placeable();
@@ -750,47 +1097,128 @@ function renderMap() {
       return;
     }
     const on = s.state === 'on', c = colorOf(s), pct = pctOf(s);
-    // a soft pool of light on the floor: size and strength follow brightness
+    // a soft, low pool of light on the floor
     let pool = glows.querySelector(`[data-id="${CSS.escape(id)}"]`);
     if (!pool) {
-      pool = document.createElementNS('http://www.w3.org/2000/svg', 'g'); pool.dataset.id = id;
-      pool.innerHTML = `<circle class="pool" r="0" opacity="0"/><circle class="pool" r="0" opacity="0"/>`;
+      pool = document.createElementNS('http://www.w3.org/2000/svg', 'circle'); pool.dataset.id = id;
+      pool.setAttribute('class', 'pool'); pool.setAttribute('style', 'mask:url(#poolm)'); pool.setAttribute('r', 0); pool.setAttribute('opacity', 0);
       glows.appendChild(pool);
     }
-    const [outer, inner] = pool.children;
-    const r = on ? 34 + pct * 0.42 : 0;
-    outer.setAttribute('cx', p[0]); outer.setAttribute('cy', p[1]); outer.setAttribute('r', r);
-    outer.setAttribute('fill', `rgb(${c})`); outer.setAttribute('opacity', on ? (0.13 + pct / 500).toFixed(3) : 0);
-    outer.style.filter = ''; outer.setAttribute('style', `mask:url(#poolm)`);
-    inner.setAttribute('cx', p[0]); inner.setAttribute('cy', p[1]); inner.setAttribute('r', on ? 9 + pct * 0.06 : 0);
-    inner.setAttribute('fill', `rgb(${c})`); inner.setAttribute('opacity', on ? 0.22 : 0);
-    inner.setAttribute('style', 'mask:url(#poolm)');
+    pool.setAttribute('cx', p[0]); pool.setAttribute('cy', p[1]); pool.setAttribute('r', on ? 30 + pct * 0.38 : 0);
+    pool.setAttribute('fill', `rgb(${c})`); pool.setAttribute('opacity', on ? (0.1 + pct / 600).toFixed(3) : 0);
     let g = marks.querySelector(`[data-id="${CSS.escape(id)}"]`);
     if (!g) {
       g = document.createElementNS('http://www.w3.org/2000/svg', 'g'); g.dataset.id = id;
-      g.innerHTML = `<circle class="hit" r="26"/><circle class="ring" r="13"/><circle class="core" r="7"/><text transform="${TR} translate(0,26)"></text>`;
+      g.innerHTML = `<circle class="hit" r="24"/><circle class="halo" r="15" fill="url(#halo)"/><circle class="ring" r="12"/><circle class="core" r="5.2"/><text y="24"></text>`;
       marks.appendChild(g);
     }
     g.setAttribute('class', `mlight ${on ? 'on' : 'off'}${id === selId ? ' sel' : ''}`);
     g.setAttribute('transform', `translate(${p[0]},${p[1]})`);
-    g.querySelector('.core').setAttribute('fill', on ? `rgb(${c})` : '');
+    g.querySelector('.core').setAttribute('fill', on ? `rgb(${mixWhite(c, 0.45)})` : '');
+    g.querySelector('.halo').setAttribute('opacity', on ? (0.45 + pct / 180).toFixed(2) : 0);
     g.querySelector('text').textContent = nameOf(s);
   });
   [...glows.children, ...marks.children].forEach((n) => { if (!keep.has(n.dataset.id)) n.remove(); });
-  // summary + panel switches
-  const bulbs = lights.filter((s) => !isDev(s.entity_id));
-  const onCount = bulbs.filter((s) => s.state === 'on').length;
-  const unplaced = lights.filter((s) => !posOf(s.entity_id));
-  const acs = Object.values(devices).filter((d) => d.entity_id.startsWith('climate.'));
-  $('#mapSum').innerHTML = `<b>${onCount}<small>of ${bulbs.length} lights on</small></b>${unplaced.length && !arranging ? `${unplaced.length} not placed on the map yet` : ''}`
-    + acs.map((d) => `<div style="margin-top:8px">${esc(nameOf(d))}: ${d.state === 'off' ? 'off' : esc(d.state.replace('_', ' ')) + (d.attributes.temperature != null ? ' · set to ' + d.attributes.temperature + '°' : '')}${d.attributes.current_temperature != null ? ' · room ' + d.attributes.current_temperature + '°' : ''}</div>`).join('');
-  $('#mapPanels').innerHTML = panels().map((p) => {
-    const i = zoneInfo(p.id);
-    return `<div class="prow2${i.on ? ' on' : ''}"><div class="pn"><div>${esc(p.name)}</div><small>${i.on ? 'On · ' + i.bri + '%' : 'Off'}</small></div>
-      <button class="power" data-zone="${esc(p.id)}" aria-label="Turn ${esc(p.name)} on or off">${svg('power')}</button></div>`;
-  }).join('');
-  $('#tray').innerHTML = unplaced.map((s) => `<button class="chip" data-id="${esc(s.entity_id)}">${esc(nameOf(s))}</button>`).join('')
-    || '<span class="tray-hint">Everything is on the map.</span>';
+  document.querySelectorAll('#roomhi .roomhi').forEach((n) => n.classList.toggle('sel', n.dataset.room === selRoom));
+  document.querySelectorAll('#rlabels .rlabel[data-room]').forEach((n) => n.classList.toggle('sel', n.dataset.room === selRoom));
+  renderNav(); renderDetail(); renderHeader();
+}
+const mixWhite = (c, t) => c.split(',').map((v) => Math.round(+v + (255 - v) * t)).join(',');
+
+function renderHeader() {
+  const w = Object.values(weather)[0];
+  $('#weather').hidden = $('#wsep').hidden = !w;
+  if (w) {
+    const st = w.state, icon = /rain|pour|snow|storm|light/.test(st) ? 'rain' : /cloud|fog/.test(st) ? 'cloud' : st === 'clear-night' ? 'moon' : 'sun';
+    $('#weather').innerHTML = `${svg(icon)}<span><b>${Math.round(w.attributes.temperature)}°</b><small>Outside</small></span>`;
+  }
+  const c = $('#conn');
+  if (!c.querySelector('svg')) c.insertAdjacentHTML('afterbegin', svg('wifi'));
+}
+
+function renderNav() {
+  const counts = (rid) => roomLights(rid).filter((s) => s.state === 'on').length;
+  const rooms = ROOMSEL.filter((r) => r.id === 'home' || r.always || roomItems(r.id).length);
+  $('#nav').innerHTML = rooms.map((r) => {
+    const n = counts(r.id);
+    return `<button class="nitem${r.id === 'home' ? ' home' : ''}${r.id === selRoom && !arranging ? ' sel' : ''}" data-nav="${r.id}">${svg(r.icon)}<span>${esc(r.name)}${r.sub ? `<small>${r.sub}</small>` : ''}</span>${n && r.id !== 'home' ? `<span class="ncount">${n}</span>` : ''}</button>`
+      + (r.id === 'home' ? '<div class="nsep"></div>' : '');
+  }).join('') + `<div class="nfill"></div><div class="nsep"></div>
+    <button class="nitem${arranging ? ' sel' : ''}" data-nav="arrange">${svg('move')}<span>Arrange</span></button>
+    <button class="nitem" data-nav="panels">${svg('grid')}<span>Panels</span></button>`;
+}
+
+function describe(rid, ls) {
+  const on = ls.filter((s) => s.state === 'on');
+  if (!ls.length) return rid === 'home' ? 'Place your lights on the plan to see them here.' : 'No lights placed in this room yet. Use Arrange to drag them in.';
+  if (!on.length) return 'All lights are off.';
+  const avg = Math.round(on.reduce((n, s) => n + pctOf(s), 0) / on.length);
+  const ks = on.map((s) => s.attributes.color_mode === 'color_temp' && s.attributes.color_temp_kelvin).filter(Boolean);
+  const k = ks.length ? ks.reduce((a, b) => a + b, 0) / ks.length : 0;
+  const mood = !k ? 'Lit' : k < 2500 ? 'Low and amber' : k < 3200 ? 'Warm and comfortable' : k < 4500 ? 'Soft neutral white' : 'Bright and crisp';
+  const level = avg < 20 ? 'dim' : avg < 55 ? 'set low' : avg < 85 ? 'at a good level' : 'at full brightness';
+  return `${mood}, ${level}. ${on.length} of ${ls.length} lights on.`;
+}
+function lightRow(s) {
+  const on = s.state === 'on', pct = pctOf(s), na = s.state === 'unavailable';
+  return `<div class="lrow${on ? ' on' : ''}">
+    <button class="li" data-open="${esc(s.entity_id)}">${svg(lightIcon(s))}<span class="ln2">${esc(nameOf(s))}${na ? '<small>Unavailable</small>' : ''}</span></button>
+    <span class="pc">${on ? pct + '%' : 'Off'}</span>
+    <div class="rs" data-id="${esc(s.entity_id)}"><div class="tr"></div><div class="tf" style="width:${on ? pct : 0}%"></div><div class="kn" style="left:${on ? pct : 0}%"></div></div>
+    <button class="tg${on ? ' on' : ''}" data-id="${esc(s.entity_id)}" aria-label="Turn ${esc(nameOf(s))} on or off"><i></i></button></div>`;
+}
+function devRow(s) {
+  const dom = s.entity_id.split('.')[0], a = s.attributes, on = !['off', 'unavailable', 'standby'].includes(s.state);
+  if (dom === 'climate') return `<div class="drow"><button class="li" data-open="${esc(s.entity_id)}">${svg('snow')}<span class="ln2">${esc(nameOf(s))}<small>${on ? esc(s.state.replace('_', ' ').replace(/^./, (c) => c.toUpperCase())) + (a.temperature != null ? ' · set to ' + a.temperature + '°' : '') : 'Off'}${a.current_temperature != null ? ' · room ' + a.current_temperature + '°' : ''}</small></span></button>
+    ${on && a.temperature != null ? `<button class="mini" data-ac="down" data-dev="${esc(s.entity_id)}">−</button><button class="mini" data-ac="up" data-dev="${esc(s.entity_id)}">+</button>` : ''}
+    <button class="tg${on ? ' on' : ''}" data-ac="power" data-dev="${esc(s.entity_id)}"><i></i></button></div>`;
+  return `<div class="drow"><button class="li" data-open="${esc(s.entity_id)}">${svg('tv')}<span class="ln2">${esc(nameOf(s))}<small>${on ? 'On' + (a.source ? ' · ' + esc(a.source) : '') : 'Off'}</small></span></button>
+    <button class="tg${on ? ' on' : ''}" data-ac="power" data-dev="${esc(s.entity_id)}"><i></i></button></div>`;
+}
+function renderDetail() {
+  if (view !== 'map' || dragging.detail) return;
+  const d = $('#detail');
+  if (arranging) {
+    const unplaced = placeable().filter((s) => !posOf(s.entity_id));
+    d.innerHTML = `<div class="eyebrow">Arrange</div><div class="dtitle"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round">${ICONS.move}</svg><h2>Place things</h2></div>
+      <div class="ddesc">Drag a light, the AC or the TV onto its spot on the plan. Drag one already on the plan to move it, or drop it back here to take it off.</div>
+      <div class="shead"><span>Not on the plan</span><span>${unplaced.length}</span></div>
+      <div class="tray">${unplaced.map((s) => `<button class="chip" data-id="${esc(s.entity_id)}">${esc(nameOf(s))}</button>`).join('') || '<div class="empty">Everything is on the plan.</div>'}</div>
+      <div class="nfill"></div><div class="ctl" style="grid-template-columns:1fr"><button data-ctl="arrange">Done</button></div>`;
+    return;
+  }
+  const room = roomById(selRoom), rid = room.id;
+  const ls = roomLights(rid), on = ls.filter((s) => s.state === 'on');
+  const sceneKey = lastScene[rid];
+  const sceneName = sceneKey && (sceneKey.startsWith('b:') ? SCENES[+sceneKey.slice(2)].name : scenes[sceneKey] && (scenes[sceneKey].attributes.name || nameOf(scenes[sceneKey])));
+  let body = '';
+  if (rid === 'home') {
+    const rooms = ROOMSEL.filter((r) => r.id !== 'home' && roomLights(r.id).length);
+    body += `<div class="shead"><span>Rooms</span><span>${on.length} on</span></div>` + (rooms.map((r) => {
+      const rl = roomLights(r.id), ro = rl.filter((s) => s.state === 'on'), avg = ro.length ? Math.round(ro.reduce((n, s) => n + pctOf(s), 0) / ro.length) : 0;
+      return `<div class="lrow${ro.length ? ' on' : ''}"><button class="li" data-goto="${r.id}">${svg(r.icon)}<span class="ln2">${esc(r.name)}<small>${ro.length} of ${rl.length} on</small></span></button>
+        <span class="pc">${ro.length ? avg + '%' : 'Off'}</span>
+        <div class="rs" data-room="${r.id}"><div class="tr"></div><div class="tf" style="width:${avg}%"></div><div class="kn" style="left:${avg}%"></div></div>
+        <button class="tg${ro.length ? ' on' : ''}" data-room="${r.id}"><i></i></button></div>`;
+    }).join('') || `<div class="empty">${describe('home', [])}</div>`);
+    const unplaced = placeable().filter((s) => !posOf(s.entity_id)).length;
+    if (unplaced) body += `<div class="empty">${unplaced} not on the plan yet — tap Arrange to place ${unplaced === 1 ? 'it' : 'them'}.</div>`;
+  } else {
+    body += `<div class="shead"><span>Lights</span><span>${on.length} on</span></div>` + (ls.map(lightRow).join('') || `<div class="empty">${describe(rid, [])}</div>`);
+  }
+  const devs = roomDevs(rid);
+  if (devs.length) body += `<div class="shead"><span>Climate & media</span><span></span></div>` + devs.map(devRow).join('');
+  // scenes
+  const cards = rid === 'home'
+    ? presetKeys().filter(presetInfo).map((k) => { const i = presetInfo(k); const b = ROOM_SCENES.find((x) => x.key === k); return { key: k, name: i.name, sub: b ? b.sub : (i.sub || 'Hue scene'), icon: b ? b.icon : 'sparkle' }; })
+    : ROOM_SCENES.concat(roomHueScenes(rid).map((sc) => ({ key: sc.entity_id, name: sc.attributes.name || nameOf(sc), sub: 'Hue scene', icon: 'sparkle' })));
+  cards.push({ key: 'off', name: 'All Off', sub: '', icon: 'power' });
+  body += `<div class="shead"><span>Scenes</span><span></span></div><div class="scgrid">${cards.map((c) => `<button class="sc${c.key === sceneKey && on.length ? ' sel' : ''}" data-key="${esc(c.key)}">${svg(c.icon)}<span>${esc(c.name)}</span>${c.sub ? `<small>${esc(c.sub)}</small>` : ''}</button>`).join('')}</div>`;
+  body += `<div class="nfill"></div><div class="ctl"><button data-ctl="arrange">${svg('move')}Arrange</button><button data-ctl="edit">${svg('gear')}Settings</button></div>`;
+  d.innerHTML = `<div class="eyebrow">${esc(room.eyebrow)}</div>
+    <div class="dtitle"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round">${ICONS[room.icon]}</svg><h2>${esc(room.id === 'home' ? 'Home' : room.eyebrow.split(' ')[0] === 'Primary' ? 'Primary' : room.name)}</h2>
+      ${ls.length ? `<button class="mpill${on.length ? ' on' : ''}"><i></i>${on.length ? esc(sceneName || 'On') : 'Off'}</button>` : ''}</div>
+    <div class="ddesc">${esc(describe(rid, ls))}</div>${body}`;
 }
 
 /* ---------- one light's controls ---------- */
@@ -1018,7 +1446,7 @@ function bindBar(bar, key, apply, fmt) {
 }
 
 /* ---------- Home Assistant connection ---------- */
-function setConn(cls, text) { const c = $('#conn'); c.className = 'conn ' + cls; c.querySelector('span').textContent = text; }
+function setConn(cls, text) { const c = $('#conn'); c.className = 'conn ' + cls; c.querySelector('span').textContent = text; const i = c.querySelector('i'); if (i) i.remove(); }
 
 function send(msg) {
   if (!ws || ws.readyState !== 1) return Promise.reject(new Error('not connected'));
@@ -1033,6 +1461,7 @@ function keep(s) {
   if (s.entity_id.startsWith('light.')) { states[s.entity_id] = s; return true; }
   if (s.entity_id.startsWith('scene.') && s.attributes.group_name) { scenes[s.entity_id] = s; return true; }
   if (/^(climate|media_player)\./.test(s.entity_id)) { devices[s.entity_id] = s; return true; }
+  if (s.entity_id.startsWith('weather.')) { weather[s.entity_id] = s; return true; }
   return false;
 }
 
@@ -1049,7 +1478,7 @@ function connect(url, token, onReady) {
     else if (m.type === 'auth_ok') {
       retry = 1000; setConn('ok', 'Connected');
       send({ type: 'get_states' }).then((list) => {
-        states = {}; scenes = {}; devices = {}; list.forEach(keep);
+        states = {}; scenes = {}; devices = {}; weather = {}; list.forEach(keep);
         render(); onReady && onReady(null); onReady = null;
       });
       send({ type: 'subscribe_events', event_type: 'state_changed' });
@@ -1210,11 +1639,12 @@ function demoInit() {
   mk('light.bedside', 'Bedside lamp', 0, 60); mk('light.floor_arm', 'Floor lamp arm', 1, 40, { color_mode: 'xy', rgb_color: [176, 88, 255] });
   mk('light.island_1', 'Island 1', 0, 80); mk('light.island_2', 'Island 2', 0, 80); mk('light.island_3', 'Island 3', 0, 80);
   mk('light.bedroom', "Aaron's Bedroom", 1, 60, { is_hue_group: true, entity_id: ['light.grashoppa', 'light.stemlite', 'light.bedside', 'light.floor_arm'] });
+  weather['weather.home'] = { entity_id: 'weather.home', state: 'clear-night', attributes: { temperature: 61 } };
   devices['climate.living_room_ac'] = { entity_id: 'climate.living_room_ac', state: 'cool', attributes: { friendly_name: 'Living room AC', hvac_modes: ['off', 'cool', 'dry', 'fan_only'], temperature: 70, current_temperature: 74, min_temp: 60, max_temp: 86, target_temp_step: 1, fan_modes: ['low', 'medium', 'high', 'auto'], fan_mode: 'auto' } };
   devices['media_player.living_room_tv'] = { entity_id: 'media_player.living_room_tv', state: 'on', attributes: { friendly_name: 'Living room TV', volume_level: 0.18, is_volume_muted: false, source: 'Apple TV', source_list: ['Apple TV', 'HDMI 2', 'Netflix', 'YouTube'] } };
   scenes['scene.bedroom_relax'] = { entity_id: 'scene.bedroom_relax', state: 'unknown', attributes: { name: 'Relax', group_name: "Aaron's Bedroom" } };
   scenes['scene.bedroom_sunset'] = { entity_id: 'scene.bedroom_sunset', state: 'unknown', attributes: { name: 'Savanna sunset', group_name: "Aaron's Bedroom" } };
-  cfg = { map: { 'climate.living_room_ac': [330, 572], 'media_player.living_room_tv': [266, 520], 'light.grashoppa': [406, 548], 'light.stemlite': [268, 436], 'light.bedside': [110, 75], 'light.island_1': [312, 351], 'light.island_2': [354, 351], 'light.island_3': [396, 351] },
+  cfg = { map: { 'climate.living_room_ac': [330, 572], 'media_player.living_room_tv': [266, 520], 'light.grashoppa': [406, 548], 'light.stemlite': [268, 436], 'light.bedside': [110, 75], 'light.floor_arm': [395, 80], 'light.island_1': [312, 351], 'light.island_2': [354, 351], 'light.island_3': [396, 351] },
     presets: ['b:0', 'b:1', 'scene.bedroom_relax', 'scene.bedroom_sunset'], panels: DEFAULT_PANELS, zones: { room: ['light.bedroom'], island: ['light.island_1', 'light.island_2', 'light.island_3'] } };
   setConn('ok', 'Demo');
 }
