@@ -92,7 +92,51 @@ header{display:flex;justify-content:space-between;align-items:flex-start}
 .bar.drag .knob{transition:none}
 
 /* scenes */
-.scenes{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:clamp(10px,1.4vw,16px)}
+.scenes{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(130px,1fr);gap:clamp(10px,1.4vw,16px);overflow-x:auto;scrollbar-width:none}
+.scenes::-webkit-scrollbar{display:none}
+.scene .sc-txt{display:flex;flex-direction:column;align-items:flex-start;line-height:1.15;min-width:0}
+.scene .sc-txt small{font-size:12px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+.scene .sc-txt span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+
+/* map / command center */
+#map{flex:1;min-height:0;display:none;grid-template-columns:minmax(0,1fr) clamp(260px,28vw,360px);gap:clamp(14px,2vw,24px)}
+body.mapview #map{display:grid}
+body.mapview #tiles{display:none!important}
+@media (orientation:portrait){#map{grid-template-columns:1fr;grid-template-rows:minmax(0,1.6fr) minmax(0,1fr)}}
+.mapbox{position:relative;min-height:0;border-radius:var(--radius);background:#0d0c0b;border:1px solid var(--line);overflow:hidden;display:grid;place-items:center;touch-action:none}
+.mapbox svg{width:100%;height:100%;display:block}
+.room-fill{fill:#1a1916}
+.room-fill.svc{fill:#141311}
+.room-fill.out{fill:url(#deck)}
+.room-wall{fill:none;stroke:#47433b;stroke-width:4;stroke-linejoin:round}
+.room-wall.out{stroke:#3a3731;stroke-width:2;stroke-dasharray:6 6}
+.fixture{fill:#24221e;stroke:#38352f;stroke-width:1.5}
+.rlabel{fill:#6d675d;font-size:11px;letter-spacing:.06em;text-transform:uppercase;text-anchor:middle;pointer-events:none}
+.mlight{cursor:pointer}
+.mlight .halo{transition:opacity .4s}
+.mlight .core{stroke:#11100e;stroke-width:2}
+.mlight .hit{fill:transparent}
+.mlight text{fill:#c9c2b6;font-size:12px;text-anchor:middle;pointer-events:none}
+.mlight.off text{fill:#7a746a}
+.mapbox.arranging .mlight .core{stroke:var(--accent);stroke-width:3}
+.side{min-height:0;display:flex;flex-direction:column;gap:12px;overflow-y:auto}
+.card{flex-shrink:0;border-radius:24px;background:var(--tile);border:1px solid var(--line);padding:16px 18px}
+.sum{font-size:15px;color:var(--muted)}
+.sum b{display:block;font-size:30px;font-weight:300;color:var(--text);margin-bottom:2px}
+.prow2{display:flex;align-items:center;gap:12px;padding:10px 0;border-top:1px solid var(--line)}
+.prow2:first-child{border-top:0;padding-top:0}
+.prow2 .pn{flex:1;min-width:0}
+.prow2 .pn div{font-size:18px}
+.prow2 .pn small{font-size:14px;color:var(--muted)}
+.prow2.on .pn small{color:#e9cfa6}
+.prow2 .power{width:52px;height:52px}
+.prow2.on .power{background:var(--accent);border-color:var(--accent);color:#1a1208}
+.prow2 .power svg{width:22px;height:22px}
+.tray{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.tray .chip{height:44px;padding:0 14px;border-radius:12px;border:1px dashed #5a4a33;background:none;color:var(--text);font-size:14px;touch-action:none}
+.tray-hint{font-size:13px;color:var(--muted);line-height:1.45;margin-top:8px}
+.dragdot{position:fixed;width:30px;height:30px;margin:-15px 0 0 -15px;border-radius:50%;background:var(--accent);box-shadow:0 0 24px var(--accent);pointer-events:none;z-index:20}
+.wide{width:100%;margin-top:10px}
 .scene{height:clamp(60px,9vh,80px);border-radius:24px;border:1px solid var(--line);background:var(--tile);
   font-size:18px;display:flex;align-items:center;justify-content:center;gap:12px;transition:background .2s,border-color .2s}
 .scene svg{width:22px;height:22px;color:var(--muted)}
@@ -159,11 +203,27 @@ header{display:flex;justify-content:space-between;align-items:flex-start}
     </div>
     <div class="hright">
       <div class="conn" id="conn"><i></i><span>Connecting…</span></div>
+      <button class="pill" id="viewBtn">Map</button>
       <button class="pill" id="editBtn">Edit</button>
     </div>
   </header>
 
   <main class="tiles" id="tiles"></main>
+
+  <section id="map">
+    <div class="mapbox" id="mapbox"></div>
+    <aside class="side">
+      <div class="card sum" id="mapSum"></div>
+      <div class="card" id="mapPanels"></div>
+      <div class="card" id="mapArrange">
+        <button class="btn ghost wide" id="arrangeBtn">Arrange lights on the map</button>
+        <div id="trayBox" hidden>
+          <div class="tray-hint">Drag a light onto its spot. Drag one already on the map to move it, or back here to take it off.</div>
+          <div class="tray" id="tray"></div>
+        </div>
+      </div>
+    </aside>
+  </section>
 
   <nav class="scenes" id="scenes"></nav>
 </div>
@@ -220,6 +280,9 @@ header{display:flex;justify-content:space-between;align-items:flex-start}
     <p>Each panel's lights turn on and off together, and every bulb also gets its own card. "In scenes" means Bright, Evening and Night change that panel; All off always turns everything off.</p>
     <div id="panelList"></div>
     <div class="actions" style="margin-top:14px"><button class="btn ghost" id="addPanelBtn">+ New panel</button></div>
+    <h2>Preset buttons</h2>
+    <p>Pick the buttons along the bottom of the screen, in the order you tap them. Your Hue scenes are listed with the Hue room they belong to. "All off" is always last.</p>
+    <div class="chips" id="presetList" style="justify-content:flex-start;max-width:860px"></div>
     <h2>Lights</h2>
     <p>Pick a Hue room/zone or individual bulbs for each panel. Skipped lights can be added back any time.</p>
     <div id="lightList"></div>
@@ -256,13 +319,14 @@ const ICONS = {
   power: '<path d="M12 3v8"/><path d="M6.3 7.2a8 8 0 1 0 11.4 0"/>',
   sun:   '<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/>',
   lamp:  '<path d="M8 3h8l3 8H5z"/><path d="M12 11v8"/><path d="M8 21h8"/>',
-  moon:  '<path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z"/>'
+  moon:  '<path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z"/>',
+  sparkle: '<path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z"/><path d="M19 16l.7 1.8 1.8.7-1.8.7L19 21l-.7-1.8-1.8-.7 1.8-.7z"/>'
 };
 const svg = (n) => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">${ICONS[n]}</svg>`;
 
 const store = {
   get(k, d) { try { const v = localStorage.getItem('panel.' + k); return v ? JSON.parse(v) : d; } catch (e) { return d; } },
-  set(k, v) { try { localStorage.setItem('panel.' + k, JSON.stringify(v)); } catch (e) {} }
+  set(k, v) { if (DEMO) return; try { localStorage.setItem('panel.' + k, JSON.stringify(v)); } catch (e) {} }
 };
 
 const DEMO = new URLSearchParams(location.search).has('demo');
@@ -353,8 +417,6 @@ function buildTiles() {
 
 function buildUI() {
   buildTiles();
-  $('#scenes').innerHTML = SCENES.map((s, i) =>
-    `<button class="scene" data-scene="${i}">${svg(s.icon)}<span>${s.name}</span></button>`).join('');
 
   // everything inside the panels, handled in one place (panels can be rebuilt)
   $('#tiles').addEventListener('click', (e) => {
@@ -366,11 +428,18 @@ function buildUI() {
     else if ((b = t('.hs-btn'))) openSceneSheet(b.dataset.zone);
     else if ((b = t('.thead .toggle, .thead .power'))) toggleZone(b.dataset.zone);
   });
-  $('#scenes').querySelectorAll('.scene').forEach((b) => b.addEventListener('click', () => {
+  $('#scenes').addEventListener('click', (e) => {
+    const b = e.target.closest('.scene'); if (!b) return;
     b.classList.add('flash'); setTimeout(() => b.classList.remove('flash'), 350);
-    runScene(SCENES[+b.dataset.scene]);
-  }));
+    const k = b.dataset.key;
+    if (k === 'off') runScene(SCENES[3]);
+    else if (k.startsWith('b:')) runScene(SCENES[+k.slice(2)]);
+    else if (DEMO) return;
+    else send({ type: 'call_service', domain: 'scene', service: 'turn_on', service_data: { transition: FADE_SECONDS }, target: { entity_id: k } });
+  });
   $('#editBtn').addEventListener('click', openEditor);
+  $('#viewBtn').addEventListener('click', () => setView(view === 'map' ? 'panels' : 'map'));
+  initMap();
 
   // sheets
   document.querySelectorAll('.backdrop').forEach((bd) => bd.addEventListener('click', (e) => {
@@ -433,7 +502,28 @@ function render() {
     t.querySelector('.hs-btn').hidden = !zoneHueScenes(z.id).length;
   });
   layoutTiles(ps.filter((z) => $('#t-' + z.id).style.display !== 'none').length);
+  renderPresets();
+  renderMap();
   renderLightSheet();
+}
+
+/* ---------- preset buttons along the bottom ---------- */
+const DEFAULT_PRESETS = ['b:0', 'b:1', 'b:2'];
+const presetKeys = () => ((cfg && cfg.presets) || DEFAULT_PRESETS);
+function presetInfo(k) {
+  if (k.startsWith('b:')) { const sc = SCENES[+k.slice(2)]; return sc && { name: sc.name, icon: sc.icon }; }
+  const sc = scenes[k]; return sc && { name: sc.attributes.name || nameOf(sc), sub: sc.attributes.group_name, icon: 'sparkle' };
+}
+let presetsKey = '';
+function renderPresets() {
+  const keys = presetKeys().filter(presetInfo).concat(['off']);
+  const sig = keys.join('|') + '#' + keys.map((k) => (presetInfo(k) || {}).name).join('|');
+  if (sig === presetsKey) return;
+  presetsKey = sig;
+  $('#scenes').innerHTML = keys.map((k) => {
+    const i = k === 'off' ? { name: 'All off', icon: 'power' } : presetInfo(k);
+    return `<button class="scene" data-key="${esc(k)}">${svg(i.icon)}<span class="sc-txt"><span>${esc(i.name)}</span>${i.sub ? `<small>${esc(i.sub)}</small>` : ''}</span></button>`;
+  }).join('');
 }
 
 // 1 panel fills the screen; 2 use the original layout; 3+ share a grid
@@ -446,6 +536,125 @@ function layoutTiles(n) {
   el.style.gridTemplateRows = `repeat(${Math.ceil(n / cols)},minmax(0,1fr))`;
 }
 addEventListener('resize', () => render());
+
+/* ---------- apartment map ----------
+   Floor plan of 17D, traced off the listing plan in inches (same geometry as pranav.golf/17d).
+   Origin = north-west corner; x → east, y → south. */
+const PLAN = [
+  { name: 'Bedroom', x: 85, y: 50, w: 123, d: 205 },
+  { name: 'Primary bedroom', x: 279, y: 50, w: 140, d: 205 },
+  { name: 'Living / dining', x: 252, y: 261, poly: [[0,0],[167,0],[167,315],[6,315],[6,108],[0,108]], label: [339, 470] },
+  { name: 'Foyer', x: 181, y: 261, w: 71, d: 120, label: [216, 330] },
+  { name: 'Terrace', kind: 'out', x: 259, y: 49, poly: [[160,0],[296,0],[296,614],[0,614],[0,527],[160,527]], label: [487, 330] },
+  { name: 'Bath', kind: 'svc', x: 7, y: 7, w: 71, d: 113 },
+  { name: 'Bath', kind: 'svc', x: 210, y: 50, w: 62, d: 103 },
+  { name: '', kind: 'svc', x: 210, y: 165, w: 62, d: 89 },
+  { name: '', kind: 'svc', x: 103, y: 276, w: 70, d: 28 },
+  { name: 'Entry', kind: 'svc', x: 85, y: 308, w: 96, d: 73 },
+  { name: '', kind: 'svc', x: 85, y: 382, w: 58, d: 51 },
+  { name: '', kind: 'svc', x: 198, y: 382, w: 59, d: 51 }
+].map((r) => {
+  const pts = (r.poly || [[0,0],[r.w,0],[r.w,r.d],[0,r.d]]).map(([a, b]) => [a + r.x, b + r.y]);
+  const xs = pts.map((q) => q[0]), ys = pts.map((q) => q[1]);
+  return Object.assign(r, { pts, label: r.label || [(Math.min(...xs) + Math.max(...xs)) / 2, (Math.min(...ys) + Math.max(...ys)) / 2] });
+});
+const FIXTURES = [{ x: 269, y: 261, w: 150, d: 24 }, { x: 289, y: 333, w: 130, d: 36 }];   // kitchen counter, island
+const VB = { x: -12, y: -12, w: 579, h: 687 };
+
+let view = store.get('view', 'panels'), arranging = false, mapDrag = null;
+const placeable = () => Object.values(states).filter((s) => !isGroup(s));
+const posOf = (id) => cfg && cfg.map && cfg.map[id];
+function zoneOfLight(id) { const p = panels().find((p) => zoneBulbs(p.id).includes(id)); return p ? p.id : null; }
+
+function setView(v) {
+  view = v; try { localStorage.setItem('panel.view', JSON.stringify(v)); } catch (e) {}
+  document.body.classList.toggle('mapview', v === 'map');
+  $('#viewBtn').textContent = v === 'map' ? 'Panels' : 'Map';
+  if (v !== 'map') setArranging(false);
+  render();
+}
+function initMap() {
+  const poly = (pts) => pts.map((q) => q.join(',')).join(' ');
+  $('#mapbox').innerHTML = `<svg id="mapsvg" viewBox="${VB.x} ${VB.y} ${VB.w} ${VB.h}" preserveAspectRatio="xMidYMid meet">
+    <defs>
+      <pattern id="deck" width="14" height="14" patternUnits="userSpaceOnUse"><rect width="14" height="14" fill="#12110f"/><path d="M0 14L14 0" stroke="#1d1b18" stroke-width="2"/></pattern>
+      <filter id="soft" x="-1" y="-1" width="3" height="3"><feGaussianBlur stdDeviation="14"/></filter>
+    </defs>
+    <g>${PLAN.map((r) => `<polygon class="room-fill ${r.kind || ''}" points="${poly(r.pts)}"/>`).join('')}</g>
+    <g>${FIXTURES.map((f) => `<rect class="fixture" x="${f.x}" y="${f.y}" width="${f.w}" height="${f.d}" rx="3"/>`).join('')}</g>
+    <g id="glows"></g>
+    <g>${PLAN.map((r) => `<polygon class="room-wall ${r.kind === 'out' ? 'out' : ''}" points="${poly(r.pts)}"/>`).join('')}</g>
+    <g>${PLAN.filter((r) => r.name).map((r) => `<text class="rlabel" x="${r.label[0]}" y="${r.label[1]}">${esc(r.name)}</text>`).join('')}</g>
+    <g id="mlights"></g>
+  </svg>`;
+  $('#mapPanels').addEventListener('click', (e) => { const b = e.target.closest('[data-zone]'); if (b) toggleZone(b.dataset.zone); });
+  $('#arrangeBtn').addEventListener('click', () => setArranging(!arranging));
+  // tap a light: open its controls (or, while arranging, pick it up)
+  $('#mapbox').addEventListener('pointerdown', (e) => {
+    const g = e.target.closest('.mlight'); if (!g) return;
+    if (arranging) return startDrag(e, g.dataset.id);
+    const id = g.dataset.id; openLightSheet(id, zoneOfLight(id));
+  });
+  $('#tray').addEventListener('pointerdown', (e) => { const c = e.target.closest('.chip'); if (c && arranging) startDrag(e, c.dataset.id); });
+  addEventListener('pointermove', (e) => { if (!mapDrag) return; mapDrag.ghost.style.left = e.clientX + 'px'; mapDrag.ghost.style.top = e.clientY + 'px'; });
+  addEventListener('pointerup', endDrag); addEventListener('pointercancel', endDrag);
+  setView(view);
+}
+function setArranging(on) {
+  arranging = on && !!cfg;
+  $('#mapbox').classList.toggle('arranging', arranging);
+  $('#trayBox').hidden = !arranging;
+  $('#arrangeBtn').textContent = arranging ? 'Done arranging' : 'Arrange lights on the map';
+  renderMap();
+}
+function startDrag(e, id) {
+  e.preventDefault();
+  const ghost = document.createElement('div'); ghost.className = 'dragdot';
+  ghost.style.left = e.clientX + 'px'; ghost.style.top = e.clientY + 'px';
+  document.body.appendChild(ghost);
+  mapDrag = { id, ghost }; dragging.map = true;
+}
+function endDrag(e) {
+  if (!mapDrag) return;
+  const { id, ghost } = mapDrag; ghost.remove(); mapDrag = null; dragging.map = false;
+  const svgEl = $('#mapsvg'), r = $('#mapbox').getBoundingClientRect();
+  cfg.map = cfg.map || {};
+  if (e.type === 'pointerup' && e.clientX >= r.left && e.clientX <= r.right && e.clientY >= r.top && e.clientY <= r.bottom) {
+    const pt = svgEl.createSVGPoint(); pt.x = e.clientX; pt.y = e.clientY;
+    const q = pt.matrixTransform(svgEl.getScreenCTM().inverse());
+    cfg.map[id] = [Math.round(Math.min(VB.x + VB.w, Math.max(VB.x, q.x))), Math.round(Math.min(VB.y + VB.h, Math.max(VB.y, q.y)))];
+  } else if (e.type === 'pointerup' && e.target.closest && e.target.closest('#mapArrange')) {
+    delete cfg.map[id];
+  }
+  store.set('cfg', cfg); render();
+}
+function renderMap() {
+  if (view !== 'map' || !$('#mapsvg') || dragging.map) return;
+  const lights = placeable();
+  // glows + markers for placed lights
+  let glows = '', marks = '';
+  lights.forEach((s) => {
+    const p = posOf(s.entity_id); if (!p) return;
+    const on = s.state === 'on', c = colorOf(s), pct = pctOf(s);
+    if (on) glows += `<circle cx="${p[0]}" cy="${p[1]}" r="${24 + pct * 0.5}" fill="rgb(${c})" opacity="${(0.35 + pct / 160).toFixed(2)}" filter="url(#soft)"/>`;
+    marks += `<g class="mlight ${on ? 'on' : 'off'}" data-id="${esc(s.entity_id)}" transform="translate(${p[0]},${p[1]})">
+      <circle class="hit" r="28"/>
+      <circle class="core" r="10" fill="${on ? `rgb(${c})` : '#3a3731'}"/>
+      <text y="28">${esc(nameOf(s))}</text></g>`;
+  });
+  $('#glows').innerHTML = glows; $('#mlights').innerHTML = marks;
+  // summary + panel switches
+  const onCount = lights.filter((s) => s.state === 'on').length;
+  const unplaced = lights.filter((s) => !posOf(s.entity_id));
+  $('#mapSum').innerHTML = `<b>${onCount} of ${lights.length}</b>lights on${unplaced.length && !arranging ? ` · ${unplaced.length} not on the map yet` : ''}`;
+  $('#mapPanels').innerHTML = panels().map((p) => {
+    const i = zoneInfo(p.id);
+    return `<div class="prow2${i.on ? ' on' : ''}"><div class="pn"><div>${esc(p.name)}</div><small>${i.on ? 'On · ' + i.bri + '%' : 'Off'}</small></div>
+      <button class="power" data-zone="${esc(p.id)}" aria-label="Turn ${esc(p.name)} on or off">${svg('power')}</button></div>`;
+  }).join('');
+  $('#tray').innerHTML = unplaced.map((s) => `<button class="chip" data-id="${esc(s.entity_id)}">${esc(nameOf(s))}</button>`).join('')
+    || '<span class="tray-hint">Every light is on the map.</span>';
+}
 
 /* ---------- one light's controls ---------- */
 let sheetId = null, sheetZone = null;
@@ -682,8 +891,25 @@ function showLightPicker() {
     else if (!hasGroups && draftPanels.length) z = /island/.test(nameOf(s).toLowerCase()) && draftPanels.some((p) => p.id === 'island') ? 'island' : draftPanels[0].id;   // first-time guess
     draftZones[s.entity_id] = z;
   });
-  renderPanelList(); renderLightList();
+  draftPresets = presetKeys().slice();
+  renderPanelList(); renderLightList(); renderPresetList();
 }
+let draftPresets = [];
+function renderPresetList() {
+  const all = SCENES.slice(0, 3).map((sc, i) => ({ k: 'b:' + i, name: sc.name, sub: 'Built in' }))
+    .concat(Object.values(scenes).sort((a, b) => (a.attributes.group_name || '').localeCompare(b.attributes.group_name || '') || (a.attributes.name || '').localeCompare(b.attributes.name || ''))
+      .map((sc) => ({ k: sc.entity_id, name: sc.attributes.name || nameOf(sc), sub: sc.attributes.group_name })));
+  $('#presetList').innerHTML = all.map((o) => {
+    const n = draftPresets.indexOf(o.k);
+    return `<button data-k="${esc(o.k)}" class="${n >= 0 ? 'sel' : ''}">${n >= 0 ? (n + 1) + '. ' : ''}${esc(o.name)}${o.sub ? ` <span style="opacity:.6">· ${esc(o.sub)}</span>` : ''}</button>`;
+  }).join('') + (Object.keys(scenes).length ? '' : '<p style="color:var(--muted);margin:8px 0 0">No Hue scenes found in Home Assistant yet.</p>');
+}
+$('#presetList').addEventListener('click', (e) => {
+  const b = e.target.closest('button'); if (!b) return;
+  const k = b.dataset.k, i = draftPresets.indexOf(k);
+  if (i >= 0) draftPresets.splice(i, 1); else draftPresets.push(k);
+  renderPresetList();
+});
 function renderPanelList() {
   $('#panelList').innerHTML = draftPanels.map((p, i) => `
     <div class="prow" data-i="${i}">
@@ -739,7 +965,7 @@ $('#saveBtn').addEventListener('click', () => {
   const zones = {}; ps.forEach((p) => (zones[p.id] = []));
   Object.entries(draftZones).forEach(([id, z]) => { if (zones[z]) zones[z].push(id); });
   if (!ps.some((p) => zones[p.id].length)) { $('#err2').textContent = 'Pick at least one light.'; return; }
-  cfg.panels = ps; cfg.zones = zones; store.set('cfg', cfg);
+  cfg.panels = ps; cfg.zones = zones; cfg.presets = draftPresets.slice(); store.set('cfg', cfg);
   $('#setup').classList.remove('show');
   render();
 });
@@ -756,7 +982,8 @@ function demoInit() {
   mk('light.bedroom', "Aaron's Bedroom", 1, 60, { is_hue_group: true, entity_id: ['light.grashoppa', 'light.stemlite', 'light.bedside', 'light.floor_arm'] });
   scenes['scene.bedroom_relax'] = { entity_id: 'scene.bedroom_relax', state: 'unknown', attributes: { name: 'Relax', group_name: "Aaron's Bedroom" } };
   scenes['scene.bedroom_sunset'] = { entity_id: 'scene.bedroom_sunset', state: 'unknown', attributes: { name: 'Savanna sunset', group_name: "Aaron's Bedroom" } };
-  cfg = { panels: DEFAULT_PANELS, zones: { room: ['light.bedroom'], island: ['light.island_1', 'light.island_2', 'light.island_3'] } };
+  cfg = { map: { 'light.grashoppa': [300, 520], 'light.stemlite': [395, 430], 'light.bedside': [110, 75], 'light.island_1': [310, 351], 'light.island_2': [354, 351], 'light.island_3': [398, 351] },
+    presets: ['b:0', 'b:1', 'scene.bedroom_relax', 'scene.bedroom_sunset'], panels: DEFAULT_PANELS, zones: { room: ['light.bedroom'], island: ['light.island_1', 'light.island_2', 'light.island_3'] } };
   setConn('ok', 'Demo');
 }
 function demoApply(service, ids, data) {
@@ -785,7 +1012,7 @@ function checkForUpdate() {
     .then((r) => (r.ok ? r.text() : null))
     .then((code) => {
       if (!code || code === current) return;
-      if ($('#setup').classList.contains('show') || document.querySelector('.backdrop.show') || Object.values(dragging).some(Boolean)) return;
+      if ($('#setup').classList.contains('show') || document.querySelector('.backdrop.show') || arranging || Object.values(dragging).some(Boolean)) return;
       location.reload();
     }).catch(() => {});
 }
