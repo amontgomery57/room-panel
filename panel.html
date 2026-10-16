@@ -107,7 +107,7 @@ body.mapview #app{display:grid;grid-template-columns:clamp(170px,15vw,200px) min
   grid-template-rows:auto minmax(0,1fr);grid-template-areas:"head head head" "nav map detail";column-gap:clamp(14px,1.6vw,22px);row-gap:clamp(10px,1.6vh,18px)}
 body.mapview header{grid-area:head}
 body.mapview #nav{grid-area:nav;display:flex}
-body.mapview #map{grid-area:map;display:block;min-height:0;position:relative}
+body.mapview #map{grid-area:map;display:block;min-height:0;position:relative;overflow:hidden}
 body.mapview #detail{grid-area:detail;display:flex}
 body.mapview #tiles,body.mapview #scenes,body.mapview #viewBtn{display:none!important}
 @media (orientation:portrait){
@@ -142,7 +142,8 @@ body.mapview #tiles,body.mapview #scenes,body.mapview #viewBtn{display:none!impo
 
 /* the plan */
 .mapbox{position:absolute;inset:0;touch-action:none}
-.mapbox svg{position:absolute;inset:0;width:100%;height:100%;display:block;overflow:visible}
+.mapbox svg{position:absolute;inset:0;width:100%;height:100%;display:block;overflow:hidden}
+.cut,.win,.door,.wall-o,.wall-i,.furn,.rug,.fixture{pointer-events:none}
 .floor{fill:url(#wood)}
 .floor.svc{fill:url(#tile)}
 .floor.out{fill:url(#deck)}
@@ -160,9 +161,9 @@ body.mapview #tiles,body.mapview #scenes,body.mapview #viewBtn{display:none!impo
 .furn.soft{fill:#2a2723}
 .furn.line{fill:none}
 .rug{fill:#201e1b;stroke:#3a362f;stroke-width:1}
-.rlabel{fill:#a3998a;font-size:12.5px;letter-spacing:.2em;text-transform:uppercase;text-anchor:middle;pointer-events:none;font-weight:500;transition:fill .3s}
+.rlabel{fill:#a3998a;font-size:var(--lf,12.5px);letter-spacing:.2em;text-transform:uppercase;text-anchor:middle;pointer-events:none;font-weight:500;transition:fill .3s}
 .rlabel.sel{fill:var(--champ)}
-.rlabel.sm{font-size:10px;letter-spacing:.16em;fill:#7b7366}
+.rlabel.sm{font-size:var(--lfs,10px);letter-spacing:.16em;fill:#7b7366}
 .flabel{display:none}
 .mlight{cursor:pointer}
 .pool{pointer-events:none;transition:opacity .5s ease,r .5s ease}
@@ -805,8 +806,7 @@ const PLAN = ROOMS17.map((r) => {
 const rect = (x, y, w, d) => [[x, y], [x + w, y], [x + w, y + d], [x, y + d]];
 const ROOMSEL = [
   { id: 'home', name: 'Home', sub: 'Apartment', icon: 'home', eyebrow: 'Apartment' },
-  { id: 'living', name: 'Living', icon: 'sofa', eyebrow: 'Living room', areas: [rect(258, 369, 161, 207)], label: [300, 432], always: true },
-  { id: 'kitchen', name: 'Kitchen', icon: 'fork', eyebrow: 'Kitchen', areas: [rect(252, 261, 167, 108)], label: [300, 312], always: true },
+  { id: 'living', name: 'Living', icon: 'sofa', eyebrow: 'Living room & kitchen', areas: [[[252, 261], [419, 261], [419, 576], [258, 576], [258, 369], [252, 369]]], label: [300, 432], label2: ['Kitchen', [300, 312]], always: true },
   { id: 'bedroom', name: 'Bedroom', icon: 'bed', eyebrow: 'Bedroom', areas: [rect(85, 50, 123, 205)], label: [146, 152], always: true },
   { id: 'primary', name: 'Primary', icon: 'bed2', eyebrow: 'Primary bedroom', areas: [rect(279, 50, 140, 205)], label: [349, 152], always: true },
   { id: 'bath', name: 'Bath', icon: 'bath', eyebrow: 'Bathrooms', areas: [rect(7, 7, 71, 113), rect(210, 50, 62, 103)] },
@@ -875,7 +875,39 @@ function setView(v) {
   if (v !== 'map') setArranging(false);
   render();
 }
-function selectRoom(id) { selRoom = id; store.set('room', id); closeSheets(); render(); }
+function selectRoom(id) { selRoom = id; store.set('room', id); closeSheets(); zoomTo(id); render(); }
+
+/* zoom the plan to one room (Home = the whole apartment); everything outside it is hidden */
+const HOME_VB = [-8, -8, VB.w + 4, VB.h + 6];
+let curVB = null, zoomAnim = 0, zoomK = 1;
+function roomVB(rid) {
+  const r = roomById(rid);
+  if (rid === 'home' || arranging || !r.areas) return HOME_VB;
+  const pts = r.areas.flat(), xs = pts.map((q) => q[0]), ys = pts.map((q) => q[1]), pad = 26;
+  const x0 = Math.min(...xs) - pad, y0 = Math.min(...ys) - pad, x1 = Math.max(...xs) + pad, y1 = Math.max(...ys) + pad;
+  return [x0, y0, x1 - x0, y1 - y0];
+}
+function zoomTo(rid, instant) {
+  const svgEl = $('#mapsvg'); if (!svgEl) return;
+  const r = roomById(rid), showAll = rid === 'home' || arranging || !r.areas;
+  // mask: white = visible. Rooms are drawn with a wide stroke so their walls stay in view.
+  $('#roommaskg').innerHTML = showAll ? '<rect x="-100" y="-100" width="800" height="900" fill="#fff"/>'
+    : r.areas.map((a) => `<polygon points="${a.map((q) => q.join(',')).join(' ')}" fill="#fff" stroke="#fff" stroke-width="9" stroke-linejoin="miter"/>`).join('');
+  const to = roomVB(rid), from = curVB || to;
+  zoomK = HOME_VB[3] / Math.max(to[3], to[2] * HOME_VB[3] / HOME_VB[2]);
+  $('#mapsvg').style.setProperty('--lf', (12.5 / Math.pow(zoomK, 0.85)).toFixed(2) + 'px');
+  $('#mapsvg').style.setProperty('--lfs', (10 / Math.pow(zoomK, 0.85)).toFixed(2) + 'px');
+  cancelAnimationFrame(zoomAnim);
+  if (instant || !curVB) { curVB = to; svgEl.setAttribute('viewBox', to.join(' ')); return; }
+  const t0 = performance.now(), dur = 520, ease = (t) => 1 - Math.pow(1 - t, 3);
+  const step = (now) => {
+    const t = Math.min(1, (now - t0) / dur), e = ease(t);
+    curVB = from.map((v, i) => v + (to[i] - v) * e);
+    svgEl.setAttribute('viewBox', curVB.join(' '));
+    if (t < 1) zoomAnim = requestAnimationFrame(step);
+  };
+  zoomAnim = requestAnimationFrame(step);
+}
 
 let TR = '';
 function buildMapSvg() {
@@ -928,6 +960,8 @@ function buildMapSvg() {
       <mask id="poolm" maskContentUnits="objectBoundingBox" maskUnits="objectBoundingBox" x="0" y="0" width="1" height="1"><circle cx=".5" cy=".5" r=".5" fill="url(#poolg)"/></mask>
       <radialGradient id="halo"><stop offset="0" stop-color="#fff3d9" stop-opacity=".95"/><stop offset=".25" stop-color="#ffd99a" stop-opacity=".45"/><stop offset="1" stop-color="#ffd99a" stop-opacity="0"/></radialGradient>
     </defs>
+    <mask id="roommask" maskUnits="userSpaceOnUse" x="-100" y="-100" width="800" height="900"><g id="roommaskg"></g></mask>
+    <g id="planbody" mask="url(#roommask)">
     <g>${PLAN.map((r) => `<polygon class="floor ${r.kind}" points="${poly(r.pts)}"/>`).join('')}</g>
     <g id="roomhi">${ROOMSEL.filter((r) => r.areas).map((r) => r.areas.map((a) => `<polygon class="roomhi" data-room="${r.id}" points="${poly(a)}"/>`).join('')).join('')}</g>
     <g>${FIXTURES.map((f) => `<rect class="fixture" x="${f.x}" y="${f.y}" width="${f.w}" height="${f.d}" rx="2"/>`).join('')}</g>
@@ -937,10 +971,12 @@ function buildMapSvg() {
     <g>${PLAN.map((r) => `<polygon class="wall-o ${r.kind}" points="${poly(r.pts)}"/>`).join('')}</g>
     <g>${PLAN.filter((r) => r.kind !== 'out').map((r) => `<polygon class="wall-i" points="${poly(r.pts)}"/>`).join('')}</g>
     <g>${cuts}</g><g>${wins}${doors}</g>
-    <g id="rlabels">${ROOMSEL.filter((r) => r.label).map((r) => `<text class="rlabel" data-room="${r.id}" x="${r.label[0]}" y="${r.label[1] + 4}">${esc(r.id === 'primary' ? 'Primary' : r.name)}</text>`).join('')}
+    <g id="rlabels">${ROOMSEL.filter((r) => r.label).map((r) => `<text class="rlabel" data-room="${r.id}" x="${r.label[0]}" y="${r.label[1] + 4}">${esc(r.id === 'primary' ? 'Primary' : r.name)}</text>`
+      + (r.label2 ? `<text class="rlabel" data-room="${r.id}" x="${r.label2[1][0]}" y="${r.label2[1][1] + 4}">${esc(r.label2[0])}</text>` : '')).join('')}
       ${label('rlabel sm', 'Bath', 42, 64)}${label('rlabel sm', 'Bath', 241, 102)}</g>
     <g id="mlights"></g>
-  </g></svg>`;
+  </g></g></svg>`;
+  curVB = null; zoomTo(selRoom, true);
 }
 
 function initMap() {
@@ -960,7 +996,9 @@ function initMap() {
       if (arranging) return;
       const svgEl = $('#mapsvg'), pt = svgEl.createSVGPoint(); pt.x = e.clientX; pt.y = e.clientY;
       const q = pt.matrixTransform($('#plan').getScreenCTM().inverse());
-      const rid = roomAt([q.x, q.y]); if (rid && rid !== selRoom) selectRoom(rid);
+      const rid = roomAt([q.x, q.y]);
+      if (selRoom !== 'home' && rid !== selRoom) selectRoom('home');
+      else if (rid && rid !== selRoom) selectRoom(rid);
       return;
     }
     if (arranging) return startDrag(e, g.dataset.id);
@@ -1055,6 +1093,7 @@ function runRoomScene(key) {
 
 function setArranging(on) {
   arranging = on && !!cfg;
+  zoomTo(selRoom);
   $('#mapbox').classList.toggle('arranging', arranging);
   closeSheets(); render();
 }
@@ -1086,7 +1125,8 @@ function renderMap() {
   autoPlace();
   const selId = sheetId || devId;
   const glows = $('#glows'), marks = $('#mlights');
-  const keep = new Set();
+  const keep = new Set(), ms = 1 / Math.pow(zoomK, 0.72);
+  TR = `scale(${ms.toFixed(3)})`;
   lights.forEach((s) => {
     const id = s.entity_id, p = posOf(id); if (!p) return;
     keep.add(id);
@@ -1113,7 +1153,7 @@ function renderMap() {
       marks.appendChild(g);
     }
     g.setAttribute('class', `mlight ${on ? 'on' : 'off'}${id === selId ? ' sel' : ''}`);
-    g.setAttribute('transform', `translate(${p[0]},${p[1]})`);
+    g.setAttribute('transform', `translate(${p[0]},${p[1]}) scale(${ms.toFixed(3)})`);
     g.querySelector('.core').setAttribute('fill', on ? `rgb(${mixWhite(c, 0.45)})` : '');
     g.querySelector('.halo').setAttribute('opacity', on ? (0.45 + pct / 180).toFixed(2) : 0);
     g.querySelector('text').textContent = nameOf(s);
@@ -1267,7 +1307,7 @@ function devMarker(s, p, sel) {
     <rect class="box" x="-15" y="-15" width="30" height="30" rx="8"/>
     <g transform="translate(-9,-9) scale(.75)"><g class="ico">${DEV_ICONS[dom]}</g></g>
     <circle class="hit" r="30" fill="transparent"/>
-    <text class="val" y="30">${esc(val || nameOf(s))}</text></g></g>`;
+    <text class="val" y="30">${esc(val)}</text></g></g>`;
 }
 function openDevSheet(id, anchor) { closeSheets(); devId = id; showSheet($('#devSheet'), anchor); renderDevSheet(); renderMap(); }
 function devCall(domain, service, data) {
