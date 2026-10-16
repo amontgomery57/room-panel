@@ -117,6 +117,8 @@ body.mapview #tiles{display:none!important}
 .mlight .core{stroke:#11100e;stroke-width:2}
 .mlight .hit{fill:transparent}
 .mlight text{fill:#c9c2b6;font-size:12px;text-anchor:middle;pointer-events:none}
+.mlight text{display:none}
+.mapbox.arranging .mlight text,.mlight.sel text{display:block}
 .mlight.off text{fill:#7a746a}
 .mapbox.arranging .mlight .core{stroke:var(--accent);stroke-width:3}
 .side{min-height:0;display:flex;flex-direction:column;gap:12px;overflow-y:auto}
@@ -145,6 +147,37 @@ body.mapview #tiles{display:none!important}
 /* bottom sheets: one light's controls, Hue scenes */
 .backdrop{position:fixed;inset:0;background:rgba(0,0,0,.55);display:none;align-items:flex-end;justify-content:center;z-index:5}
 .backdrop.show{display:flex}
+/* on the map, controls open as a card next to the thing you tapped */
+.backdrop.pop{background:transparent;display:none}
+.backdrop.pop.show{display:block}
+.backdrop.pop .sheet{position:fixed;width:min(400px,calc(100vw - 32px));max-height:calc(100vh - 32px);border-radius:26px;border:1px solid #3a372f;
+  padding:20px 22px 22px;gap:14px;box-shadow:0 24px 60px rgba(0,0,0,.6)}
+.backdrop.pop .sh-name{font-size:23px}
+.backdrop.pop .power{width:56px;height:56px}
+.backdrop.pop .close{width:46px;height:46px}
+.backdrop.pop .bar{height:60px}
+.backdrop.pop .swatches{gap:8px}
+/* devices (AC, TV) */
+.dev-big{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.dev-temp{font-size:56px;font-weight:300;letter-spacing:-.03em;line-height:1;font-variant-numeric:tabular-nums}
+.dev-temp small{font-size:20px;color:var(--muted);margin-left:2px}
+.stepper{display:flex;gap:10px}
+.stepper button{width:64px;height:64px;border-radius:20px;border:1px solid var(--line);background:rgba(255,255,255,.04);font-size:30px;line-height:1}
+.stepper button:active{border-color:var(--accent)}
+.dev-sub{font-size:15px;color:var(--muted)}
+.opts{display:flex;flex-wrap:wrap;gap:8px}
+.opts button{height:46px;padding:0 16px;border-radius:14px;border:1px solid var(--line);background:rgba(255,255,255,.04);color:var(--muted);font-size:15px;text-transform:capitalize}
+.opts button.sel{background:var(--text);color:var(--bg);border-color:var(--text)}
+.mdev .box{fill:#24221e;stroke:#5a5348;stroke-width:2}
+.mdev.on .box{fill:#2d2a24;stroke:#8fc7ff}
+.mdev.on.heat .box{stroke:#ff9c6b}
+.mdev .ico{fill:none;stroke:#bdb6aa;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.mdev.on .ico{stroke:#e8f3ff}
+.mdev .val{fill:#f3efe8;font-size:12px;text-anchor:middle;font-weight:500}
+.mlight.sel .core,.mdev.sel .box{stroke:var(--accent);stroke-width:3}
+.furn{fill:none;stroke:#2f2c27;stroke-width:1.5}
+.furn.solid{fill:#1f1d1a}
+.flabel{fill:#4f4a42;font-size:10px;text-anchor:middle;pointer-events:none;letter-spacing:.05em}
 .sheet{width:min(720px,100%);max-height:92%;overflow:auto;background:#1b1a17;border:1px solid var(--line);border-bottom:0;
   border-radius:32px 32px 0 0;padding:26px clamp(20px,3vw,32px) 32px;display:flex;flex-direction:column;gap:16px}
 .sh-head{display:flex;align-items:center;gap:14px}
@@ -216,9 +249,9 @@ body.mapview #tiles{display:none!important}
       <div class="card sum" id="mapSum"></div>
       <div class="card" id="mapPanels"></div>
       <div class="card" id="mapArrange">
-        <button class="btn ghost wide" id="arrangeBtn">Arrange lights on the map</button>
+        <button class="btn ghost wide" id="arrangeBtn">Arrange the map</button>
         <div id="trayBox" hidden>
-          <div class="tray-hint">Drag a light onto its spot. Drag one already on the map to move it, or back here to take it off.</div>
+          <div class="tray-hint">Drag a light, the AC or the TV onto its spot. Drag one already on the map to move it, or back here to take it off.</div>
           <div class="tray" id="tray"></div>
         </div>
       </div>
@@ -242,6 +275,11 @@ body.mapview #tiles{display:none!important}
     <div class="swatches" id="lsSw"></div>
     <div class="sh-foot"><button class="link" id="lsRemove" hidden></button></div>
   </div>
+</div>
+
+<!-- AC / TV controls -->
+<div class="backdrop" id="devSheet">
+  <div class="sheet" id="ds"></div>
 </div>
 
 <!-- add a light to a panel -->
@@ -337,6 +375,7 @@ const panels = () => (cfg && cfg.panels) || DEFAULT_PANELS;
 const panelName = (id) => (panels().find((p) => p.id === id) || {}).name || '';
 let states = {};                              // light.* entity_id -> state object
 let scenes = {};                              // scene.* entity_id -> state object (Hue scenes)
+let devices = {};                             // climate.* (AC) and media_player.* (TV) for the map
 let ws = null, msgId = 1, pending = {}, retry = 1000;
 
 /* ---------- clock ---------- */
@@ -445,6 +484,7 @@ function buildUI() {
   document.querySelectorAll('.backdrop').forEach((bd) => bd.addEventListener('click', (e) => {
     if (e.target === bd || e.target.closest('[data-close]')) closeSheets();
   }));
+  $('#ds').addEventListener('click', (e) => { const b = e.target.closest('[data-act]'); if (b) devAction(b.dataset.act, b.dataset.v); });
   $('#lsPow').innerHTML = svg('power');
   $('#lsPow').addEventListener('click', () => sheetId && toggleLight(sheetId));
   bindBar($('#lsBri'), 'ls-bri', (p) => sheetId && lightCall('turn_on', [sheetId], { brightness_pct: p }), (p) => p + '%');
@@ -505,6 +545,7 @@ function render() {
   renderPresets();
   renderMap();
   renderLightSheet();
+  renderDevSheet();
 }
 
 /* ---------- preset buttons along the bottom ---------- */
@@ -559,10 +600,41 @@ const PLAN = [
   return Object.assign(r, { pts, label: r.label || [(Math.min(...xs) + Math.max(...xs)) / 2, (Math.min(...ys) + Math.max(...ys)) / 2] });
 });
 const FIXTURES = [{ x: 269, y: 261, w: 150, d: 24 }, { x: 289, y: 333, w: 130, d: 36 }];   // kitchen counter, island
+// Living room furniture, placed from Aaron's photo (looking south from the kitchen island)
+const FURN = [
+  { t: 'ellipse', cx: 352, cy: 420, rx: 24, ry: 34, label: 'Dining' },
+  { t: 'rect', x: 377, y: 446, w: 38, h: 93, solid: true, label: 'Sofa' },
+  { t: 'ellipse', cx: 337, cy: 494, rx: 22, ry: 22 },
+  { t: 'rect', x: 300, y: 452, w: 70, h: 104 },                          // rug
+  { t: 'rect', x: 258, y: 488, w: 18, h: 64, solid: true, label: 'TV' },
+  { t: 'rect', x: 258, y: 404, w: 14, h: 62, solid: true }               // console
+];
 const VB = { x: -12, y: -12, w: 579, h: 687 };
+// first-time guesses for where a light or device goes, by its name (drag to fix)
+const GUESS = [
+  [/gr[aä]s+hop+a/i, [406, 548]],
+  [/island|pendant/i, [[312, 351], [354, 351], [396, 351]]]
+];
 
 let view = store.get('view', 'panels'), arranging = false, mapDrag = null;
-const placeable = () => Object.values(states).filter((s) => !isGroup(s));
+const placeable = () => Object.values(states).filter((s) => !isGroup(s)).concat(Object.values(devices));
+const isDev = (id) => /^(climate|media_player)\./.test(id);
+function autoPlace() {
+  if (!cfg || DEMO) return;
+  cfg.map = cfg.map || {}; cfg.guessed = cfg.guessed || [];
+  let changed = false, islandN = 0;
+  placeable().forEach((s) => {
+    const id = s.entity_id; if (cfg.map[id] || cfg.guessed.includes(id)) return;
+    const name = nameOf(s);
+    if (isDev(id)) return;
+    for (const [re, spot] of GUESS) {
+      if (!re.test(name)) continue;
+      const pos = Array.isArray(spot[0]) ? spot[Math.min(islandN++, spot.length - 1)] : spot;
+      cfg.map[id] = pos.slice(); cfg.guessed.push(id); changed = true; break;
+    }
+  });
+  if (changed) store.set('cfg', cfg);
+}
 const posOf = (id) => cfg && cfg.map && cfg.map[id];
 function zoneOfLight(id) { const p = panels().find((p) => zoneBulbs(p.id).includes(id)); return p ? p.id : null; }
 
@@ -582,6 +654,8 @@ function initMap() {
     </defs>
     <g>${PLAN.map((r) => `<polygon class="room-fill ${r.kind || ''}" points="${poly(r.pts)}"/>`).join('')}</g>
     <g>${FIXTURES.map((f) => `<rect class="fixture" x="${f.x}" y="${f.y}" width="${f.w}" height="${f.d}" rx="3"/>`).join('')}</g>
+    <g>${FURN.map((f) => (f.t === 'ellipse' ? `<ellipse class="furn${f.solid ? ' solid' : ''}" cx="${f.cx}" cy="${f.cy}" rx="${f.rx}" ry="${f.ry}"/>` : `<rect class="furn${f.solid ? ' solid' : ''}" x="${f.x}" y="${f.y}" width="${f.w}" height="${f.h}" rx="4"/>`)
+      + (f.label ? `<text class="flabel" x="${f.t === 'ellipse' ? f.cx : f.x + f.w / 2}" y="${(f.t === 'ellipse' ? f.cy : f.y + f.h / 2) + 3}">${f.label.toUpperCase()}</text>` : '')).join('')}</g>
     <g id="glows"></g>
     <g>${PLAN.map((r) => `<polygon class="room-wall ${r.kind === 'out' ? 'out' : ''}" points="${poly(r.pts)}"/>`).join('')}</g>
     <g>${PLAN.filter((r) => r.name).map((r) => `<text class="rlabel" x="${r.label[0]}" y="${r.label[1]}">${esc(r.name)}</text>`).join('')}</g>
@@ -591,9 +665,11 @@ function initMap() {
   $('#arrangeBtn').addEventListener('click', () => setArranging(!arranging));
   // tap a light: open its controls (or, while arranging, pick it up)
   $('#mapbox').addEventListener('pointerdown', (e) => {
-    const g = e.target.closest('.mlight'); if (!g) return;
+    const g = e.target.closest('.mlight, .mdev'); if (!g) return;
     if (arranging) return startDrag(e, g.dataset.id);
-    const id = g.dataset.id; openLightSheet(id, zoneOfLight(id));
+    e.preventDefault();
+    const id = g.dataset.id, r = g.getBoundingClientRect(), anchor = { x: r.left + r.width / 2, y: r.top + r.height / 2 };
+    if (isDev(id)) openDevSheet(id, anchor); else openLightSheet(id, zoneOfLight(id), anchor);
   });
   $('#tray').addEventListener('pointerdown', (e) => { const c = e.target.closest('.chip'); if (c && arranging) startDrag(e, c.dataset.id); });
   addEventListener('pointermove', (e) => { if (!mapDrag) return; mapDrag.ghost.style.left = e.clientX + 'px'; mapDrag.ghost.style.top = e.clientY + 'px'; });
@@ -604,7 +680,7 @@ function setArranging(on) {
   arranging = on && !!cfg;
   $('#mapbox').classList.toggle('arranging', arranging);
   $('#trayBox').hidden = !arranging;
-  $('#arrangeBtn').textContent = arranging ? 'Done arranging' : 'Arrange lights on the map';
+  $('#arrangeBtn').textContent = arranging ? 'Done arranging' : 'Arrange the map';
   renderMap();
 }
 function startDrag(e, id) {
@@ -633,27 +709,33 @@ function renderMap() {
   const lights = placeable();
   // glows + markers for placed lights
   let glows = '', marks = '';
+  autoPlace();
+  const selId = sheetId || devId;
   lights.forEach((s) => {
     const p = posOf(s.entity_id); if (!p) return;
+    if (isDev(s.entity_id)) { marks += devMarker(s, p, s.entity_id === selId); return; }
     const on = s.state === 'on', c = colorOf(s), pct = pctOf(s);
     if (on) glows += `<circle cx="${p[0]}" cy="${p[1]}" r="${24 + pct * 0.5}" fill="rgb(${c})" opacity="${(0.35 + pct / 160).toFixed(2)}" filter="url(#soft)"/>`;
-    marks += `<g class="mlight ${on ? 'on' : 'off'}" data-id="${esc(s.entity_id)}" transform="translate(${p[0]},${p[1]})">
+    marks += `<g class="mlight ${on ? 'on' : 'off'}${s.entity_id === selId ? ' sel' : ''}" data-id="${esc(s.entity_id)}" transform="translate(${p[0]},${p[1]})">
       <circle class="hit" r="28"/>
       <circle class="core" r="10" fill="${on ? `rgb(${c})` : '#3a3731'}"/>
       <text y="28">${esc(nameOf(s))}</text></g>`;
   });
   $('#glows').innerHTML = glows; $('#mlights').innerHTML = marks;
   // summary + panel switches
-  const onCount = lights.filter((s) => s.state === 'on').length;
+  const bulbs = lights.filter((s) => !isDev(s.entity_id));
+  const onCount = bulbs.filter((s) => s.state === 'on').length;
   const unplaced = lights.filter((s) => !posOf(s.entity_id));
-  $('#mapSum').innerHTML = `<b>${onCount} of ${lights.length}</b>lights on${unplaced.length && !arranging ? ` · ${unplaced.length} not on the map yet` : ''}`;
+  const acs = Object.values(devices).filter((d) => d.entity_id.startsWith('climate.'));
+  $('#mapSum').innerHTML = `<b>${onCount} of ${bulbs.length}</b>lights on${unplaced.length && !arranging ? ` · ${unplaced.length} not on the map yet` : ''}`
+    + acs.map((d) => `<div style="margin-top:8px">${esc(nameOf(d))}: ${d.state === 'off' ? 'off' : esc(d.state.replace('_', ' ')) + (d.attributes.temperature != null ? ' · set to ' + d.attributes.temperature + '°' : '')}${d.attributes.current_temperature != null ? ' · room ' + d.attributes.current_temperature + '°' : ''}</div>`).join('');
   $('#mapPanels').innerHTML = panels().map((p) => {
     const i = zoneInfo(p.id);
     return `<div class="prow2${i.on ? ' on' : ''}"><div class="pn"><div>${esc(p.name)}</div><small>${i.on ? 'On · ' + i.bri + '%' : 'Off'}</small></div>
       <button class="power" data-zone="${esc(p.id)}" aria-label="Turn ${esc(p.name)} on or off">${svg('power')}</button></div>`;
   }).join('');
   $('#tray').innerHTML = unplaced.map((s) => `<button class="chip" data-id="${esc(s.entity_id)}">${esc(nameOf(s))}</button>`).join('')
-    || '<span class="tray-hint">Every light is on the map.</span>';
+    || '<span class="tray-hint">Everything is on the map.</span>';
 }
 
 /* ---------- one light's controls ---------- */
@@ -664,8 +746,100 @@ function tempRange(s) {
   return [a.min_color_temp_kelvin || TEMP_MIN, a.max_color_temp_kelvin || TEMP_MAX];
 }
 function kelvinAt(p) { const [lo, hi] = tempRange(states[sheetId]); return Math.round((lo + (hi - lo) * (p - 1) / 99) / 50) * 50; }
-function openLightSheet(id, zone) { sheetId = id; sheetZone = zone || null; $('#lightSheet').classList.add('show'); renderLightSheet(); }
-function closeSheets() { sheetId = null; sheetZone = null; document.querySelectorAll('.backdrop').forEach((b) => b.classList.remove('show')); }
+function openLightSheet(id, zone, anchor) {
+  closeSheets();
+  sheetId = id; sheetZone = zone || null;
+  showSheet($('#lightSheet'), anchor); renderLightSheet(); renderMap();
+}
+function closeSheets() {
+  const had = sheetId || devId;
+  sheetId = null; sheetZone = null; devId = null;
+  document.querySelectorAll('.backdrop').forEach((b) => b.classList.remove('show', 'pop'));
+  if (had) renderMap();
+}
+// anchor = where on screen the tap was: show a card beside it instead of a bottom sheet
+function showSheet(bd, anchor) {
+  const card = bd.querySelector('.sheet');
+  bd.classList.toggle('pop', !!anchor); bd.classList.add('show');
+  card.style.left = card.style.top = '';
+  if (!anchor) return;
+  requestAnimationFrame(() => {
+    const w = card.offsetWidth, h = card.offsetHeight, m = 16, gap = 34;
+    let x = anchor.x + gap; if (x + w > innerWidth - m) x = anchor.x - gap - w; if (x < m) x = Math.max(m, (innerWidth - w) / 2);
+    let y = anchor.y - h / 2; y = Math.max(m, Math.min(innerHeight - h - m, y));
+    card.style.left = x + 'px'; card.style.top = y + 'px';
+  });
+}
+
+/* ---------- AC and TV ---------- */
+let devId = null;
+const DEV_ICONS = {
+  climate: '<path d="M12 3v18M4.2 7.5l15.6 9M4.2 16.5l15.6-9"/><path d="M9.5 4.5L12 7l2.5-2.5M9.5 19.5L12 17l2.5 2.5"/>',
+  media_player: '<rect x="3" y="5" width="18" height="12" rx="1.5"/><path d="M8 20h8"/>'
+};
+function devMarker(s, p, sel) {
+  const dom = s.entity_id.split('.')[0], a = s.attributes, on = !['off', 'unavailable', 'standby'].includes(s.state);
+  const val = dom === 'climate' ? (on && a.temperature != null ? a.temperature + '°' : (a.current_temperature != null ? a.current_temperature + '°' : '')) : '';
+  return `<g class="mdev ${on ? 'on' : 'off'} ${esc(s.state)}${sel ? ' sel' : ''}" data-id="${esc(s.entity_id)}" transform="translate(${p[0]},${p[1]})">
+    <rect class="box" x="-17" y="-17" width="34" height="34" rx="9"/>
+    <g transform="translate(-10,-10) scale(.833)"><g class="ico">${DEV_ICONS[dom]}</g></g>
+    <circle class="hit" r="30" fill="transparent"/>
+    <text class="val" y="32">${esc(val || nameOf(s))}</text></g>`;
+}
+function openDevSheet(id, anchor) { closeSheets(); devId = id; showSheet($('#devSheet'), anchor); renderDevSheet(); renderMap(); }
+function devCall(domain, service, data) {
+  if (!devId) return;
+  if (DEMO) return demoDev(service, data);
+  send({ type: 'call_service', domain, service, service_data: data || {}, target: { entity_id: devId } });
+}
+function renderDevSheet() {
+  if (!devId) return;
+  const s = devices[devId]; if (!s) return closeSheets();
+  const a = s.attributes, dom = devId.split('.')[0], on = !['off', 'unavailable', 'standby'].includes(s.state);
+  const head = (sub) => `<div class="sh-head"><div class="sh-title"><div class="sh-name">${esc(nameOf(s))}</div><div class="sh-state">${sub}</div></div>
+      <button class="power" data-act="power" aria-label="Turn on or off">${svg('power')}</button><button class="close" data-close aria-label="Close">×</button></div>`;
+  let html = '';
+  if (dom === 'climate') {
+    const modes = (a.hvac_modes || []).filter((m) => m !== 'off');
+    const unit = a.temperature_unit || '°';
+    html = head(s.state === 'unavailable' ? 'Unavailable' : on ? `${esc(s.state.replace('_', ' '))}${a.current_temperature != null ? ' · room is ' + a.current_temperature + '°' : ''}` : `Off${a.current_temperature != null ? ' · room is ' + a.current_temperature + '°' : ''}`)
+      + (a.temperature != null ? `<div class="dev-big"><div><div class="dev-temp">${a.temperature}<small>°</small></div><div class="dev-sub">Target</div></div>
+          <div class="stepper"><button data-act="down" aria-label="Cooler">−</button><button data-act="up" aria-label="Warmer">+</button></div></div>` : '')
+      + (modes.length ? `<div class="sh-label">Mode</div><div class="opts">${modes.map((m) => `<button data-act="mode" data-v="${esc(m)}" class="${s.state === m ? 'sel' : ''}">${esc(m.replace('_', ' '))}</button>`).join('')}</div>` : '')
+      + ((a.fan_modes || []).length ? `<div class="sh-label">Fan</div><div class="opts">${a.fan_modes.map((m) => `<button data-act="fan" data-v="${esc(m)}" class="${a.fan_mode === m ? 'sel' : ''}">${esc(m)}</button>`).join('')}</div>` : '');
+  } else {
+    const vol = a.volume_level != null ? Math.round(a.volume_level * 100) : null;
+    html = head(s.state === 'unavailable' ? 'Unavailable' : on ? `On${a.source ? ' · ' + esc(a.source) : ''}${a.media_title ? ' · ' + esc(a.media_title) : ''}` : 'Off')
+      + (on ? `<div class="dev-big"><div><div class="dev-temp">${vol != null ? vol : '–'}<small>${a.is_volume_muted ? ' muted' : ''}</small></div><div class="dev-sub">Volume</div></div>
+          <div class="stepper"><button data-act="vdown" aria-label="Volume down">−</button><button data-act="vup" aria-label="Volume up">+</button></div></div>
+        <div class="opts"><button data-act="mute" class="${a.is_volume_muted ? 'sel' : ''}">Mute</button><button data-act="play">Play / pause</button></div>`
+        + ((a.source_list || []).length ? `<div class="sh-label">Input</div><div class="opts">${a.source_list.slice(0, 10).map((x) => `<button data-act="source" data-v="${esc(x)}" class="${a.source === x ? 'sel' : ''}">${esc(x)}</button>`).join('')}</div>` : '') : '');
+  }
+  const ds = $('#ds');
+  ds.innerHTML = html;
+  ds.classList.toggle('on', on);
+}
+function devAction(act, v) {
+  const s = devices[devId]; if (!s) return;
+  const a = s.attributes, dom = devId.split('.')[0], on = !['off', 'unavailable', 'standby'].includes(s.state);
+  if (dom === 'climate') {
+    const step = a.target_temp_step || 1;
+    if (act === 'power') devCall('climate', on ? 'turn_off' : 'turn_on');
+    if (act === 'up' || act === 'down') {
+      const t = Math.min(a.max_temp ?? 99, Math.max(a.min_temp ?? 0, (a.temperature || 0) + (act === 'up' ? step : -step)));
+      devCall('climate', 'set_temperature', { temperature: t });
+    }
+    if (act === 'mode') devCall('climate', 'set_hvac_mode', { hvac_mode: v });
+    if (act === 'fan') devCall('climate', 'set_fan_mode', { fan_mode: v });
+  } else {
+    if (act === 'power') devCall('media_player', on ? 'turn_off' : 'turn_on');
+    if (act === 'vup') devCall('media_player', 'volume_up');
+    if (act === 'vdown') devCall('media_player', 'volume_down');
+    if (act === 'mute') devCall('media_player', 'volume_mute', { is_volume_muted: !a.is_volume_muted });
+    if (act === 'play') devCall('media_player', 'media_play_pause');
+    if (act === 'source') devCall('media_player', 'select_source', { source: v });
+  }
+}
 function renderLightSheet() {
   if (!sheetId) return;
   const s = states[sheetId]; if (!s) return closeSheets();
@@ -803,6 +977,7 @@ function wsUrl(base) { return base.replace(/\/+$/, '').replace(/^http/, 'ws') + 
 function keep(s) {
   if (s.entity_id.startsWith('light.')) { states[s.entity_id] = s; return true; }
   if (s.entity_id.startsWith('scene.') && s.attributes.group_name) { scenes[s.entity_id] = s; return true; }
+  if (/^(climate|media_player)\./.test(s.entity_id)) { devices[s.entity_id] = s; return true; }
   return false;
 }
 
@@ -819,7 +994,7 @@ function connect(url, token, onReady) {
     else if (m.type === 'auth_ok') {
       retry = 1000; setConn('ok', 'Connected');
       send({ type: 'get_states' }).then((list) => {
-        states = {}; scenes = {}; list.forEach(keep);
+        states = {}; scenes = {}; devices = {}; list.forEach(keep);
         render(); onReady && onReady(null); onReady = null;
       });
       send({ type: 'subscribe_events', event_type: 'state_changed' });
@@ -831,7 +1006,7 @@ function connect(url, token, onReady) {
     else if (m.type === 'event' && m.event.event_type === 'state_changed') {
       const d = m.event.data;
       if (d.new_state) { if (keep(d.new_state)) render(); }
-      else if (states[d.entity_id] || scenes[d.entity_id]) { delete states[d.entity_id]; delete scenes[d.entity_id]; render(); }
+      else if (states[d.entity_id] || scenes[d.entity_id] || devices[d.entity_id]) { delete states[d.entity_id]; delete scenes[d.entity_id]; delete devices[d.entity_id]; render(); }
     }
   };
   sock.onerror = () => { if (onReady) { onReady(new Error("Couldn't reach Home Assistant at that address.")); onReady = null; } };
@@ -980,11 +1155,26 @@ function demoInit() {
   mk('light.bedside', 'Bedside lamp', 0, 60); mk('light.floor_arm', 'Floor lamp arm', 1, 40, { color_mode: 'xy', rgb_color: [176, 88, 255] });
   mk('light.island_1', 'Island 1', 0, 80); mk('light.island_2', 'Island 2', 0, 80); mk('light.island_3', 'Island 3', 0, 80);
   mk('light.bedroom', "Aaron's Bedroom", 1, 60, { is_hue_group: true, entity_id: ['light.grashoppa', 'light.stemlite', 'light.bedside', 'light.floor_arm'] });
+  devices['climate.living_room_ac'] = { entity_id: 'climate.living_room_ac', state: 'cool', attributes: { friendly_name: 'Living room AC', hvac_modes: ['off', 'cool', 'dry', 'fan_only'], temperature: 70, current_temperature: 74, min_temp: 60, max_temp: 86, target_temp_step: 1, fan_modes: ['low', 'medium', 'high', 'auto'], fan_mode: 'auto' } };
+  devices['media_player.living_room_tv'] = { entity_id: 'media_player.living_room_tv', state: 'on', attributes: { friendly_name: 'Living room TV', volume_level: 0.18, is_volume_muted: false, source: 'Apple TV', source_list: ['Apple TV', 'HDMI 2', 'Netflix', 'YouTube'] } };
   scenes['scene.bedroom_relax'] = { entity_id: 'scene.bedroom_relax', state: 'unknown', attributes: { name: 'Relax', group_name: "Aaron's Bedroom" } };
   scenes['scene.bedroom_sunset'] = { entity_id: 'scene.bedroom_sunset', state: 'unknown', attributes: { name: 'Savanna sunset', group_name: "Aaron's Bedroom" } };
-  cfg = { map: { 'light.grashoppa': [300, 520], 'light.stemlite': [395, 430], 'light.bedside': [110, 75], 'light.island_1': [310, 351], 'light.island_2': [354, 351], 'light.island_3': [398, 351] },
+  cfg = { map: { 'climate.living_room_ac': [312, 566], 'media_player.living_room_tv': [266, 520], 'light.grashoppa': [406, 548], 'light.stemlite': [268, 436], 'light.bedside': [110, 75], 'light.island_1': [312, 351], 'light.island_2': [354, 351], 'light.island_3': [396, 351] },
     presets: ['b:0', 'b:1', 'scene.bedroom_relax', 'scene.bedroom_sunset'], panels: DEFAULT_PANELS, zones: { room: ['light.bedroom'], island: ['light.island_1', 'light.island_2', 'light.island_3'] } };
   setConn('ok', 'Demo');
+}
+function demoDev(service, data) {
+  const s = devices[devId], a = s.attributes;
+  if (service === 'turn_off') s.state = 'off';
+  if (service === 'turn_on') s.state = devId.startsWith('climate.') ? 'cool' : 'on';
+  if (service === 'set_temperature') a.temperature = data.temperature;
+  if (service === 'set_hvac_mode') s.state = data.hvac_mode;
+  if (service === 'set_fan_mode') a.fan_mode = data.fan_mode;
+  if (service === 'volume_up') a.volume_level = Math.min(1, (a.volume_level || 0) + 0.02);
+  if (service === 'volume_down') a.volume_level = Math.max(0, (a.volume_level || 0) - 0.02);
+  if (service === 'volume_mute') a.is_volume_muted = data.is_volume_muted;
+  if (service === 'select_source') a.source = data.source;
+  render();
 }
 function demoApply(service, ids, data) {
   ids.flatMap(membersOf).concat(ids).forEach((id) => {
