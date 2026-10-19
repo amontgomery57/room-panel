@@ -272,6 +272,45 @@ body.mapview .master{display:none!important}
 .tile6 .n{font-size:13px;opacity:.85;margin-top:auto;line-height:1.3}
 .wx-none{grid-column:1/-1;text-align:center;opacity:.85;font-size:15px}
 
+/* Sonos card (panels view) */
+.sonos{grid-column:1/-1;padding:16px 18px 18px;gap:14px}
+.so-top{display:flex;align-items:center;gap:16px;min-width:0}
+.so-art{width:84px;height:84px;border-radius:14px;flex-shrink:0;background:#262420 center/cover no-repeat;display:grid;place-items:center;color:#7d7568;border:1px solid var(--line)}
+.so-art svg{width:34px;height:34px}
+.so-meta{flex:1;min-width:0}
+.so-meta .eyebrow{margin-bottom:4px}
+.so-t{font-size:20px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.so-a{font-size:15px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:2px}
+.so-src{display:inline-flex;align-items:center;gap:6px;margin-top:6px;font-size:12.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--champ)}
+.so-src i{width:7px;height:7px;border-radius:50%;background:var(--accent);box-shadow:0 0 8px rgba(217,189,142,.8)}
+.so-src.idle{color:var(--muted)}.so-src.idle i{background:var(--dim);box-shadow:none}
+.so-btns{display:flex;gap:8px;flex-shrink:0}
+.so-btn{height:46px;padding:0 16px;border-radius:12px;border:1px solid var(--line-2);background:none;color:var(--text);font-size:14.5px;display:flex;align-items:center;gap:8px}
+.so-btn svg{width:18px;height:18px;color:var(--champ)}
+.so-btn.on{border-color:rgba(217,189,142,.6);background:rgba(217,189,142,.1)}
+.so-bot{display:flex;align-items:center;gap:12px}
+.tp{width:52px;height:52px;border-radius:50%;border:1px solid var(--line-2);background:none;color:var(--text);display:grid;place-items:center;flex-shrink:0}
+.tp svg{width:22px;height:22px}
+.tp.main{width:60px;height:60px;background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.tp.main svg{width:26px;height:26px}
+.sonos .hs,#eq .hs{--c:226,196,146}
+.so-bot .hs{flex:1;margin:0;height:52px;border-radius:14px}
+.so-empty{color:var(--muted);font-size:15px;line-height:1.5}
+/* sound settings popup */
+#eqSheet .sheet{gap:10px}
+.eqrow{display:flex;align-items:center;gap:14px;min-height:56px;border-top:1px solid var(--line)}
+.eqrow:first-of-type{border-top:0}
+.eqrow .lbl{width:150px;flex-shrink:0;font-size:15.5px}
+.eqrow .lbl small{display:block;font-size:12px;color:var(--muted)}
+.eqrow .hs{flex:1;margin:0;height:44px}
+.eqrow .hs.bi .hf{background:none}
+.eqrow .hs.bi .bf{position:absolute;top:0;bottom:0;background:linear-gradient(90deg,rgba(217,189,142,.25),rgba(217,189,142,.55));transition:all .18s}
+.eqrow .hs.bi.drag .bf{transition:none}
+.eqrow .hs.bi::before{content:'';position:absolute;left:50%;top:8px;bottom:8px;width:1px;background:rgba(255,255,255,.25)}
+.eqrow .tg{margin-left:auto}
+.eqsec{font-size:11.5px;letter-spacing:.24em;text-transform:uppercase;color:var(--muted);margin:12px 0 2px}
+.eqreset{margin-left:auto;border:0;background:none;color:var(--muted);font-size:14px;text-decoration:underline}
+
 /* right detail panel */
 #detail{flex-direction:column;padding:22px 22px 18px;overflow-y:auto;scrollbar-width:none;min-height:0}
 #detail::-webkit-scrollbar{display:none}
@@ -467,6 +506,9 @@ body.mapview .master{display:none!important}
   </div>
 </div>
 
+<!-- Sonos sound settings -->
+<div class="backdrop" id="eqSheet"><div class="sheet" id="eq"></div></div>
+
 <!-- weather forecast -->
 <div class="wx-bd" id="wxSheet"><div class="wx" id="wx"></div></div>
 
@@ -576,6 +618,14 @@ const ICONS = {
   drop: '<path d="M12 3.5c3 3.6 5.5 6.8 5.5 10a5.5 5.5 0 0 1-11 0c0-3.2 2.5-6.4 5.5-10z"/>',
   fan: '<circle cx="12" cy="12" r="1.6"/><path d="M12 10.4C11 7 12 3.5 15 3.5c2.5 0 2.8 3.4.5 5.2M13.6 12c3.4-1 6.9 0 6.9 3 0 2.5-3.4 2.8-5.2.5M12 13.6c1 3.4 0 6.9-3 6.9-2.5 0-2.8-3.4-.5-5.2M10.4 12C7 13 3.5 12 3.5 9c0-2.5 3.4-2.8 5.2-.5"/>',
   swing: '<path d="M4 12a8 8 0 0 1 16 0"/><path d="M12 12l5-5M12 12l-5-5M12 12v-8"/>',
+  play: '<path d="M8 5.5v13l10.5-6.5z" fill="currentColor" stroke="none"/>',
+  pause: '<rect x="7" y="5.5" width="3.6" height="13" rx="1" fill="currentColor" stroke="none"/><rect x="13.4" y="5.5" width="3.6" height="13" rx="1" fill="currentColor" stroke="none"/>',
+  next: '<path d="M6 6l8.5 6L6 18z" fill="currentColor" stroke="none"/><path d="M17.5 6v12"/>',
+  prev: '<path d="M18 6l-8.5 6L18 18z" fill="currentColor" stroke="none"/><path d="M6.5 6v12"/>',
+  vol: '<path d="M4 9.5h3.5L12 6v12l-4.5-3.5H4z"/><path d="M15.5 9a4 4 0 0 1 0 6M18 6.5a7.5 7.5 0 0 1 0 11"/>',
+  mute: '<path d="M4 9.5h3.5L12 6v12l-4.5-3.5H4z"/><path d="M16 9.5l5 5M21 9.5l-5 5"/>',
+  eq: '<path d="M5 20v-6M5 10V4M12 20v-9M12 7V4M19 20v-4M19 12V4"/><path d="M3 14h4M10 7h4M17 16h4"/>',
+  speaker: '<rect x="2.5" y="8" width="19" height="8" rx="2.5"/><path d="M7 12h.01M11 12h.01M15 12h.01"/>',
   clock: '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
   cal: '<rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M9 3v4M15 3v4"/>',
   cup: '<path d="M5 9h11v5a5 5 0 0 1-5 5h-1a5 5 0 0 1-5-5z"/><path d="M16 10h1.5a2.5 2.5 0 0 1 0 5H16"/><path d="M8.5 3.5c-.6.8.6 1.6 0 2.5M11.5 3.5c-.6.8.6 1.6 0 2.5"/>'
@@ -597,6 +647,7 @@ let states = {};                              // light.* entity_id -> state obje
 let scenes = {};                              // scene.* entity_id -> state object (Hue scenes)
 let devices = {};                             // climate.* (AC) and media_player.* (TV) for the map
 let weather = {};                             // weather.* for the header
+let extras = {};                              // number/switch/select entities (Sonos sound settings)
 let ws = null, msgId = 1, pending = {}, retry = 1000;
 
 /* ---------- clock ---------- */
@@ -668,7 +719,7 @@ function buildTiles() {
         <div class="fill"></div>
         <label><span>Brightness</span><b>–</b></label>
       </div>
-    </section>`).join('');
+    </section>`).join('') + `<section class="tile sonos" id="sonosCard"></section>`;
   $('#tiles').querySelectorAll('.tile .bar').forEach((bar) => {
     const zid = bar.dataset.zone;
     bindBar(bar, 'z-' + zid, (p) => setZoneBri(zid, p));
@@ -687,6 +738,15 @@ function buildUI() {
     else if ((b = t('.lt-add'))) openAddSheet(b.dataset.zone);
     else if ((b = t('.hs-btn'))) openSceneSheet(b.dataset.zone);
     else if ((b = t('.thead .toggle, .thead .power'))) toggleZone(b.dataset.zone);
+    else if ((b = t('[data-so]'))) sonosAction(b.dataset.so, b.dataset.v);
+  });
+  $('#tiles').addEventListener('pointerdown', (e) => { const sl = e.target.closest('#sonosCard .hs'); if (sl) startSlide(e, sl); });
+  $('#eqSheet').addEventListener('pointerdown', (e) => { const sl = e.target.closest('.hs'); if (sl) startSlide(e, sl); });
+  $('#eqSheet').addEventListener('click', (e) => {
+    const b = e.target.closest('[data-eqsw]'); if (b) return eqToggle(b.dataset.eqsw);
+    const r = e.target.closest('[data-eqreset]'); if (r) return eqReset();
+    const o = e.target.closest('[data-eqsel]'); if (o) return eqSelect(o.dataset.eqsel, o.dataset.v);
+    const src = e.target.closest('[data-src]'); if (src) return sonosAction('source', src.dataset.src);
   });
   $('#scenes').addEventListener('click', (e) => {
     const b = e.target.closest('.scene'); if (!b) return;
@@ -775,6 +835,8 @@ function render() {
   layoutTiles(ps.filter((z) => $('#t-' + z.id).style.display !== 'none').length);
   renderPresets();
   renderMaster();
+  renderSonos();
+  renderEq();
   renderMap();
   renderLightSheet();
   renderDevSheet();
@@ -1171,13 +1233,14 @@ function startSlide(e, el) {
   slide = { el, last: 0, val: 0, sent: -1 }; dragging.detail = true; el.classList.add('drag'); moveSlide(e);
 }
 function moveSlide(e) {
-  const r = slide.el.getBoundingClientRect();
-  const v = Math.min(100, Math.max(1, Math.round((e.clientX - r.left) / r.width * 100)));
+  const r = slide.el.getBoundingClientRect(), el = slide.el;
+  const v = Math.min(100, Math.max(el.dataset.num || el.dataset.vol ? 0 : 1, Math.round((e.clientX - r.left) / r.width * 100)));
   if (v === slide.val) return;
   slide.val = v;
-  slide.el.style.setProperty('--p', v + '%');
+  if (el.dataset.num) { const n = numFromPct(el, v); paintNum(el, n); const b = el.querySelector('.hl b'); if (b) b.textContent = fmtNum(n); slide.num = n; }
+  else el.style.setProperty('--p', v + '%');
   slide.el.classList.remove('off'); const card = slide.el.closest('.lc'); if (card) card.classList.remove('off');
-  const b = slide.el.querySelector('.hl b'); if (b) b.textContent = v + '%';
+  const b = el.dataset.num ? null : slide.el.querySelector('.hl b'); if (b) b.textContent = v + '%';
   const now = Date.now();
   if (now - slide.last > 250) { slide.last = now; applySlide(); }
 }
@@ -1201,11 +1264,162 @@ function slideTargets(el) {
 function applySlide() {
   if (slide.sent === slide.val) return;
   slide.sent = slide.val;
+  const el = slide.el;
+  if (el.dataset.vol) {
+    const d = devices[el.dataset.vol]; if (d) { holdDev(d.entity_id); d.attributes.volume_level = slide.val / 100; d.attributes.is_volume_muted = false; }
+    if (!DEMO) callSvc('media_player', 'volume_set', { volume_level: slide.val / 100 }, el.dataset.vol);
+    return;
+  }
+  if (el.dataset.num) {
+    const x = extras[el.dataset.num]; if (x) { holdDev(x.entity_id); x.state = String(slide.num); }
+    if (!DEMO) callSvc('number', 'set_value', { value: slide.num }, el.dataset.num);
+    return;
+  }
   // only update the screen at the end, so the bar under your finger never redraws
   const ids = slideTargets(slide.el);
   optimistic('turn_on', ids, { brightness_pct: slide.val });
   if (!DEMO) send({ type: 'call_service', domain: 'light', service: 'turn_on', service_data: { transition: 0.25, brightness_pct: slide.val }, target: { entity_id: ids } }).catch(() => {});
 }
+/* ---------- Sonos ---------- */
+const callSvc = (domain, service, data, entity) => send({ type: 'call_service', domain, service, service_data: data || {}, target: { entity_id: entity } }).catch(() => {});
+// changes we just made win over Home Assistant's slower echo for a moment
+const devHold = {};
+const holdDev = (id) => { devHold[id] = Date.now() + 2500; };
+// while held, keep Home Assistant's newest report and apply it once the hold ends
+function heldBack(s) {
+  const id = s.entity_id, left = (devHold[id] || 0) - Date.now();
+  if (left <= 0) return false;
+  devLatest[id] = s;
+  setTimeout(() => {
+    const n = devLatest[id]; if (!n || devHold[id] > Date.now()) return;
+    delete devLatest[id];
+    (id.startsWith('climate.') || id.startsWith('media_player.') ? devices : extras)[id] = n; render();
+  }, left + 60);
+  return true;
+}
+const devLatest = {};
+const objOf = (id) => id.split('.')[1];
+// the Sonos player: a media player that has Sonos sound settings next to it (…_bass, …_treble)
+function sonosPlayers() {
+  return Object.values(devices).filter((d) => d.entity_id.startsWith('media_player.') && (extras['number.' + objOf(d.entity_id) + '_bass'] || extras['number.' + objOf(d.entity_id) + '_treble'] || /sonos/i.test(d.attributes.friendly_name || '')));
+}
+function sonosPlayer() {
+  const ps = sonosPlayers();
+  // prefer the soundbar (it has speech enhancement / night sound), i.e. the Beam
+  return ps.find((d) => extras['switch.' + objOf(d.entity_id) + '_speech_enhancement'] || extras['switch.' + objOf(d.entity_id) + '_night_sound'] || /beam/i.test(nameOf(d))) || ps[0];
+}
+function isSonosExtra(id) {
+  const o = objOf(id);
+  return Object.values(devices).some((d) => d.entity_id.startsWith('media_player.') && o.startsWith(objOf(d.entity_id) + '_'));
+}
+const playerExtras = (d) => Object.values(extras).filter((x) => objOf(x.entity_id).startsWith(objOf(d.entity_id) + '_'));
+function renderSonos() {
+  const c = $('#sonosCard'); if (!c || view === 'map' || (slide && c.contains(slide.el))) return;
+  const d = sonosPlayer();
+  if (!d) {
+    c.innerHTML = `<div class="so-top"><div class="so-art">${svg('speaker')}</div><div class="so-meta"><div class="eyebrow">Sonos</div>
+      <div class="so-empty">No Sonos found yet. In Home Assistant, open Settings → Devices &amp; services: Sonos usually shows up under "Discovered" — tap Add.</div></div></div>`;
+    return;
+  }
+  const a = d.attributes, playing = d.state === 'playing', vol = a.volume_level != null ? Math.round(a.volume_level * 100) : 0, muted = !!a.is_volume_muted;
+  const isTV = /^tv$/i.test(a.source || '') || a.media_content_id && /htastream|spdif/i.test(a.media_content_id);
+  const title = isTV ? 'TV audio' : a.media_title || (d.state === 'idle' || d.state === 'paused' ? 'Nothing playing' : 'Ready');
+  const artist = isTV ? 'Sound from the TV' : [a.media_artist, a.media_album_name].filter(Boolean).join(' · ');
+  const pic = a.entity_picture ? (/^https?:/.test(a.entity_picture) ? a.entity_picture : (cfg && cfg.url ? cfg.url.replace(/\/+$/, '') : '') + a.entity_picture) : '';
+  const srcLabel = isTV ? 'TV' : a.source || (playing ? 'Playing' : d.state === 'paused' ? 'Paused' : 'Idle');
+  const hasTV = (a.source_list || []).some((x) => /^tv$/i.test(x));
+  c.innerHTML = `<div class="so-top">
+      <div class="so-art" style="${pic && !isTV ? `background-image:url('${esc(pic)}')` : ''}">${pic && !isTV ? '' : svg(isTV ? 'tv' : 'speaker')}</div>
+      <div class="so-meta"><div class="eyebrow">${esc(nameOf(d))} · Sonos</div><div class="so-t">${esc(title)}</div>${artist ? `<div class="so-a">${esc(artist)}</div>` : ''}
+        <div class="so-src${playing || isTV ? '' : ' idle'}"><i></i>${esc(srcLabel)}</div></div>
+      <div class="so-btns">${hasTV ? `<button class="so-btn${isTV ? ' on' : ''}" data-so="source" data-v="TV">${svg('tv')}TV</button>` : ''}
+        <button class="so-btn" data-so="eq">${svg('eq')}Sound settings</button></div></div>
+    <div class="so-bot">
+      <button class="tp" data-so="prev" aria-label="Previous">${svg('prev')}</button>
+      <button class="tp main" data-so="play" aria-label="Play or pause">${svg(playing ? 'pause' : 'play')}</button>
+      <button class="tp" data-so="next" aria-label="Next">${svg('next')}</button>
+      <div class="hs${muted ? ' off' : ''}" data-vol="${esc(d.entity_id)}" style="--p:${vol}%"><div class="hf"></div><div class="hl"><span>Volume${muted ? ' · muted' : ''}</span><b>${vol}%</b></div></div>
+      <button class="tp" data-so="mute" aria-label="Mute">${svg(muted ? 'mute' : 'vol')}</button>
+    </div>`;
+}
+function sonosAction(act, v) {
+  const d = sonosPlayer(); if (!d) return;
+  const a = d.attributes, id = d.entity_id;
+  if (act === 'eq') { $('#eqSheet').classList.add('show'); renderEq(true); return; }
+  holdDev(id);
+  if (act === 'play') { d.state = d.state === 'playing' ? 'paused' : 'playing'; if (!DEMO) callSvc('media_player', 'media_play_pause', {}, id); }
+  if (act === 'next' && !DEMO) callSvc('media_player', 'media_next_track', {}, id);
+  if (act === 'prev' && !DEMO) callSvc('media_player', 'media_previous_track', {}, id);
+  if (act === 'mute') { a.is_volume_muted = !a.is_volume_muted; if (!DEMO) callSvc('media_player', 'volume_mute', { is_volume_muted: a.is_volume_muted }, id); }
+  if (act === 'source') { a.source = v; if (/^tv$/i.test(v)) d.state = 'playing'; if (!DEMO) callSvc('media_player', 'select_source', { source: v }, id); }
+  render();
+}
+
+/* sound settings popup: every EQ control the Beam exposes */
+const EQ_INFO = {
+  bass: ['Bass', 'tone'], treble: ['Treble', 'tone'], balance: ['Balance', 'tone'], loudness: ['Loudness', 'tone', 'Boosts bass and treble at low volume'],
+  speech_enhancement: ['Speech enhancement', 'tv', 'Makes dialogue clearer'], night_sound: ['Night sound', 'tv', 'Quiets loud effects, keeps speech clear'],
+  audio_delay: ['Audio delay', 'tv', 'Lip sync, if voices lag the picture'], dialog_level: ['Dialog level', 'tv'],
+  surround_enabled: ['Surrounds', 'surround'], surround_level: ['TV surround level', 'surround'], music_surround_level: ['Music surround level', 'surround'],
+  surround_mode: ['Music playback', 'surround'], surround_music_full_volume: ['Full surround for music', 'surround', 'Off = ambient'],
+  subwoofer_enabled: ['Subwoofer', 'sub'], sub_gain: ['Sub level', 'sub'], sub_crossover: ['Sub crossover', 'sub'],
+  crossfade: ['Crossfade', 'other', 'Blend songs into each other'], status_light: ['Status light', 'other'], touch_controls: ['Touch controls', 'other'],
+  tv_autoplay: ['TV autoplay', 'other', 'Switch to TV sound when the TV turns on'], ungroup_on_autoplay: ['Ungroup on autoplay', 'other']
+};
+const EQ_SECTIONS = [['tone', 'Tone'], ['tv', 'TV & dialogue'], ['surround', 'Surround'], ['sub', 'Subwoofer'], ['other', 'Other']];
+const fmtNum = (n) => (Math.abs(n % 1) > 0 ? n.toFixed(1) : String(n)).replace(/^(\d)/, (m) => m) ;
+function numRange(x) { const a = x.attributes; return [a.min ?? -10, a.max ?? 10, a.step || 1]; }
+function numFromPct(el, p) {
+  const x = extras[el.dataset.num]; const [lo, hi, st] = numRange(x);
+  return Math.round((lo + (hi - lo) * p / 100) / st) * st;
+}
+function paintNum(el, n) {
+  const x = extras[el.dataset.num]; const [lo, hi] = numRange(x);
+  const pos = (n - lo) / (hi - lo) * 100;
+  if (lo < 0 && hi > 0) {
+    const zero = (0 - lo) / (hi - lo) * 100, bf = el.querySelector('.bf');
+    if (bf) { bf.style.left = Math.min(zero, pos) + '%'; bf.style.width = Math.abs(pos - zero) + '%'; }
+  } else el.style.setProperty('--p', pos + '%');
+}
+function renderEq(force) {
+  const bd = $('#eqSheet'); if (!bd.classList.contains('show') || (slide && bd.contains(slide.el))) return;
+  const d = sonosPlayer(); if (!d) return;
+  const base = objOf(d.entity_id) + '_';
+  const items = playerExtras(d).map((x) => {
+    const key = objOf(x.entity_id).slice(base.length);
+    const info = EQ_INFO[key] || [(x.attributes.friendly_name || key).replace(new RegExp('^' + (d.attributes.friendly_name || '') + '\\s*', 'i'), ''), 'other'];
+    return { x, key, label: info[0], sec: info[1], note: info[2] || '' };
+  }).filter((i) => !/alarm/.test(i.key));
+  const row = (i) => {
+    const dom = i.x.entity_id.split('.')[0], st = i.x.state;
+    if (dom === 'switch') return `<div class="eqrow"><div class="lbl">${esc(i.label)}${i.note ? `<small>${esc(i.note)}</small>` : ''}</div><button class="tg${st === 'on' ? ' on' : ''}" data-eqsw="${esc(i.x.entity_id)}"><i></i></button></div>`;
+    if (dom === 'select') return `<div class="eqrow"><div class="lbl">${esc(i.label)}</div><div class="opts">${(i.x.attributes.options || []).map((o) => `<button data-eqsel="${esc(i.x.entity_id)}" data-v="${esc(o)}" class="${st === o ? 'sel' : ''}">${esc(o)}</button>`).join('')}</div></div>`;
+    const [lo, hi] = numRange(i.x), n = parseFloat(st) || 0, bi = lo < 0 && hi > 0;
+    return `<div class="eqrow"><div class="lbl">${esc(i.label)}${i.note ? `<small>${esc(i.note)}</small>` : ''}</div>
+      <div class="hs${bi ? ' bi' : ''}" data-num="${esc(i.x.entity_id)}" style="--p:${((n - lo) / (hi - lo) * 100).toFixed(1)}%"><div class="hf"></div>${bi ? '<div class="bf"></div>' : ''}<div class="hl"><span>${lo}</span><b>${esc(fmtNum(n))}</b><span>${hi}</span></div></div></div>`;
+  };
+  const srcs = (d.attributes.source_list || []).slice(0, 12);
+  $('#eq').innerHTML = `<div class="sh-head"><div class="sh-title"><div class="sh-name">Sound settings</div><div class="sh-state">${esc(nameOf(d))}</div></div>
+      <button class="eqreset" data-eqreset>Reset EQ</button><button class="close" data-close aria-label="Close">×</button></div>`
+    + (items.length ? EQ_SECTIONS.map(([sec, title]) => { const rs = items.filter((i) => i.sec === sec); return rs.length ? `<div class="eqsec">${title}</div>` + rs.map(row).join('') : ''; }).join('')
+      : `<div class="empty">Home Assistant isn't showing any sound settings for this speaker yet. They appear automatically with the Sonos integration — some are off by default under the device's "entities not shown".</div>`)
+    + (srcs.length ? `<div class="eqsec">Input &amp; favorites</div><div class="opts">${srcs.map((x) => `<button data-src="${esc(x)}" class="${d.attributes.source === x ? 'sel' : ''}">${esc(x)}</button>`).join('')}</div>` : '');
+  $('#eq').querySelectorAll('.hs.bi').forEach((el) => paintNum(el, parseFloat(extras[el.dataset.num].state) || 0));
+}
+function eqToggle(id) {
+  const x = extras[id]; if (!x) return;
+  const on = x.state === 'on'; x.state = on ? 'off' : 'on'; holdDev(id);
+  if (!DEMO) callSvc('switch', on ? 'turn_off' : 'turn_on', {}, id);
+  renderEq();
+}
+function eqSelect(id, v) { const x = extras[id]; if (!x) return; x.state = v; holdDev(id); if (!DEMO) callSvc('select', 'select_option', { option: v }, id); renderEq(); }
+function eqReset() {
+  const d = sonosPlayer(); if (!d) return;
+  ['bass', 'treble', 'balance'].forEach((k) => { const id = 'number.' + objOf(d.entity_id) + '_' + k, x = extras[id]; if (x) { x.state = '0'; holdDev(id); if (!DEMO) callSvc('number', 'set_value', { value: 0 }, id); } });
+  const l = extras['switch.' + objOf(d.entity_id) + '_loudness']; if (l && l.state !== 'on') eqToggle(l.entity_id);
+  renderEq();
+}
+
 function endSlide() {
   if (!slide) return;
   applySlide(); slide.el.classList.remove('drag'); slide = null; dragging.detail = false; render();
@@ -1863,8 +2077,9 @@ function keep(s) {
     states[s.entity_id] = s; return true;
   }
   if (s.entity_id.startsWith('scene.') && s.attributes.group_name) { scenes[s.entity_id] = s; return true; }
-  if (/^(climate|media_player)\./.test(s.entity_id)) { devices[s.entity_id] = s; return true; }
+  if (/^(climate|media_player)\./.test(s.entity_id)) { if (heldBack(s)) return false; devices[s.entity_id] = s; return true; }
   if (s.entity_id.startsWith('weather.')) { weather[s.entity_id] = s; return true; }
+  if (/^(number|switch|select)\./.test(s.entity_id)) { if (heldBack(s)) return false; extras[s.entity_id] = s; return isSonosExtra(s.entity_id); }
   return false;
 }
 
@@ -1881,7 +2096,7 @@ function connect(url, token, onReady) {
     else if (m.type === 'auth_ok') {
       retry = 1000; setConn('ok', 'Connected');
       send({ type: 'get_states' }).then((list) => {
-        states = {}; scenes = {}; devices = {}; weather = {}; list.forEach(keep);
+        states = {}; scenes = {}; devices = {}; weather = {}; extras = {}; list.forEach(keep);
         render(); onReady && onReady(null); onReady = null;
         subscribeForecast();
       });
@@ -2049,6 +2264,12 @@ function demoInit() {
     forecast.hourly = Array.from({ length: 25 }, (_, i) => { const d = new Date(+t0 + i * 3600e3), h = d.getHours(); return { datetime: d.toISOString(), condition: h < 6 || h >= 19 ? 'clear-night' : h < 12 ? 'sunny' : 'partlycloudy', temperature: 56 + 10 * Math.sin((h - 9) / 24 * 2 * Math.PI), precipitation_probability: h > 14 && h < 18 ? 30 : 0 }; });
     forecast.daily = conds.map((c, i) => ({ datetime: new Date(+t0 + i * 864e5).toISOString(), condition: c === 'clear-night' ? 'sunny' : c, temperature: [68, 66, 63, 70, 72, 65, 59, 55, 57, 61][i], templow: [54, 52, 50, 55, 58, 52, 47, 44, 45, 48][i], precipitation_probability: /rain/.test(c) ? 70 : 0 })); }
   devices['climate.living_room_ac'] = { entity_id: 'climate.living_room_ac', state: 'cool', attributes: { friendly_name: 'Living room AC', hvac_modes: ['off', 'cool', 'dry', 'fan_only', 'heat', 'auto'], temperature: 70, current_temperature: 74, current_humidity: 52, min_temp: 60, max_temp: 86, target_temp_step: 1, fan_modes: ['silent', 'low', 'medium', 'high', 'auto'], fan_mode: 'auto', preset_modes: ['none', 'eco', 'boost', 'sleep', 'away'], preset_mode: 'none', swing_modes: ['off', 'vertical'], swing_mode: 'off' } };
+  devices['media_player.living_room'] = { entity_id: 'media_player.living_room', state: 'playing', attributes: { friendly_name: 'Living Room', volume_level: 0.24, is_volume_muted: false, media_title: 'Midnight City', media_artist: 'M83', media_album_name: "Hurry Up, We're Dreaming", source_list: ['TV', 'Discover Weekly', 'Jazz Classics', 'WNYC'] } };
+  const ex = (id, state, attrs) => (extras[id] = { entity_id: id, state, attributes: Object.assign({ friendly_name: id }, attrs || {}) });
+  ex('number.living_room_bass', '2', { min: -10, max: 10, step: 1 }); ex('number.living_room_treble', '0', { min: -10, max: 10, step: 1 });
+  ex('switch.living_room_loudness', 'on'); ex('switch.living_room_speech_enhancement', 'off'); ex('switch.living_room_night_sound', 'off');
+  ex('number.living_room_audio_delay', '0', { min: 0, max: 5, step: 1 }); ex('switch.living_room_crossfade', 'off'); ex('switch.living_room_tv_autoplay', 'on');
+  ex('number.living_room_sub_gain', '0', { min: -15, max: 15, step: 1 }); ex('switch.living_room_subwoofer_enabled', 'on');
   devices['media_player.living_room_tv'] = { entity_id: 'media_player.living_room_tv', state: 'on', attributes: { friendly_name: 'Living room TV', volume_level: 0.18, is_volume_muted: false, source: 'Apple TV', source_list: ['Apple TV', 'HDMI 2', 'Netflix', 'YouTube'] } };
   scenes['scene.bedroom_relax'] = { entity_id: 'scene.bedroom_relax', state: 'unknown', attributes: { name: 'Relax', group_name: "Aaron's Bedroom" } };
   scenes['scene.bedroom_sunset'] = { entity_id: 'scene.bedroom_sunset', state: 'unknown', attributes: { name: 'Savanna sunset', group_name: "Aaron's Bedroom" } };
