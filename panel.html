@@ -206,7 +206,7 @@ body.mapview #tiles,body.mapview #scenes,body.mapview #viewBtn{display:none!impo
 .gact .sw-dots{display:flex;gap:3px}
 .gact .sw-dots i{width:8px;height:8px;border-radius:50%}
 /* room power in the left rail */
-.nitem .npw{margin-left:auto;width:34px;height:34px;border-radius:50%;border:1px solid var(--line-2);display:grid;place-items:center;color:#8b8274;flex-shrink:0;transition:all .2s}
+.nitem .npw{margin-left:auto;width:34px;height:34px;border-radius:50%;border:1px solid var(--line-2);background:none;padding:0;display:grid;place-items:center;color:#8b8274;flex-shrink:0;transition:all .2s}
 .nitem .npw svg{width:16px;height:16px;color:inherit}
 .nitem .npw.on{background:rgba(217,189,142,.92);border-color:transparent;color:var(--accent-ink);box-shadow:0 0 12px rgba(217,189,142,.35)}
 .nitem .npw.on svg{color:var(--accent-ink)}
@@ -227,6 +227,50 @@ body.mapview #tiles,body.mapview #scenes,body.mapview #viewBtn{display:none!impo
 .master.on .mt small{color:var(--champ)}
 .master .hs{flex:1;height:52px;margin:0;border-radius:14px}
 body.mapview .master{display:none!important}
+
+/* weather forecast (Apple Weather style) */
+#weather{cursor:pointer;border-radius:12px;padding:4px 8px;margin:-4px -4px}
+#weather:active{background:rgba(255,255,255,.05)}
+.wx-bd{position:fixed;inset:0;z-index:8;display:none;background:rgba(0,0,0,.45)}
+.wx-bd.show{display:block}
+.wx{position:absolute;inset:clamp(10px,2vh,24px) clamp(10px,2vw,28px);border-radius:28px;overflow:hidden;color:#fff;
+  font-family:-apple-system,'SF Pro Display','Geist',system-ui,sans-serif;animation:pop .22s ease-out;
+  background:linear-gradient(180deg,var(--sky1,#2f6fb8) 0%,var(--sky2,#6aa3d9) 100%);box-shadow:0 30px 80px rgba(0,0,0,.55)}
+.wx-in{position:absolute;inset:0;overflow-y:auto;padding:clamp(18px,3vh,30px) clamp(18px,2.6vw,34px);display:grid;
+  grid-template-columns:minmax(0,1.25fr) minmax(0,1fr);gap:14px;align-content:start;scrollbar-width:none}
+.wx-in::-webkit-scrollbar{display:none}
+@media (orientation:portrait){.wx-in{grid-template-columns:1fr}}
+.wx-close{position:absolute;top:14px;right:16px;z-index:2;width:44px;height:44px;border-radius:50%;border:0;background:rgba(255,255,255,.18);color:#fff;font-size:24px;line-height:1;backdrop-filter:blur(10px)}
+.wx-hero{grid-column:1/-1;text-align:center;padding:6px 0 10px;text-shadow:0 1px 8px rgba(0,0,0,.12)}
+.wx-hero .loc{font-size:30px;font-weight:400;letter-spacing:.01em}
+.wx-hero .loc small{display:block;font-size:12px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;opacity:.75;margin-bottom:2px}
+.wx-hero .tmp{font-size:96px;font-weight:200;line-height:1;margin:2px 0 2px 26px}
+.wx-hero .cond{font-size:20px;font-weight:500;opacity:.92;text-transform:capitalize}
+.wx-hero .hl{font-size:19px;font-weight:500;margin-top:2px}
+.wcard{background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.12);border-radius:18px;padding:12px 14px;backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px)}
+.wcard h4{margin:0 0 8px;font-size:12px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;opacity:.65;display:flex;align-items:center;gap:6px}
+.wcard h4 svg{width:14px;height:14px}
+.wcol{display:flex;flex-direction:column;gap:14px;min-width:0}
+.hours{display:flex;gap:4px;overflow-x:auto;padding:8px 0 2px;border-top:1px solid rgba(255,255,255,.18);scrollbar-width:none}
+.hours::-webkit-scrollbar{display:none}
+.hr{flex:0 0 58px;display:flex;flex-direction:column;align-items:center;gap:6px;font-size:16px;font-weight:500}
+.hr .t{font-size:14px;opacity:.9}
+.hr svg{width:30px;height:30px}
+.hr .pp{font-size:12px;font-weight:600;color:#9fd8ff;height:14px;margin-top:-4px}
+.days .dr{display:grid;grid-template-columns:62px 40px 40px 1fr 40px;align-items:center;gap:10px;height:52px;border-top:1px solid rgba(255,255,255,.16);font-size:18px;font-weight:500}
+.days .dr .ic{display:flex;flex-direction:column;align-items:center;line-height:1}
+.days .dr svg{width:28px;height:28px}
+.days .dr .pp{font-size:11px;font-weight:600;color:#9fd8ff;margin-top:1px}
+.days .dr .lo{opacity:.6;text-align:right}
+.days .dr .hi{text-align:right}
+.rng{position:relative;height:5px;border-radius:3px;background:rgba(0,0,0,.18)}
+.rng i{position:absolute;top:0;bottom:0;border-radius:3px}
+.rng b{position:absolute;top:50%;width:9px;height:9px;margin:-4.5px 0 0 -4.5px;border-radius:50%;background:#fff;box-shadow:0 0 0 2px rgba(0,0,0,.25)}
+.tiles6{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+.tile6{min-height:118px;display:flex;flex-direction:column}
+.tile6 .v{font-size:30px;font-weight:500;line-height:1.1}
+.tile6 .n{font-size:13px;opacity:.85;margin-top:auto;line-height:1.3}
+.wx-none{grid-column:1/-1;text-align:center;opacity:.85;font-size:15px}
 
 /* right detail panel */
 #detail{flex-direction:column;padding:22px 22px 18px;overflow-y:auto;scrollbar-width:none;min-height:0}
@@ -316,6 +360,8 @@ body.mapview .master{display:none!important}
 .opts{display:flex;flex-wrap:wrap;gap:8px}
 .opts button{height:46px;padding:0 16px;border-radius:14px;border:1px solid var(--line);background:rgba(255,255,255,.04);color:var(--muted);font-size:15px;text-transform:capitalize}
 .opts button.sel{background:var(--text);color:var(--bg);border-color:var(--text)}
+.opts button.mb{display:flex;align-items:center;gap:8px}
+.opts button.mb svg{width:18px;height:18px}
 .mdev .box{fill:#22201c;stroke:#6a6356;stroke-width:1.2}
 .mdev.on .box{fill:#262420;stroke:#a9c4dc}
 .mdev.on.heat .box{stroke:#d9a27a}
@@ -421,6 +467,9 @@ body.mapview .master{display:none!important}
   </div>
 </div>
 
+<!-- weather forecast -->
+<div class="wx-bd" id="wxSheet"><div class="wx" id="wx"></div></div>
+
 <!-- AC / TV controls -->
 <div class="backdrop" id="devSheet">
   <div class="sheet" id="ds"></div>
@@ -524,6 +573,11 @@ const ICONS = {
   strip: '<rect x="3" y="10" width="18" height="4" rx="1"/><path d="M6 10v4M10 10v4M14 10v4M18 10v4"/>',
   snow: '<path d="M12 3v18M4.2 7.5l15.6 9M4.2 16.5l15.6-9"/><path d="M9.5 4.5L12 7l2.5-2.5M9.5 19.5L12 17l2.5 2.5"/>',
   tv: '<rect x="3" y="5" width="18" height="12" rx="1.5"/><path d="M8 20h8"/>',
+  drop: '<path d="M12 3.5c3 3.6 5.5 6.8 5.5 10a5.5 5.5 0 0 1-11 0c0-3.2 2.5-6.4 5.5-10z"/>',
+  fan: '<circle cx="12" cy="12" r="1.6"/><path d="M12 10.4C11 7 12 3.5 15 3.5c2.5 0 2.8 3.4.5 5.2M13.6 12c3.4-1 6.9 0 6.9 3 0 2.5-3.4 2.8-5.2.5M12 13.6c1 3.4 0 6.9-3 6.9-2.5 0-2.8-3.4-.5-5.2M10.4 12C7 13 3.5 12 3.5 9c0-2.5 3.4-2.8 5.2-.5"/>',
+  swing: '<path d="M4 12a8 8 0 0 1 16 0"/><path d="M12 12l5-5M12 12l-5-5M12 12v-8"/>',
+  clock: '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
+  cal: '<rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M9 3v4M15 3v4"/>',
   cup: '<path d="M5 9h11v5a5 5 0 0 1-5 5h-1a5 5 0 0 1-5-5z"/><path d="M16 10h1.5a2.5 2.5 0 0 1 0 5H16"/><path d="M8.5 3.5c-.6.8.6 1.6 0 2.5M11.5 3.5c-.6.8.6 1.6 0 2.5"/>'
 };
 const svg = (n) => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">${ICONS[n]}</svg>`;
@@ -1050,6 +1104,8 @@ function buildMapSvg() {
 
 function initMap() {
   buildMapSvg();
+  $('#weather').addEventListener('click', openWeather);
+  $('#wxSheet').addEventListener('click', (e) => { if (e.target.id === 'wxSheet' || e.target.closest('[data-wxclose]')) $('#wxSheet').classList.remove('show'); });
   $('#editBtn').innerHTML = svg('gear');
   $('#nav').addEventListener('click', (e) => {
     const pw = e.target.closest('[data-pw]'); if (pw) { toggleRoom(pw.dataset.pw); return; }
@@ -1262,12 +1318,106 @@ function renderMap() {
 }
 const mixWhite = (c, t) => c.split(',').map((v) => Math.round(+v + (255 - v) * t)).join(',');
 
+/* ---------- weather ---------- */
+function wIcon(cond, night) {
+  const sun = '<circle cx="12" cy="12" r="4.6" fill="#ffd60a"/><g stroke="#ffd60a" stroke-width="1.7" stroke-linecap="round"><path d="M12 2.6v2.2M12 19.2v2.2M2.6 12h2.2M19.2 12h2.2M5.4 5.4l1.5 1.5M17.1 17.1l1.5 1.5M5.4 18.6l1.5-1.5M17.1 6.9l1.5-1.5"/></g>';
+  const moon = '<path d="M19.5 14.6A7.6 7.6 0 1 1 9.4 4.5a6.2 6.2 0 0 0 10.1 10.1z" fill="#f2f2f7"/>';
+  const cloud = (y, c) => `<path transform="translate(0 ${y || 0})" d="M7.2 18.5h10.1a3.9 3.9 0 0 0 .4-7.8 5.6 5.6 0 0 0-10.8 1.6 3.1 3.1 0 0 0 .3 6.2z" fill="${c || '#f2f2f7'}"/>`;
+  const smallSun = '<g transform="translate(-3 -4) scale(.75)">' + sun + '</g>', smallMoon = '<g transform="translate(-2 -3) scale(.7)">' + moon + '</g>';
+  const drops = '<g stroke="#5ac8fa" stroke-width="1.8" stroke-linecap="round"><path d="M8.5 20.5l-1 2M12.5 20.5l-1 2M16.5 20.5l-1 2"/></g>';
+  const flakes = '<g fill="#fff"><circle cx="8" cy="21.5" r="1.1"/><circle cx="12" cy="22.5" r="1.1"/><circle cx="16" cy="21.5" r="1.1"/></g>';
+  let g;
+  switch (cond) {
+    case 'sunny': g = sun; break;
+    case 'clear-night': g = moon; break;
+    case 'partlycloudy': g = (night ? smallMoon : smallSun) + cloud(2); break;
+    case 'cloudy': g = cloud(-1, '#d8dce3'); break;
+    case 'fog': g = cloud(-3, '#d8dce3') + '<g stroke="#f2f2f7" stroke-width="1.6" stroke-linecap="round"><path d="M5 19h14M7 22h10"/></g>'; break;
+    case 'rainy': g = cloud(-3) + drops; break;
+    case 'pouring': g = cloud(-3, '#c9ced6') + drops + '<g stroke="#5ac8fa" stroke-width="1.8" stroke-linecap="round"><path d="M10.5 19.5l-1 2M14.5 19.5l-1 2"/></g>'; break;
+    case 'snowy': case 'snowy-rainy': g = cloud(-3) + flakes; break;
+    case 'hail': g = cloud(-3) + flakes; break;
+    case 'lightning': case 'lightning-rainy': g = cloud(-3, '#c9ced6') + '<path d="M12.5 15.5l-2.5 4h2.4l-1.4 4 4.2-5.4h-2.5l1.6-2.6z" fill="#ffd60a"/>'; break;
+    case 'windy': case 'windy-variant': g = '<g stroke="#f2f2f7" stroke-width="1.8" stroke-linecap="round" fill="none"><path d="M3 9h11a2.5 2.5 0 1 0-2.5-2.5M3 13h15a2.5 2.5 0 1 1-2.5 2.5M3 17h8"/></g>'; break;
+    default: g = cloud(0, '#d8dce3');
+  }
+  return `<svg viewBox="0 0 24 24">${g}</svg>`;
+}
+const COND = { 'clear-night': 'Clear', cloudy: 'Cloudy', exceptional: 'Unusual weather', fog: 'Fog', hail: 'Hail', lightning: 'Thunderstorms', 'lightning-rainy': 'Thunderstorms', partlycloudy: 'Partly cloudy', pouring: 'Heavy rain', rainy: 'Rain', snowy: 'Snow', 'snowy-rainy': 'Sleet', sunny: 'Sunny', windy: 'Windy', 'windy-variant': 'Windy' };
+function skyFor(cond, night) {
+  if (night) return /rain|pour|lightning|snow|hail|fog|cloudy$/.test(cond) && cond !== 'partlycloudy' ? ['#1c2533', '#38475a'] : ['#0b1630', '#24395e'];
+  if (/rain|pour|lightning|hail/.test(cond)) return ['#4b5a6b', '#7b8b9c'];
+  if (/snow/.test(cond)) return ['#7e93ab', '#b7c6d6'];
+  if (/cloudy$|fog/.test(cond) && cond !== 'partlycloudy') return ['#5e7186', '#93a5b8'];
+  return ['#2f6fb8', '#79b0e3'];
+}
+function tempColor(t, c) {
+  const f = c ? t * 9 / 5 + 32 : t;
+  const stops = [[20, [90, 200, 250]], [45, [100, 210, 200]], [60, [150, 220, 120]], [72, [255, 214, 10]], [85, [255, 159, 10]], [100, [255, 69, 58]]];
+  if (f <= stops[0][0]) return `rgb(${stops[0][1]})`;
+  for (let i = 1; i < stops.length; i++) if (f <= stops[i][0]) {
+    const [t0, c0] = stops[i - 1], [t1, c1] = stops[i], k = (f - t0) / (t1 - t0);
+    return `rgb(${c0.map((v, j) => Math.round(v + (c1[j] - v) * k))})`;
+  }
+  return `rgb(${stops[stops.length - 1][1]})`;
+}
+const isNightAt = (d) => { const h = new Date(d).getHours(); return h < 6 || h >= 19; };
+function openWeather() { $('#wxSheet').classList.add('show'); renderWeather(); }
+function renderWeather() {
+  const w = Object.values(weather)[0]; if (!w) return;
+  const a = w.attributes, unit = a.temperature_unit || '°F', C = /C/.test(unit);
+  const night = w.state === 'clear-night' || isNightAt(Date.now());
+  const [s1, s2] = skyFor(w.state, night);
+  const el = $('#wx'); el.style.setProperty('--sky1', s1); el.style.setProperty('--sky2', s2);
+  const daily = forecast.daily || [], hourly = forecast.hourly || [];
+  const today = daily[0];
+  const r = (v) => (v == null ? '–' : Math.round(v) + '°');
+  const loc = (a.friendly_name || 'Home').replace(/^forecast\s*/i, '') || 'Home';
+  // hourly strip: Now + next 24 hours
+  const hrs = hourly.slice(0, 25).map((h, i) => {
+    const d = new Date(h.datetime), label = i === 0 ? 'Now' : d.toLocaleTimeString([], { hour: 'numeric' }).replace(/\s/g, '');
+    const pp = h.precipitation_probability;
+    return `<div class="hr"><span class="t">${label}</span>${wIcon(i === 0 ? w.state : h.condition, isNightAt(h.datetime))}<span class="pp">${pp >= 20 ? Math.round(pp) + '%' : ''}</span><span>${r(i === 0 ? a.temperature : h.temperature)}</span></div>`;
+  }).join('');
+  // 10-day list with Apple's temperature range bars
+  const days = daily.slice(0, 10);
+  const lo = Math.min(...days.map((d) => d.templow ?? d.temperature)), hi = Math.max(...days.map((d) => d.temperature));
+  const span = Math.max(1, hi - lo), pos = (t) => ((t - lo) / span * 100).toFixed(1);
+  const dayRows = days.map((d, i) => {
+    const dl = d.templow ?? d.temperature, dh = d.temperature, pp = d.precipitation_probability;
+    const name = i === 0 ? 'Today' : new Date(d.datetime).toLocaleDateString([], { weekday: 'short' });
+    const now = i === 0 && a.temperature != null ? `<b style="left:${pos(Math.min(dh, Math.max(dl, a.temperature)))}%"></b>` : '';
+    return `<div class="dr"><span>${name}</span><span class="ic">${wIcon(d.condition, false)}${pp >= 20 ? `<span class="pp">${Math.round(pp)}%</span>` : ''}</span>
+      <span class="lo">${r(dl)}</span><div class="rng"><i style="left:${pos(dl)}%;right:${(100 - pos(dh)).toFixed(1)}%;background:linear-gradient(90deg,${tempColor(dl, C)},${tempColor(dh, C)})"></i>${now}</div><span class="hi">${r(dh)}</span></div>`;
+  }).join('');
+  // detail tiles, whichever the weather service provides
+  const tiles = [];
+  if (a.apparent_temperature != null) tiles.push(['Feels like', r(a.apparent_temperature), Math.abs(a.apparent_temperature - a.temperature) < 2 ? 'Similar to the actual temperature.' : a.apparent_temperature < a.temperature ? 'Wind is making it feel cooler.' : 'Humidity is making it feel warmer.']);
+  if (a.humidity != null) tiles.push(['Humidity', Math.round(a.humidity) + '%', a.dew_point != null ? `The dew point is ${r(a.dew_point)} right now.` : '']);
+  if (a.wind_speed != null) tiles.push(['Wind', `${Math.round(a.wind_speed)} <small style="font-size:15px">${esc(a.wind_speed_unit || '')}</small>`, a.wind_bearing != null ? 'From the ' + ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW'][Math.round(a.wind_bearing / 45) % 8] + (a.wind_gust_speed != null ? ` · gusts ${Math.round(a.wind_gust_speed)}` : '') : '']);
+  if (a.uv_index != null) tiles.push(['UV index', Math.round(a.uv_index), a.uv_index < 3 ? 'Low' : a.uv_index < 6 ? 'Moderate' : a.uv_index < 8 ? 'High' : 'Very high']);
+  if (a.cloud_coverage != null) tiles.push(['Cloud cover', Math.round(a.cloud_coverage) + '%', '']);
+  if (a.pressure != null) tiles.push(['Pressure', `${Math.round(a.pressure)} <small style="font-size:15px">${esc(a.pressure_unit || '')}</small>`, '']);
+  if (a.visibility != null) tiles.push(['Visibility', `${Math.round(a.visibility)} <small style="font-size:15px">${esc(a.visibility_unit || '')}</small>`, '']);
+  const hiT = today ? today.temperature : null, loT = today ? (today.templow ?? null) : null;
+  el.innerHTML = `<button class="wx-close" data-wxclose aria-label="Close">×</button><div class="wx-in">
+    <div class="wx-hero"><div class="loc"><small>My home</small>${esc(loc)}</div><div class="tmp">${r(a.temperature)}</div>
+      <div class="cond">${esc(COND[w.state] || w.state.replace(/-/g, ' '))}</div>${hiT != null ? `<div class="hl">H:${r(hiT)}  L:${r(loT)}</div>` : ''}</div>
+    <div class="wcol">
+      ${hrs ? `<div class="wcard"><h4><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">${ICONS.clock}</svg>Hourly forecast</h4><div class="hours">${hrs}</div></div>` : ''}
+      ${tiles.length ? `<div class="tiles6">${tiles.slice(0, 6).map(([k, v, n]) => `<div class="wcard tile6"><h4>${k}</h4><div class="v">${v}</div><div class="n">${esc(n)}</div></div>`).join('')}</div>` : ''}
+    </div>
+    <div class="wcol">${dayRows ? `<div class="wcard days"><h4><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">${ICONS.cal}</svg>${days.length}-day forecast</h4>${dayRows}</div>` : ''}</div>
+    ${!hrs && !dayRows ? '<div class="wx-none">Loading the forecast…</div>' : ''}
+  </div>`;
+}
+
 function renderHeader() {
   const w = Object.values(weather)[0];
   $('#weather').hidden = $('#wsep').hidden = !w;
   if (w) {
     const st = w.state, icon = /rain|pour|snow|storm|light/.test(st) ? 'rain' : /cloud|fog/.test(st) ? 'cloud' : st === 'clear-night' ? 'moon' : 'sun';
-    $('#weather').innerHTML = `${svg(icon)}<span><b>${Math.round(w.attributes.temperature)}°</b><small>Outside</small></span>`;
+    $('#weather').innerHTML = `${svg(icon)}<span><b>${Math.round(w.attributes.temperature)}°</b><small>Forecast</small></span>`;
   }
   const c = $('#conn');
   if (!c.querySelector('svg')) c.insertAdjacentHTML('afterbegin', svg('wifi'));
@@ -1423,6 +1573,9 @@ function devCall(domain, service, data) {
   if (DEMO) return demoDev(service, data);
   send({ type: 'call_service', domain, service, service_data: data || {}, target: { entity_id: devId } });
 }
+const MODE_ICON = { cool: 'snow', heat: 'sun', dry: 'drop', fan_only: 'fan', auto: 'swing', heat_cool: 'swing' };
+const MODE_NAME = { cool: 'Cool', heat: 'Heat', dry: 'Dry', fan_only: 'Fan', auto: 'Auto', heat_cool: 'Auto' };
+const PRESET_NAME = { eco: 'Eco', boost: 'Turbo', sleep: 'Sleep', away: 'Freeze guard', comfort: 'Comfort', silent: 'Silent' };
 function renderDevSheet() {
   if (!devId) return;
   const s = devices[devId]; if (!s) return closeSheets();
@@ -1433,11 +1586,14 @@ function renderDevSheet() {
   if (dom === 'climate') {
     const modes = (a.hvac_modes || []).filter((m) => m !== 'off');
     const unit = a.temperature_unit || '°';
-    html = head(s.state === 'unavailable' ? 'Unavailable' : on ? `${esc(s.state.replace('_', ' '))}${a.current_temperature != null ? ' · room is ' + a.current_temperature + '°' : ''}` : `Off${a.current_temperature != null ? ' · room is ' + a.current_temperature + '°' : ''}`)
+    const room = `${a.current_temperature != null ? ' · room is ' + a.current_temperature + '°' : ''}${a.current_humidity != null ? ' · ' + Math.round(a.current_humidity) + '% humidity' : ''}`;
+    html = head(s.state === 'unavailable' ? 'Unavailable' : on ? `${esc(MODE_NAME[s.state] || s.state.replace('_', ' '))}${room}` : `Off${room}`)
       + (a.temperature != null ? `<div class="dev-big"><div><div class="dev-temp">${a.temperature}<small>°</small></div><div class="dev-sub">Target</div></div>
           <div class="stepper"><button data-act="down" aria-label="Cooler">−</button><button data-act="up" aria-label="Warmer">+</button></div></div>` : '')
-      + (modes.length ? `<div class="sh-label">Mode</div><div class="opts">${modes.map((m) => `<button data-act="mode" data-v="${esc(m)}" class="${s.state === m ? 'sel' : ''}">${esc(m.replace('_', ' '))}</button>`).join('')}</div>` : '')
-      + ((a.fan_modes || []).length ? `<div class="sh-label">Fan</div><div class="opts">${a.fan_modes.map((m) => `<button data-act="fan" data-v="${esc(m)}" class="${a.fan_mode === m ? 'sel' : ''}">${esc(m)}</button>`).join('')}</div>` : '');
+      + (modes.length ? `<div class="sh-label">Mode</div><div class="opts">${modes.map((m) => `<button data-act="mode" data-v="${esc(m)}" class="mb${s.state === m ? ' sel' : ''}">${svg(MODE_ICON[m] || 'snow')}${esc(MODE_NAME[m] || m.replace('_', ' '))}</button>`).join('')}</div>` : '')
+      + ((a.fan_modes || []).length ? `<div class="sh-label">Fan speed</div><div class="opts">${a.fan_modes.map((m) => `<button data-act="fan" data-v="${esc(m)}" class="${a.fan_mode === m ? 'sel' : ''}">${esc(m)}</button>`).join('')}</div>` : '')
+      + ((a.preset_modes || []).filter((m) => m !== 'none').length ? `<div class="sh-label">Presets</div><div class="opts">${a.preset_modes.filter((m) => m !== 'none').map((m) => `<button data-act="preset" data-v="${esc(m)}" class="${a.preset_mode === m ? 'sel' : ''}">${esc(PRESET_NAME[m] || m)}</button>`).join('')}</div>` : '')
+      + ((a.swing_modes || []).length > 1 ? `<div class="sh-label">Swing</div><div class="opts">${a.swing_modes.map((m) => `<button data-act="swing" data-v="${esc(m)}" class="${a.swing_mode === m ? 'sel' : ''}">${esc(m)}</button>`).join('')}</div>` : '');
   } else {
     const vol = a.volume_level != null ? Math.round(a.volume_level * 100) : null;
     html = head(s.state === 'unavailable' ? 'Unavailable' : on ? `On${a.source ? ' · ' + esc(a.source) : ''}${a.media_title ? ' · ' + esc(a.media_title) : ''}` : 'Off')
@@ -1462,6 +1618,8 @@ function devAction(act, v) {
     }
     if (act === 'mode') devCall('climate', 'set_hvac_mode', { hvac_mode: v });
     if (act === 'fan') devCall('climate', 'set_fan_mode', { fan_mode: v });
+    if (act === 'preset') devCall('climate', 'set_preset_mode', { preset_mode: a.preset_mode === v ? 'none' : v });
+    if (act === 'swing') devCall('climate', 'set_swing_mode', { swing_mode: v });
   } else {
     if (act === 'power') devCall('media_player', on ? 'turn_off' : 'turn_on');
     if (act === 'vup') devCall('media_player', 'volume_up');
@@ -1674,6 +1832,20 @@ function bindBar(bar, key, apply, fmt) {
 }
 
 /* ---------- Home Assistant connection ---------- */
+/* hourly + daily forecast for the first weather entity (the default "Forecast Home") */
+const subs = {}, forecast = { hourly: [], daily: [] };
+function subscribeForecast() {
+  const w = Object.values(weather)[0]; if (!w || DEMO) return;
+  const f = w.attributes.supported_features || 0;
+  [['hourly', 2], ['daily', 1]].forEach(([type, bit]) => {
+    if (f && !(f & bit)) return;
+    const msg = { type: 'weather/subscribe_forecast', entity_id: w.entity_id, forecast_type: type };
+    const p = send(msg); const id = msg.id;
+    subs[id] = (ev) => { forecast[type] = ev.forecast || []; if ($('#wxSheet').classList.contains('show')) renderWeather(); };
+    p.catch(() => { delete subs[id]; });
+  });
+}
+
 function setConn(cls, text) { const c = $('#conn'); c.className = 'conn ' + cls; c.querySelector('span').textContent = text; const i = c.querySelector('i'); if (i) i.remove(); }
 
 function send(msg) {
@@ -1711,9 +1883,11 @@ function connect(url, token, onReady) {
       send({ type: 'get_states' }).then((list) => {
         states = {}; scenes = {}; devices = {}; weather = {}; list.forEach(keep);
         render(); onReady && onReady(null); onReady = null;
+        subscribeForecast();
       });
       send({ type: 'subscribe_events', event_type: 'state_changed' });
     }
+    else if (m.type === 'event' && subs[m.id]) subs[m.id](m.event);
     else if (m.type === 'result' && pending[m.id]) {
       const p = pending[m.id]; delete pending[m.id];
       m.success ? p.res(m.result) : p.rej(new Error(m.error && m.error.message));
@@ -1870,8 +2044,11 @@ function demoInit() {
   mk('light.bedside', 'Bedside lamp', 0, 60); mk('light.floor_arm', 'Floor lamp arm', 1, 40, { color_mode: 'xy', rgb_color: [176, 88, 255] });
   mk('light.island_1', 'Island 1', 0, 80); mk('light.island_2', 'Island 2', 0, 80); mk('light.island_3', 'Island 3', 0, 80);
   mk('light.bedroom', "Aaron's Bedroom", 1, 60, { is_hue_group: true, entity_id: ['light.grashoppa', 'light.stemlite', 'light.bedside', 'light.floor_arm'] });
-  weather['weather.home'] = { entity_id: 'weather.home', state: 'clear-night', attributes: { temperature: 61 } };
-  devices['climate.living_room_ac'] = { entity_id: 'climate.living_room_ac', state: 'cool', attributes: { friendly_name: 'Living room AC', hvac_modes: ['off', 'cool', 'dry', 'fan_only'], temperature: 70, current_temperature: 74, min_temp: 60, max_temp: 86, target_temp_step: 1, fan_modes: ['low', 'medium', 'high', 'auto'], fan_mode: 'auto' } };
+  weather['weather.home'] = { entity_id: 'weather.home', state: 'clear-night', attributes: { friendly_name: 'Forecast New York', temperature: 61, temperature_unit: '°F', apparent_temperature: 58, humidity: 64, dew_point: 49, wind_speed: 9, wind_speed_unit: 'mph', wind_bearing: 290, uv_index: 0, cloud_coverage: 12, pressure: 30.1, pressure_unit: 'inHg' } };
+  { const conds = ['clear-night', 'clear-night', 'partlycloudy', 'sunny', 'sunny', 'partlycloudy', 'cloudy', 'rainy', 'rainy', 'cloudy'], t0 = new Date(); t0.setMinutes(0, 0, 0);
+    forecast.hourly = Array.from({ length: 25 }, (_, i) => { const d = new Date(+t0 + i * 3600e3), h = d.getHours(); return { datetime: d.toISOString(), condition: h < 6 || h >= 19 ? 'clear-night' : h < 12 ? 'sunny' : 'partlycloudy', temperature: 56 + 10 * Math.sin((h - 9) / 24 * 2 * Math.PI), precipitation_probability: h > 14 && h < 18 ? 30 : 0 }; });
+    forecast.daily = conds.map((c, i) => ({ datetime: new Date(+t0 + i * 864e5).toISOString(), condition: c === 'clear-night' ? 'sunny' : c, temperature: [68, 66, 63, 70, 72, 65, 59, 55, 57, 61][i], templow: [54, 52, 50, 55, 58, 52, 47, 44, 45, 48][i], precipitation_probability: /rain/.test(c) ? 70 : 0 })); }
+  devices['climate.living_room_ac'] = { entity_id: 'climate.living_room_ac', state: 'cool', attributes: { friendly_name: 'Living room AC', hvac_modes: ['off', 'cool', 'dry', 'fan_only', 'heat', 'auto'], temperature: 70, current_temperature: 74, current_humidity: 52, min_temp: 60, max_temp: 86, target_temp_step: 1, fan_modes: ['silent', 'low', 'medium', 'high', 'auto'], fan_mode: 'auto', preset_modes: ['none', 'eco', 'boost', 'sleep', 'away'], preset_mode: 'none', swing_modes: ['off', 'vertical'], swing_mode: 'off' } };
   devices['media_player.living_room_tv'] = { entity_id: 'media_player.living_room_tv', state: 'on', attributes: { friendly_name: 'Living room TV', volume_level: 0.18, is_volume_muted: false, source: 'Apple TV', source_list: ['Apple TV', 'HDMI 2', 'Netflix', 'YouTube'] } };
   scenes['scene.bedroom_relax'] = { entity_id: 'scene.bedroom_relax', state: 'unknown', attributes: { name: 'Relax', group_name: "Aaron's Bedroom" } };
   scenes['scene.bedroom_sunset'] = { entity_id: 'scene.bedroom_sunset', state: 'unknown', attributes: { name: 'Savanna sunset', group_name: "Aaron's Bedroom" } };
@@ -1886,6 +2063,8 @@ function demoDev(service, data) {
   if (service === 'set_temperature') a.temperature = data.temperature;
   if (service === 'set_hvac_mode') s.state = data.hvac_mode;
   if (service === 'set_fan_mode') a.fan_mode = data.fan_mode;
+  if (service === 'set_preset_mode') a.preset_mode = data.preset_mode;
+  if (service === 'set_swing_mode') a.swing_mode = data.swing_mode;
   if (service === 'volume_up') a.volume_level = Math.min(1, (a.volume_level || 0) + 0.02);
   if (service === 'volume_down') a.volume_level = Math.max(0, (a.volume_level || 0) - 0.02);
   if (service === 'volume_mute') a.is_volume_muted = data.is_volume_muted;
